@@ -9,7 +9,7 @@ public class InodeTest {
 		for(int i = 2001; i < 2115 ; i++){
 			
 			fileInode.inodeWriteWalker(i);
-			// Hola lo edite
+			// Hola lo edite lo edito pao
 			
 		}
 
