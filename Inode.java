@@ -28,9 +28,8 @@ public class Inode {
 		
 	}
 	
-	public void inodeWriteWalker(int address){
+	public void inodeWriteWalker(int address) throws InodeFileTooBigException{
 		
-		//Checar si no nos hemos terminado el total dispoibln
 		currentOffset++;
 		this.address = address;
 		
@@ -45,22 +44,17 @@ public class Inode {
 		case 3:
 			doubleIndirectPointers();
 			break;
-		default:
-			
-			System.out.println("Default ya tronó con "+totalReferencedAddresses+" direcciones.");
-			System.exit(1);
-			break;
+		default:		
+			System.out.println("Should not exhaust");
 
-		}
-		
+		}	
 		totalReferencedAddresses++;
 	}
 		
 	public void directPointers(){
 		
-		
+		// Syso. is a simulation, replace with real function.
 		System.out.println("\nWrite direct pointer in Inode: "+address+" offset: "+currentOffset);
-		
 		
 		if(currentOffset == DIRECT_POINTERS-1){
 			flag = 2;
@@ -72,11 +66,14 @@ public class Inode {
 	public void singleIndirectPointers(){
 		
 		if (IDB1 == -1){	
-			//Lanzar error si regresa que no hay
-			IDB1 = fsm.firstFreeBlock();
+			if ((IDB1 = fsm.firstFreeBlock()) == -1) {
+				// Throw not enough disk space exception.
+			}
+			// Syso. is a simulation, replace with real function.
 			System.out.println("--->IDB1 assigned to: "+IDB1);
 		}
 		
+		// Syso. is a simulation, replace with real function.
 		System.out.println("Write address: "+address+" to "+IDB1+" OFFSET: "+currentOffset);
 		
 		if(currentOffset == IDB_TOTAL_ADDRESSES-1){
@@ -87,39 +84,33 @@ public class Inode {
 		
 	}
 	
-	public void doubleIndirectPointers(){
-		
-		
-		
-		
+	public void doubleIndirectPointers() throws InodeFileTooBigException{
 		
 		if (IDB2 == -1){	
-			//Lanzar error si regresa que no hay
-			IDB2 = fsm.firstFreeBlock();
+			if ((IDB2 = fsm.firstFreeBlock()) == -1) {
+				// Throw not enough disk space exception.
+			}
+			// Syso. is a simulation, replace with real function.
 			System.out.println("--->IDB2 assigned: "+IDB2);
 		}
 		
 		if (currentIDB2InternalIDB == -1){	
 			IDB2InternalOffset++;
 			
-			if(IDB2InternalOffset == IDB_TOTAL_ADDRESSES){
-				
-				
-				System.out.println("File too big for ADDRESS: " + address);
-				flag = -1;
-				return;
+			if(IDB2InternalOffset == IDB_TOTAL_ADDRESSES){	
+				throw new InodeFileTooBigException("ERROR: File is too big to be allocated by the FileSystem.");
 			}
-			
-			//Lanzar error si regresa que no hay
-			currentIDB2InternalIDB = fsm.firstFreeBlock();
+						
+			if ((currentIDB2InternalIDB = fsm.firstFreeBlock()) == -1) {
+				// Throw not enough disk space exception.
+			}
+			// Syso. is a simulation, replace with real function.
 			System.out.println("--->Write new currentIDB2InternalIDB: "+currentIDB2InternalIDB+" to: "+IDB2
 					+" internal IDB2 offset"+ IDB2InternalOffset);
 
 		}
-		
+		// Syso. is a simulation, replace with real function.
 		System.out.println("Write ADDRESS:"+address+" to internal IDB "+currentIDB2InternalIDB+" OFFSET: "+currentOffset);
-		
-		
 		if(currentOffset == IDB_TOTAL_ADDRESSES-1){
 			currentIDB2InternalIDB = -1;
 			resetOffset();
@@ -128,7 +119,7 @@ public class Inode {
 	}
 	
 	public void resetOffset(){
-		
+
 		currentOffset = -1;
 	}
 	

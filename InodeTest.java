@@ -8,7 +8,12 @@ public class InodeTest {
 		
 		for(int i = 2001; i < 2115 ; i++){
 			
-			fileInode.inodeWriteWalker(i);
+			try {
+				fileInode.inodeWriteWalker(i);
+			} catch (InodeFileTooBigException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 
 			// Hola lo edite lo edito pao
 
