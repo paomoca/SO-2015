@@ -6,7 +6,7 @@ public class InodeTest {
 		
 		Inode fileInode = new Inode();
 		
-		for(int i = 1001; i < 1115 ; i++){
+		for(int i = 2001; i < 2115 ; i++){
 			
 			fileInode.inodeWriteWalker(i);
 			
