@@ -5,6 +5,10 @@ import java.io.RandomAccessFile;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map.Entry;
+
+import so.filesystem.disk.DeviceInitializationException;
+import so.filesystem.disk.FreeSpaceManager;
+
 import java.util.TreeMap;
 import java.util.*;
 

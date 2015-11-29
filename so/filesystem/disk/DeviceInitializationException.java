@@ -1,3 +1,4 @@
+package so.filesystem.disk;
 public class DeviceInitializationException extends Exception {
 	
 	private String mensaje;

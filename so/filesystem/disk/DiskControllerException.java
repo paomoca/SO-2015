@@ -1,3 +1,4 @@
+package so.filesystem.disk;
 
 public class DiskControllerException extends Exception{
 
