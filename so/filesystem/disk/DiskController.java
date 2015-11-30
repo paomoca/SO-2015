@@ -5,10 +5,12 @@ import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.util.Arrays;
 
+import javax.security.auth.login.Configuration;
+
+import so.filesystem.general.CONFIG;
+
 public class DiskController {
 	
-	private int BLOCK_SIZE;
-	private int CONTROL_SIZE;
 	private int METADATA_LENGTH;
 	
 	byte[] systemKey = "0KYHNzQbaIRPe6APYx3NLg5kX3VsEvN52eOYAmJl7YlrahtGOI8xy22RrUUhMyMtPNYWAOEfes376IQIMmHPf1JUE8cwm26xBTN69pF9hCk6jc2f23mXNE2Z8CQLEU9RcJGGXO9Zb3vgzyHB2JhQs0zNf08DEPt6kEWgB0yrXpCcYoljprSVtjGh2rJfJOXmSR2oz8gSADU7y7nBPhznVGMKCKyeCfiUCQWIZ4BHCqq1ul4P1Nlcj9g1K8YorxCF3NAsMELBMlINU9oaNgc04nAX7VqmulOOhAUUCs4D2AV1yJ8aQSkjloBkwBp8StAWgpaP9fuuy4FBKGtHeTRwf4XNZqT3TyNre0PLP7usiijDo2RaXDARleKaEbsISYQBUBUYhrH3QtPV2qJ7bwtcj2uAvlUP4KSDSE5yAuGEoSXs69quHk3OR2aWarXhuvQ7kVeKincMNzo2UzR0XRuW5zq1K1vl0yWR4jXaGurzyjYG0JYRlPk5Ba2sDjHmSOakgjGPAD55OxRTc5ztglNmSXMjU8zrSEGa1slM5LjjxI9e1HUVD4yMc0QZBC6PtLI6snkWGq8fWHTm22q797O5vOyjWiQlDwee2RQM3vreKX1s85mMmgy6a3wzIREuH2ivwJjimp3KjUyUZe3h5tkhQtRnMSfCqw57IZ5IGbOt9b3to44Ghj5k3T8RUX43G0cheT81DYT1VpATlAgQlXCARjyBDEpIuiAB6x9Nfpg1b5SskvJ3oM7Kyl0AM9GTlZOLy1tNRtFejtgfwvZm7inWEFK1AGzftB2RsGlODbKaaNDErZaqYFKnxAkcsmJ0pQtQLo25fUYS9N577F8Hs6BrFc7axv4kkIbLUytFvNUAkIwpWsbTDJ4fCQz9VQXChO4Qsog8wxCILspfR5qb0QNV9a9V8zUYVnSKjBVCtPyyrZpXqz1WmhuYUaWa0XNyKR45wyN2mjXyfOlopxtwhK3BsXBs5jrnREuQMl83gpWxDHTzNYjOgiJCU6eYhAFxjBOl".getBytes();
@@ -17,15 +19,12 @@ public class DiskController {
 	private DiskDirectory directory;
 	private FreeSpaceManager fsm;
 	
-	public DiskController(String HDName, int blockSize, int controlSize) throws DiskControllerException{
-	
-		this.BLOCK_SIZE = blockSize;
-		this.CONTROL_SIZE = controlSize;
+	public DiskController() throws DiskControllerException{
 		
 		try {
 			
 			//The order is important please do not modify.
-			mountDevice(HDName);
+			mountDevice();
 			deviceIdentification();
 			directoryInitialization();
 			freeSpaceManagerInitialization();
@@ -42,11 +41,11 @@ public class DiskController {
 	 *    Initialization Functions
 	 *********************************/
 	
-	public void mountDevice(String HDName) throws DeviceInitializationException{
+	public void mountDevice() throws DeviceInitializationException{
 		
 		//Reference to the raw device	
 		try {
-			rawDeviceRW = new RandomAccessFile(HDName, "rw");
+			rawDeviceRW = new RandomAccessFile(CONFIG.DISK_LOCATION, "rw");
 		} catch (FileNotFoundException e) {
 			
 			throw new DeviceInitializationException("Unable to mount device.");
@@ -87,7 +86,7 @@ public class DiskController {
 	
 		try {
 			
-			int numberOfBlocks = (int) ((rawDeviceRW.length()-METADATA_LENGTH)/BLOCK_SIZE);
+			int numberOfBlocks = (int) ((rawDeviceRW.length()-METADATA_LENGTH)/CONFIG.BLOCK_SIZE);
 			fsm = new FreeSpaceManager(numberOfBlocks);
 			
 		} catch (IOException e) {
@@ -136,7 +135,7 @@ public class DiskController {
 	
 	private int addressTranslation(int address, int offset){
 		
-		int position = METADATA_LENGTH + (BLOCK_SIZE * address) + offset;
+		int position = METADATA_LENGTH + (CONFIG.BLOCK_SIZE * address) + offset;
 		
 		return position;
 	}

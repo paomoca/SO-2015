@@ -1,11 +1,21 @@
 import java.io.FileInputStream;
 import java.io.IOException;
 
+import so.filesystem.disk.*;
+import so.filesystem.general.CONFIG;
+
 public class FileController {
 	
-	/*public void readDiskFile(String fileName) throws DiskControllerException{
+	private DiskController disk;
+	
+	public FileController(){
 		
-		byte[] dataBuffer = new byte[BLOCK_SIZE-CONTROL_SIZE];
+		disk = new DiskController();
+	}
+	
+	public void readDiskFile(String fileName) throws DiskControllerException{
+		
+		byte[] dataBuffer = new byte[CONFIG.BLOCK_SIZE-CONFIG.CONTROL_BYTES_SIZE];
 		int position;
 		int blockAdressToRead = 0;
 		
@@ -19,7 +29,7 @@ public class FileController {
 		//Asks the inode walker, based on the inodeBlockAddress for each block to read.
 		while(true){
 			
-			dataBuffer = rawRead(blockAdressToRead, CONTROL_SIZE, dataBuffer.length);
+			dataBuffer = rawRead(blockAdressToRead, CONFIG.CONTROL_BYTES_SIZE, dataBuffer.length);
 			
 		}
 			
@@ -38,7 +48,7 @@ public class FileController {
 		
 		
 		FileInputStream fis = new FileInputStream(fileName);
-		byte[] dataBuffer = new byte[BLOCK_SIZE-CONTROL_SIZE];
+		byte[] dataBuffer = new byte[CONFIG.BLOCK_SIZE-CONFIG.CONTROL_BYTES_SIZE];
 		
 		//We create a new Inode for the file.
 		//Inode fileInode = new Inode();
@@ -65,7 +75,7 @@ public class FileController {
 		//Iker nos pasa un arreglo de bytes
 		
 		
-	}*/
+	}
 	
 
 }
