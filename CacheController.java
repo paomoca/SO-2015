@@ -7,6 +7,7 @@ import java.util.HashMap;
 import java.util.Map.Entry;
 
 import so.filesystem.disk.DeviceInitializationException;
+import so.filesystem.disk.DiskControllerException;
 import so.filesystem.general.CONFIG;
 import so.filesystem.general.FreeSpaceManager;
 
@@ -126,7 +127,7 @@ public class CacheController {
 		}
 	}
 
-	public void writeBlock(int hddAddr, byte[] block, int frec)
+	public void writeCacheBlock(int hddAddr, byte[] block, int frec)
 			throws CacheControllerException {
 
 		int blockWriteAddr = fsm.firstFreeBlock();
@@ -137,21 +138,21 @@ public class CacheController {
 			int cacheAddress = this.diskVSCache.get(blockToDie);
 			this.diskVSCache.remove(blockToDie);
 			this.diskVSFrequency.remove(blockToDie);
-			rawWrite(cacheAddress, 0, block);
+			rawWriteBlock(cacheAddress, 0, block);
 			diskVSCache.put(hddAddr, cacheAddress);
 			diskVSFrequency.put(hddAddr, frec);
 			this.updateLowestEntry();
 		} else {
-			rawWrite(blockWriteAddr, 0, block);
+			rawWriteBlock(blockWriteAddr, 0, block);
 			diskVSCache.put(hddAddr, blockWriteAddr);
 			diskVSFrequency.put(hddAddr, frec);
 			this.updateLowestEntry();
 		}
 	}
 
-	public byte[] readBlock(int hddAddr) throws CacheControllerException {
+	public byte[] readCacheBlock(int hddAddr) throws CacheControllerException {
 		int cacheAddress = this.diskVSCache.get(hddAddr);
-		byte[] blockPayload = rawRead(cacheAddress, 0, CONFIG.BLOCK_SIZE);
+		byte[] blockPayload = rawReadBlock(cacheAddress);
 
 		int newFreq = this.diskVSFrequency.get(hddAddr) + 1;
 		this.diskVSFrequency.put(hddAddr, newFreq);
@@ -206,6 +207,42 @@ public class CacheController {
 			throw new CacheControllerException("");
 		}
 
+	}
+	
+public void rawWriteBlock(int address, int offset, byte[] dataToWrite) throws CacheControllerException{
+		
+		try {
+			
+			if(dataToWrite.length > CONFIG.BLOCK_SIZE){
+				throw new CacheControllerException("An error occured trying to write a block on Cache, "
+						+ "data[] size did not correspond to "+CONFIG.BLOCK_SIZE);
+			}
+			
+			int position = addressTranslation(address, offset);
+			rawDeviceRW.seek(position);
+			rawDeviceRW.write(dataToWrite, 0, dataToWrite.length);
+		} catch (IOException e) {
+		
+			throw new CacheControllerException("Could not write block on Cache.");
+		}
+		
+	}
+	
+	public byte[] rawReadBlock(int address) throws CacheControllerException{
+		
+		byte[] readBuffer = new byte[CONFIG.BLOCK_SIZE-CONFIG.CONTROL_BYTES_SIZE];
+		int position = addressTranslation(address, CONFIG.CONTROL_BYTES_SIZE);
+		
+		try {
+			rawDeviceRW.seek(position);
+			rawDeviceRW.read(readBuffer, 0 , readBuffer.length);
+			return readBuffer;
+		} catch (IOException e) {
+			
+			throw new CacheControllerException("Could not read Block on Cache.");
+		}
+		
+		
 	}
 
 	private int addressTranslation(int address, int offset) {
