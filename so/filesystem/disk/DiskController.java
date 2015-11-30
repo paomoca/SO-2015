@@ -181,18 +181,19 @@ public class DiskController {
 	
 	private byte[] intAddressToBytes(int length, int intAddress){
 		
-	
-		byte[] byteAddress =  ByteBuffer.allocate(length).putInt(intAddress).array();
-		
-		return byteAddress;
+		ByteBuffer dbuf = ByteBuffer.allocate(length);
+		dbuf.putShort((short) intAddress);
+		byte[] bytes = dbuf.array();
+		return bytes; 
 		
 	}
 	
 	private int byteAddressToInt(byte[] byteAddress){
 		
+		ByteBuffer wrapped = ByteBuffer.wrap(byteAddress);
+		short num = wrapped.getShort(); 
 		
-		
-		return 0;
+		return num;
 	}
 	
 	/**********************************
