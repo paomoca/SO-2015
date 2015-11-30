@@ -10,7 +10,6 @@ import so.filesystem.disk.CacheFreeSpaceManager;
 import so.filesystem.disk.DeviceInitializationException;
 import so.filesystem.disk.FreeSpaceManager;
 
-import java.util.TreeMap;
 import java.util.*;
 
 public class CacheController {
@@ -29,7 +28,7 @@ public class CacheController {
 	private HashMap<Integer, Integer> diskVSFrequency;
 
 	public CacheController(String cacheName, int blockSize, int controlSize, boolean formatFlag)
-			throws CacheControllerException {
+			throws CacheControllerException, DeviceFormatException {
 
 		this.BLOCK_SIZE = blockSize;
 		this.CONTROL_SIZE = controlSize;
@@ -60,7 +59,7 @@ public class CacheController {
 	}
 
 
-	public void deviceIdentification() throws DeviceInitializationException {
+	public void deviceIdentification() throws DeviceInitializationException, DeviceFormatException {
 
 		// Initialize METADATA_LENGTH in 0 so we can start reading in the actual
 		// position 0.
@@ -72,9 +71,8 @@ public class CacheController {
 
 			inKey = rawRead(0, 0, cacheSystemKey.length);
 			if (!Arrays.equals(cacheSystemKey, inKey)) {
-				throw new DeviceInitializationException(
-						"This device is already initialized with a different FileSystem.\n"
-								+ "Please use a raw device.");
+				throw new DeviceFormatException(
+						"This device is already initialized with a different FileSystem.");
 			}
 
 			// If everything went well we add the size of the key to
@@ -100,7 +98,7 @@ public class CacheController {
 		}
 	}
 
-	public void formatDevice() throws DeviceInitializationException {
+	public void formatDevice() throws DeviceInitializationException, DeviceFormatException {
 		METADATA_LENGTH = 0;
 
 		try {
@@ -112,7 +110,7 @@ public class CacheController {
 			METADATA_LENGTH += cacheSystemKey.length;
 
 		} catch (CacheControllerException e) {
-			throw new DeviceInitializationException(
+			throw new DeviceFormatException(
 					"An error occured trying formatting the device.");
 		}
 	}
