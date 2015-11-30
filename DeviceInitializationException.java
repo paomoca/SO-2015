@@ -1,18 +1,18 @@
 public class DeviceInitializationException extends Exception {
 	
-	private String mensaje;
+	private String message;
 	
 	private static final long serialVersionUID = 1L;
 	
-	public DeviceInitializationException(String mensaje){
+	public DeviceInitializationException(String message){
 		
-		this.mensaje = mensaje;
+		this.message = message;
 		
 	}
 	
 	@Override
 	public String toString() {
-		return mensaje;
+		return message;
 	}
 
 }
