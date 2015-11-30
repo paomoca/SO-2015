@@ -6,11 +6,19 @@ import so.filesystem.general.CONFIG;
 
 public class FileController {
 	
+	
+	private boolean IS_USING_CACHE = false;
 	private DiskController disk;
 	
 	public FileController(){
 		
-		disk = new DiskController();
+		try {
+			disk = new DiskController();
+		} catch(DiskControllerException e){
+			System.out.println(e.toString());
+			
+		}
+				
 	}
 	
 	public void readDiskFile(String fileName) throws DiskControllerException{
