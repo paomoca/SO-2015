@@ -17,15 +17,19 @@ public class DiskController {
 	private DiskDirectory directory;
 	
 	//Free Space Manager is initialized but never used within this class.
-	private FreeSpaceManager fsm;
+	private DiskFreeSpaceManager fsm;
 	
-	public DiskController() throws DiskControllerException{
+	public DiskController(boolean formatFlag) throws DiskControllerException, DiskFormatException{
 		
 		try {
 			
 			//The order is important please do not modify.
 			mountDevice();
-			deviceIdentification();
+			if(formatFlag){
+				formatDevice();
+			}else{
+				deviceIdentification();
+			}
 			directoryInitialization();
 			freeSpaceManagerInitialization();
 			
@@ -53,7 +57,7 @@ public class DiskController {
 		}
 	}
 	
-	private void deviceIdentification() throws DeviceInitializationException{
+	private void deviceIdentification() throws DeviceInitializationException, DiskFormatException{
 		
 		//Initialize METADATA_LENGTH in 0 so we can start reading in the actual position 0. 
 		//(Check addressTranslation function)
@@ -69,8 +73,7 @@ public class DiskController {
 				//TODO: ESCRIBIR EL KEY AL PRINCIPIO
 				NEW_DISK = true;
 				
-				throw new DeviceInitializationException("This device is already initialized with a different FileSystem.\n"
-						+ "Please use a raw device.");
+				throw new DiskFormatException("This device is already initialized with a different FileSystem");
 				
 			}
 			
@@ -81,6 +84,25 @@ public class DiskController {
 			throw new DeviceInitializationException("An error occured trying to identify the device.");
 		}
 		
+	}
+	
+	public void formatDevice() throws DeviceInitializationException, DiskFormatException {
+		METADATA_LENGTH = 0;
+
+		try {
+
+			rawWrite(0, 0, systemKey);
+			
+			NEW_DISK = true;
+
+			// If everything went well we add the size of the key to
+			// METADATA_LENGTH.
+			METADATA_LENGTH += systemKey.length;
+
+		} catch (DiskControllerException e) {
+			throw new DiskFormatException(
+					"An error occured trying formatting the device.");
+		}
 	}
 	
 	private void directoryInitialization(){
@@ -95,7 +117,7 @@ public class DiskController {
 			if(NEW_DISK){
 				//If a new disk is being used the Disk Free Space Manager is initialized with the total Disk Available Space in int.
 				int numberOfBlocks = (int) ((rawDeviceRW.length()-METADATA_LENGTH)/CONFIG.BLOCK_SIZE);
-				fsm = new FreeSpaceManager(numberOfBlocks);
+				fsm = new DiskFreeSpaceManager(numberOfBlocks);
 				
 			} else {
 				
