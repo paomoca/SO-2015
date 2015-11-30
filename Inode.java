@@ -1,3 +1,4 @@
+import so.filesystem.disk.FreeSpaceManager;
 
 public class Inode {
 	

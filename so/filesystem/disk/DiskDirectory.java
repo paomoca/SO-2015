@@ -1,3 +1,4 @@
+package so.filesystem.disk;
 import java.util.HashMap;
 
 public class DiskDirectory extends HashMap<String, Integer> {

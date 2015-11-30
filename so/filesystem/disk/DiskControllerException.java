@@ -1,10 +1,12 @@
-public class DeviceInitializationException extends Exception {
-	
+package so.filesystem.disk;
+
+public class DiskControllerException extends Exception{
+
 	private String message;
 	
 	private static final long serialVersionUID = 1L;
 	
-	public DeviceInitializationException(String message){
+	public DiskControllerException(String message){
 		
 		this.message = message;
 		
