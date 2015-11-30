@@ -24,15 +24,14 @@ public class JuanTestsMain {
 		// String s = scan.next();
 		// System.out.println(s);
 
-		String cacheName = "cacheRawDeviceTestFile";
+		String cacheName = CONFIG.CACHE_LOCATION;
 		boolean cacheFormatFlag = false;
 		boolean cacheActive = false;
 		boolean cacheContinueFlag = true;
 
 		while (cacheContinueFlag) {
 			try {
-				cc = new CacheController(cacheName, 2, 0,
-						cacheFormatFlag);
+				cc = new CacheController(cacheFormatFlag);
 				cacheContinueFlag = false;
 			} catch (CacheControllerException e) {
 				// TODO Auto-generated catch block
