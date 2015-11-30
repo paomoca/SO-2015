@@ -1,5 +1,6 @@
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
+import java.nio.ByteBuffer;
 import java.util.Scanner;
 
 public class JuanTestsMain {
@@ -8,6 +9,9 @@ public class JuanTestsMain {
 	private static CacheController cc;
 
 	public static void main(String[] args) {
+
+		
+		
 		scan = new Scanner(System.in);
 		// System.out.println("Escribe algo: ");
 		// String s = scan.next();
@@ -45,6 +49,15 @@ public class JuanTestsMain {
 				}
 			}
 		}
+		
+		System.out.println("Pao");
+		
+		byte[] bytes =  ByteBuffer.allocate(2).putShort((short) 111111).array();
+		
+		for (byte b : bytes) {
+		    System.out.println(Byte.toUnsignedShort(b));
+		}
+		
 	}
 
 }

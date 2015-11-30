@@ -6,7 +6,6 @@ import so.filesystem.general.CONFIG;
 
 public class FileController {
 	
-	
 	private boolean IS_USING_CACHE = false;
 	private DiskController disk;
 	
