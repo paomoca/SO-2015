@@ -5,6 +5,7 @@ import java.io.RandomAccessFile;
 import java.util.Arrays;
 
 import so.filesystem.general.CONFIG;
+import so.filesystem.general.FreeSpaceManager;
 
 public class DiskController {
 	

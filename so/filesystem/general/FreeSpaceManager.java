@@ -1,4 +1,4 @@
-package so.filesystem.disk;
+package so.filesystem.general;
 
 
 import java.util.BitSet;

@@ -1,4 +1,6 @@
-package so.filesystem.disk;
+
+
+import so.filesystem.general.FreeSpaceManager;
 
 public class CacheFreeSpaceManager extends FreeSpaceManager {
 	
@@ -6,12 +8,12 @@ public class CacheFreeSpaceManager extends FreeSpaceManager {
 
 	public CacheFreeSpaceManager(byte[] bitmapBytes) {
 		super(bitmapBytes);
-		// TODO Auto-generated constructor stub
+		
 	}
 
 	public CacheFreeSpaceManager(int deviceBlockSize) {
 		super(deviceBlockSize);
-		// TODO Auto-generated constructor stub
+		
 	}
 
 	public static CacheFreeSpaceManager getInstance(byte[] bitmapBytes) {
