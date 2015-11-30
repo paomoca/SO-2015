@@ -22,21 +22,24 @@ public class FileController {
 	
 	public void readDiskFile(String fileName) throws DiskControllerException{
 		
-		byte[] dataBuffer = new byte[CONFIG.BLOCK_SIZE-CONFIG.CONTROL_BYTES_SIZE];
-		int position;
-		int blockAdressToRead = 0;
+		byte[] dataBuffer = new byte[CONFIG.BLOCK_PAYLOAD_SIZE];
+		int blockAdressToRead = -1;
 		
 		//Searches for file inode reference (inodeBlockAddress) in the directory.
-		int fileInodeBlock = directory.searchForFile(fileName);
+		int fileInodeBlock = disk.getDirectory().searchForFile(fileName);
 		
 		if(fileInodeBlock == -1){
 			throw new DiskControllerException("The file: "+fileName+ " does not exist.");
 		}
+		
+		
 			
 		//Asks the inode walker, based on the inodeBlockAddress for each block to read.
 		while(true){
 			
-			dataBuffer = rawRead(blockAdressToRead, CONFIG.CONTROL_BYTES_SIZE, dataBuffer.length);
+			//Reads the inode block
+			//Loops through block addresses containing the file.
+			//Reads those block addresses
 			
 		}
 			
@@ -45,37 +48,40 @@ public class FileController {
 	
 	
 	//Pulls a file from user computer and writes it to our disk.
-	public void importFile(String fileName) throws IOException{
+	public void importFile(String fileName) throws IOException, DiskControllerException, InodeFileTooBigException, InodeNotEnoughDiskSpaceExcepcion{
 		
 		int numberOfBytesRead;
 		int blockAddress;
-		int blockReadCounter;
-		//Temporal list storing the blocks used by this file.
-		int[] listaTempo;
-		
-		
+
 		FileInputStream fis = new FileInputStream(fileName);
-		byte[] dataBuffer = new byte[CONFIG.BLOCK_SIZE-CONFIG.CONTROL_BYTES_SIZE];
+		byte[] dataBuffer = new byte[CONFIG.BLOCK_PAYLOAD_SIZE];
 		
 		//We create a new Inode for the file.
-		//Inode fileInode = new Inode();
-		
-		blockReadCounter = 0;
+		//TODO: QUE EL INODE LANCE EXCEPCION SI NO PUEDE
+		Inode fileInode = new Inode();
+
 		while((numberOfBytesRead = fis.read(dataBuffer)) != -1){
-			blockReadCounter++;
+		
 			
 			//We ask the Free Space Manager for an available block.
-			//blockAddress = fsm.firstFreeBlock();
-			 
-			//We write the data on the given block
-			//rawWrite(blockAdress,0, dataToWrite);
-			
-			//We save the reference to the new address in the inode.
-			//fileInode.inodeWalker(blockAddress, block);
-			
-			
-			
+			if((blockAddress = DiskFreeSpaceManager.getInstance().firstFreeBlock()) != -1){
+				
+				//TODO: Como definimos que hacer cuando no leimos un bloque completo. 
+				//We write the data on the given block
+				disk.rawWriteBlockPayload(blockAddress, dataBuffer, numberOfBytesRead);
+				
+				//We save the reference to the new address in the inode.
+				fileInode.inodeWriteWalker(blockAddress);
+				
+			} else {
+				
+				//TODO: throw exception
+			}
+	
 		}
+		
+		//If the file was created successfully we add the inode reference to the directory.
+		disk.newDirectoryEntry(fileName, fileInode.getInodeAddress());
 		
 		//Write file entry into Directory.
 		//Update Free Space

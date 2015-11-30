@@ -16,6 +16,7 @@ public class DiskFreeSpaceManager extends FreeSpaceManager {
 		
 	}
 
+
 	public static DiskFreeSpaceManager getInstance(byte[] bitmapBytes) {
 		if (self == null) {
 			self = new DiskFreeSpaceManager(bitmapBytes);
@@ -27,6 +28,11 @@ public class DiskFreeSpaceManager extends FreeSpaceManager {
 		if (self == null) {
 			self = new DiskFreeSpaceManager(deviceBlockSize);
 		}
+		return self;
+	}
+	
+	public static DiskFreeSpaceManager getInstance(){
+		
 		return self;
 	}
 }

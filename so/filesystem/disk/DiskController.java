@@ -22,20 +22,31 @@ public class DiskController {
 		
 		try {
 			
-			//The order is important please do not modify.
+			//Initialize METADATA_LENGTH in 0 so we can start reading in the actual position 0. 
+			//(Check addressTranslation function to see why this is important)
+			METADATA_LENGTH = 0;
+			
+			/**** The order is important please do not modify. ******/
 			mountDevice();
 			if(formatFlag){
 				formatDevice();
 			}else{
 				deviceIdentification();
 			}
-			directoryInitialization();
+	
 			freeSpaceManagerInitialization();
+			directoryInitialization();
 			
 			
 		} catch (DeviceInitializationException e) {
 			
 			throw new DiskControllerException(e.toString());
+		} catch (IncorrectLengthConversionException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
 
 	}
@@ -58,26 +69,22 @@ public class DiskController {
 	
 	private void deviceIdentification() throws DeviceInitializationException, DiskFormatException{
 		
-		//Initialize METADATA_LENGTH in 0 so we can start reading in the actual position 0. 
-		//(Check addressTranslation function)
-		METADATA_LENGTH = 0;
 		byte[] inKey;
 		
 		try {
 			
-			inKey = rawRead(0, 0, systemKey.length);
+			inKey = rawMetadataRead(systemKey.length);
 			
 			if(!Arrays.equals(systemKey, inKey)){
 				
-				//TODO: ESCRIBIR EL KEY AL PRINCIPIO
+				//TODO: ESCRIBIR EL KEY AL PRINCIPIO HAY QUE HACER UN RESET DE LA METADATA A CERO OTRA VEZ PORQUE VAMOS A ESCRIBIR.
 				NEW_DISK = true;
 				
 				throw new DiskFormatException("This device is already initialized with a different FileSystem");
 				
 			}
 			
-			//If everything went well we add the size of the key to METADATA_LENGTH-1 because we start in 0.
-			METADATA_LENGTH += systemKey.length-1;
+			
 			
 		} catch (DiskControllerException e) {
 			throw new DeviceInitializationException("An error occured trying to identify the device.");
@@ -90,13 +97,10 @@ public class DiskController {
 
 		try {
 
-			rawWrite(0, 0, systemKey);
+			rawMetadataWrite(systemKey);
 			
 			NEW_DISK = true;
 
-			// If everything went well we add the size of the key to
-			// METADATA_LENGTH.
-			METADATA_LENGTH += systemKey.length;
 
 		} catch (DiskControllerException e) {
 			throw new DiskFormatException(
@@ -104,14 +108,21 @@ public class DiskController {
 		}
 	}
 	
-	private void directoryInitialization(){
+	private void directoryInitialization() throws IncorrectLengthConversionException, DiskControllerException{
+		
+		if(NEW_DISK){
+			//TODO: Uses free space manager to allocate a block for the Directory Inode?
+		} else {
+			//TODO: gets the directory inode 4 byte address
+			int directoryAddress = rawAddressRead(METADATA_LENGTH, 0);
+		}
+		
+		
 		
 		
 	}
 	
-	private void freeSpaceManagerInitialization() throws DiskControllerException, IncorrectLengthConversionException{
-	
-		try {
+	private void freeSpaceManagerInitialization() throws DiskControllerException, IncorrectLengthConversionException, IOException{
 			
 			if(NEW_DISK){
 				//If a new disk is being used the Disk Free Space Manager is initialized with the total Disk Available Space in int.
@@ -125,41 +136,36 @@ public class DiskController {
 				/* If it is not a new disk and the disk already contains free space information,
 				 * the Disk Free Space Manager is initialized with with that information. */
 				
-				// 1. First we get information about how many blocks contain the Free Space Manager data.
-				byte[] freeSpaceManagerBlockDataSize = rawRead(0,0,CONFIG.FREE_SPACE_MANAGER_INITIAL_CONTROL_BYTE_SIZE);
-				METADATA_LENGTH += CONFIG.FREE_SPACE_MANAGER_INITIAL_CONTROL_BYTE_SIZE;
+				// 1. First we get byte[] information about how many blocks contain the Free Space Manager data.
+				byte[] freeSpaceManagerBlockDataSize = rawMetadataRead(CONFIG.FREE_SPACE_MANAGER_INITIAL_CONTROL_BYTE_SIZE);
 				
-				int numberOfBlocksToRead = byteAddressToInt(freeSpaceManagerBlockDataSize);
-
+				//We get an int from those bytes so we can know the actual number of blocks.
+				int numberOfBlocksToRead = bytesToInt(freeSpaceManagerBlockDataSize);
+				
 				//TODO: FALTA MAS LOGICA
-				// 2. Next we read that amount of blocks.
-				byte[] freeSpaceManagerData = rawReadBlock(0);
-				METADATA_LENGTH += CONFIG.FREE_SPACE_MANAGER_INITIAL_CONTROL_BYTE_SIZE;
+				// 2. Next we read that amount of blocks through a rawMetadataRead;
+				byte[] freeSpaceManagerData = rawMetadataRead(CONFIG.BLOCK_SIZE*numberOfBlocksToRead);
 				
-				// 3. We use the data we read to initialize the DiskFreeSpaceManager
+				// 3. We use the data we read as an argument to initialize the DiskFreeSpaceManager
 				DiskFreeSpaceManager.getInstance(freeSpaceManagerData);
 				
 			}
-			
-		} catch (IOException e) {
-			
-			throw new DiskControllerException("Unable to initialize Free Space Manager.");
-		}
 
 		
 	}
 	
 	/**********************************
-	 *    Raw Read-Write
+	 *    Raw Read-Write.
+	 *    USED BY THE REST OF THE RAW FUNCTIONS. THIS ARE THE LOWEST LEVEL METHODS REACHED BEFORE GETTING THE ACTUAL DATA.
 	 *********************************/
 	
 	//Function used whenever we need to write to disk. This is the only function that actually writes into the raw device.
-	public void rawWrite(int address, int offset, byte[] dataToWrite) throws DiskControllerException{
+	public void rawWrite(int address, int offset, byte[] dataToWrite, int length) throws DiskControllerException{
 		
 		try {
 			int position = addressTranslation(address, offset);
 			rawDeviceRW.seek(position);
-			rawDeviceRW.write(dataToWrite, 0, dataToWrite.length);
+			rawDeviceRW.write(dataToWrite, 0, length);
 		} catch (IOException e) {
 		
 			throw new DiskControllerException("");
@@ -184,42 +190,71 @@ public class DiskController {
 		
 	}
 	
-public void rawWriteBlock(int address, int offset, byte[] dataToWrite) throws DiskControllerException{
+	public void rawWriteBlockPayload(int address, byte[] dataToWrite, int length) throws DiskControllerException{
 			
-			if(dataToWrite.length > CONFIG.BLOCK_SIZE-CONFIG.CONTROL_BYTES_SIZE){
+			if(dataToWrite.length > CONFIG.BLOCK_PAYLOAD_SIZE){
 				throw new DiskControllerException("An error occured trying to write a block, "
-						+ "data[] size did not correspond to "+CONFIG.BLOCK_SIZE);
+						+ "data[] size did not correspond to "+CONFIG.BLOCK_PAYLOAD_SIZE);
 			}
 			
-			rawWrite(address, CONFIG.BLOCK_SIZE, dataToWrite);
+			rawWrite(address, CONFIG.CONTROL_BYTES_SIZE, dataToWrite, length);
 		
 	}
 	
-	public byte[] rawReadBlock(int address) throws DiskControllerException{
+	public byte[] rawReadBlockPayload(int address) throws DiskControllerException{
 		
-		byte[] readBuffer = rawRead(address, CONFIG.CONTROL_BYTES_SIZE, CONFIG.BLOCK_SIZE-CONFIG.CONTROL_BYTES_SIZE);
+		byte[] readBuffer = rawRead(address, CONFIG.CONTROL_BYTES_SIZE, CONFIG.BLOCK_PAYLOAD_SIZE);
 		
 		return readBuffer;
 		
 		
 	}
 	
+	
 	//TODO: PARA LEER Y ESCRIBIR DIRECCIONES
-	public byte[] rawAddressRead(int address) throws IncorrectLengthConversionException{
+	/*****************************************************************************************
+	 * USED WHENEVER WE ARE READING AND WRITING IDB INFORMATION. (USUALLY 4 BYTE ADDRESSES)
+	 *****************************************************************************************/
+	
+	public int rawAddressRead(int idbAddress, int offset) throws IncorrectLengthConversionException, DiskControllerException{
 		
+		byte[] blockAddressReference = rawRead(idbAddress, offset, CONFIG.ADDRESS_SIZE);
+		return bytesToInt(blockAddressReference);
 		
-		
-		return intAddressToBytes(4, address);
 	}
 	
-	public void rawAddressWrite(){
+	public void rawAddressWrite(int idbAddress, int offset, int blockAddressReference) throws IncorrectLengthConversionException, DiskControllerException{
 		
-		//bytesToIntTranslation()
+		byte[] byteBlockAddressReference = intToBytes(CONFIG.ADDRESS_SIZE, blockAddressReference);
+		rawWrite(idbAddress, offset, byteBlockAddressReference, CONFIG.ADDRESS_SIZE);
+		
+		
+	}
+	
+	
+	/*****************************************************************************************
+	 * METHODS IN CHARGE OF METADATA MANIPULATION (READ/WRITE).
+	 * This class is important because it allows the amount of meta data content at the beginning
+	 * of the disk to be dynamically updated. 
+	 *****************************************************************************************/
+	
+	public byte[] rawMetadataRead(int length) throws DiskControllerException{
+		
+		byte metadata[] = rawRead(0,0,length);
+		METADATA_LENGTH += metadata.length;
+		
+		return  metadata;
+	}
+	
+	public void rawMetadataWrite(byte[] data) throws DiskControllerException{
+		
+		rawWrite(0, 0, data, data.length);
+		METADATA_LENGTH+=data.length;
 		
 	}
 	
 	/**********************************
-	 *    Translations and conversions
+	 *  Translations and conversions
 	 *********************************/
 	
 	private int addressTranslation(int address, int offset){
@@ -229,7 +264,7 @@ public void rawWriteBlock(int address, int offset, byte[] dataToWrite) throws Di
 		return position;
 	}
 	
-	private byte[] intAddressToBytes(int length, int intAddress) throws IncorrectLengthConversionException{
+	private byte[] intToBytes(int length, int intAddress) throws IncorrectLengthConversionException{
 		
 		if (length == 2) {
 			return ByteBuffer.allocate(2).putShort((short) intAddress).array(); 
@@ -241,7 +276,7 @@ public void rawWriteBlock(int address, int offset, byte[] dataToWrite) throws Di
 		
 	}
 	
-	private int byteAddressToInt(byte[] byteAddress) throws IncorrectLengthConversionException{
+	private int bytesToInt(byte[] byteAddress) throws IncorrectLengthConversionException{
 		
 		if (byteAddress.length == 2) {
 			return ByteBuffer.wrap(byteAddress).getShort();
@@ -254,10 +289,18 @@ public void rawWriteBlock(int address, int offset, byte[] dataToWrite) throws Di
 	}
 	
 	/**********************************
-	 *    Disk Directory Getters
+	 *    Disk Directory Manipulation
 	 *********************************/
 	public DiskDirectory getDirectory() {
 		return directory;
+	}
+	
+	public void newDirectoryEntry(String fileName, int inodeAddress){
+		
+		//TODO: WRITE TO DISK FILE CONTAINING THE DIRECTORY.
+		
+		directory.newFile(fileName, inodeAddress);
+		
 	}
 	
 		

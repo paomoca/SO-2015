@@ -3,6 +3,8 @@ import so.filesystem.general.FreeSpaceManager;
 
 public class Inode {
 	
+	private int inodeAddress = -1;
+	
 	private int BLOCK_SIZE = 40;
 	private int ADDRESS_SIZE = 4;
 	private int DIRECT_POINTERS = 2;
@@ -24,6 +26,12 @@ public class Inode {
 	
 	
 	public Inode(){
+		
+		//We ask the Free Space Manager for an available block.
+		if((inodeAddress = DiskFreeSpaceManager.getInstance().firstFreeBlock()) != -1){
+			
+			
+		}
 		
 		fsm = DiskFreeSpaceManager.getInstance(500);
 		IDB_TOTAL_ADDRESSES = BLOCK_SIZE/ADDRESS_SIZE;
@@ -123,6 +131,10 @@ public class Inode {
 	public void resetOffset(){
 
 		currentOffset = -1;
+	}
+	
+	public int getInodeAddress(){
+		return inodeAddress;
 	}
 	
 
