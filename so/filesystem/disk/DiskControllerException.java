@@ -9,7 +9,7 @@ public class DiskControllerException extends Exception{
 	public DiskControllerException(String message){
 		
 		this.message = message;
-		
+
 	}
 	
 	@Override

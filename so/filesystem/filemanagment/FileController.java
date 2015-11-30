@@ -10,7 +10,9 @@ public class FileController {
 	private boolean IS_USING_CACHE = false;
 	private DiskController disk;
 	
-	public FileController(){
+	public FileController(boolean cacheActive){
+
+		this.IS_USING_CACHE = cacheActive;
 		
 		try {
 			disk = DiskController.getInstance();
