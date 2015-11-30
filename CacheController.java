@@ -7,14 +7,13 @@ import java.util.HashMap;
 import java.util.Map.Entry;
 
 import so.filesystem.disk.DeviceInitializationException;
+import so.filesystem.general.CONFIG;
 import so.filesystem.general.FreeSpaceManager;
 
 import java.util.*;
 
 public class CacheController {
 
-	private int BLOCK_SIZE;
-	private int CONTROL_SIZE;
 	private int METADATA_LENGTH;
 	private int cacheHits;
 	private Entry<Integer, Integer> lowestEntry;
@@ -26,11 +25,8 @@ public class CacheController {
 	private HashMap<Integer, Integer> diskVSCache;
 	private HashMap<Integer, Integer> diskVSFrequency;
 
-	public CacheController(String cacheName, int blockSize, int controlSize, boolean formatFlag)
+	public CacheController(boolean formatFlag)
 			throws CacheControllerException, DeviceFormatException {
-
-		this.BLOCK_SIZE = blockSize;
-		this.CONTROL_SIZE = controlSize;
 
 		diskVSCache = new HashMap<Integer, Integer>();
 		diskVSFrequency = new HashMap<Integer, Integer>();
@@ -43,7 +39,7 @@ public class CacheController {
 
 		try {
 
-			mountDevice(cacheName);
+			mountDevice();
 			if(formatFlag){
 				formatDevice();
 			}else{
@@ -84,12 +80,12 @@ public class CacheController {
 		}
 	}
 
-	public void mountDevice(String SSDName)
+	public void mountDevice()
 			throws DeviceInitializationException {
 
 		// Reference to the raw device
 		try {
-			rawDeviceRW = new RandomAccessFile(SSDName, "rw");
+			rawDeviceRW = new RandomAccessFile(CONFIG.CACHE_LOCATION, "rw");
 		} catch (FileNotFoundException e) {
 
 			throw new DeviceInitializationException("Unable to mount device.");
@@ -119,7 +115,7 @@ public class CacheController {
 
 		try {
 
-			int numberOfBlocks = (int) ((rawDeviceRW.length() - cacheSystemKey.length) / BLOCK_SIZE);
+			int numberOfBlocks = (int) ((rawDeviceRW.length() - cacheSystemKey.length) / CONFIG.BLOCK_SIZE);
 			System.out.println("bblocks av: " + numberOfBlocks);
 			fsm = CacheFreeSpaceManager.getInstance(numberOfBlocks);
 
@@ -155,7 +151,7 @@ public class CacheController {
 
 	public byte[] readBlock(int hddAddr) throws CacheControllerException {
 		int cacheAddress = this.diskVSCache.get(hddAddr);
-		byte[] blockPayload = rawRead(cacheAddress, 0, BLOCK_SIZE);
+		byte[] blockPayload = rawRead(cacheAddress, 0, CONFIG.BLOCK_SIZE);
 
 		int newFreq = this.diskVSFrequency.get(hddAddr) + 1;
 		this.diskVSFrequency.put(hddAddr, newFreq);
@@ -214,7 +210,7 @@ public class CacheController {
 
 	private int addressTranslation(int address, int offset) {
 
-		int position = METADATA_LENGTH + (BLOCK_SIZE * address) + offset;
+		int position = METADATA_LENGTH + (CONFIG.BLOCK_SIZE * address) + offset;
 
 		return position;
 	}
