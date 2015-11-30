@@ -208,21 +208,28 @@ public class DiskController {
 		return position;
 	}
 	
-	public byte[] intAddressToBytes(int length, int intAddress){
+	public byte[] intAddressToBytes(int length, int intAddress) throws IncorrectLengthConversionException{
 		
-		ByteBuffer dbuf = ByteBuffer.allocate(length);
-		dbuf.putShort((short) intAddress);
-		byte[] bytes = dbuf.array();
-		return bytes; 
+		if (length == 2) {
+			return ByteBuffer.allocate(2).putShort((short) intAddress).array(); 
+		} else if (length == 4) {
+			return ByteBuffer.allocate(4).putInt(intAddress).array();
+		} else {
+			throw new IncorrectLengthConversionException("ERROR: The number you are trying to convert is neither 2 nor 4 bytes long.");
+		}
 		
 	}
 	
-	public int byteAddressToInt(byte[] byteAddress){
+	public int byteAddressToInt(byte[] byteAddress) throws IncorrectLengthConversionException{
 		
-		ByteBuffer wrapped = ByteBuffer.wrap(byteAddress);
-		short num = wrapped.getShort(); 
+		if (byteAddress.length == 2) {
+			return ByteBuffer.wrap(byteAddress).getShort();
+		} else if(byteAddress.length == 4) {
+			return ByteBuffer.wrap(byteAddress).getInt();
+		} else {
+			throw new IncorrectLengthConversionException("ERROR: The bytes array you are trying to convert is neither 2 nor 4 bytes long.");
+		}	
 		
-		return num;
 	}
 	
 	/**********************************
