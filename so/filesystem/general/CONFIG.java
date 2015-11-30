@@ -6,7 +6,7 @@ public class CONFIG {
 	public static int DIRECT_POINTERS = 2;
 	public static int IDB_TOTAL_ADDRESSES = BLOCK_SIZE/ADDRESS_SIZE;
 	public static int CONTROL_BYTES_SIZE = 4;
-	public static String DISK_LOCATION = "/dev/s...";
+	public static String DISK_LOCATION = "diskRawDeviceTestFile";
 	
 	//Do not modify. No more than 2 bytes should be used.
 	public static int FREE_SPACE_MANAGER_INITIAL_CONTROL_BYTE_SIZE=2;
