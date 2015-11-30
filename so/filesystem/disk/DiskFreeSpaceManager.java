@@ -33,6 +33,7 @@ public class DiskFreeSpaceManager extends FreeSpaceManager {
 	
 	public static DiskFreeSpaceManager getInstance(){
 		
+		//TODO: SI ES NULL THORW EXCEPTION
 		return self;
 	}
 }

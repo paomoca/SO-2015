@@ -59,10 +59,10 @@ public class FileController {
 		//We create a new Inode for the file.
 		//TODO: QUE EL INODE LANCE EXCEPCION SI NO PUEDE
 		Inode fileInode = new Inode();
-
+		int inodeBlockAddress = fileInode.getInodeAddress();
+		
 		while((numberOfBytesRead = fis.read(dataBuffer)) != -1){
 		
-			
 			//We ask the Free Space Manager for an available block.
 			if((blockAddress = DiskFreeSpaceManager.getInstance().firstFreeBlock()) != -1){
 				
@@ -81,7 +81,7 @@ public class FileController {
 		}
 		
 		//If the file was created successfully we add the inode reference to the directory.
-		disk.newDirectoryEntry(fileName, fileInode.getInodeAddress());
+		disk.newDirectoryEntry(fileName, inodeBlockAddress);
 		
 		//Write file entry into Directory.
 		//Update Free Space

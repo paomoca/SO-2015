@@ -28,9 +28,9 @@ public class Inode {
 	public Inode(){
 		
 		//We ask the Free Space Manager for an available block.
-		if((inodeAddress = DiskFreeSpaceManager.getInstance().firstFreeBlock()) != -1){
+		if((inodeAddress = DiskFreeSpaceManager.getInstance().firstFreeBlock()) == -1){
 			
-			
+			//TODO: THROW EXCEPTION
 		}
 		
 		fsm = DiskFreeSpaceManager.getInstance(500);
