@@ -10,6 +10,8 @@ import so.filesystem.general.FreeSpaceManager;
 
 public class DiskController {
 	
+	private static DiskController self = null;
+	
 	private int METADATA_LENGTH;
 	private boolean NEW_DISK = false;
 	
@@ -18,8 +20,7 @@ public class DiskController {
 	private RandomAccessFile rawDeviceRW;
 	private DiskDirectory directory;
 		
-	public DiskController(boolean formatFlag) throws DiskControllerException, DiskFormatException{
-		
+	private DiskController(boolean formatFlag) throws DiskControllerException, DiskFormatException{
 		try {
 			
 			//Initialize METADATA_LENGTH in 0 so we can start reading in the actual position 0. 
@@ -49,6 +50,20 @@ public class DiskController {
 			e.printStackTrace();
 		}
 
+	}
+	
+	public static DiskController getInstance(boolean formatFlag) throws DiskControllerException, DiskFormatException {
+		if (self == null) {
+			self = new DiskController(formatFlag);
+		}
+		return self;
+	}
+	
+	public static DiskController getInstance() throws DiskControllerException{
+		if (self == null) {
+			throw new DiskControllerException("ERROR: DiskController not yet init.");
+		}
+		return self;
 	}
 	
 	/**********************************
