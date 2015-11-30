@@ -126,19 +126,16 @@ public class DiskController {
 				 * the Disk Free Space Manager is initialized with with that information. */
 				
 				// 1. First we get information about how many blocks contain the Free Space Manager data.
-				byte[] freeSpaceManagerData = rawRead(0,0,CONFIG.FREE_SPACE_MANAGER_INITIAL_CONTROL_BYTE_SIZE);
-				
-				//TODO: PASAR BYTES A INT
-				
-				
+				byte[] freeSpaceManagerBlockDataSize = rawRead(0,0,CONFIG.FREE_SPACE_MANAGER_INITIAL_CONTROL_BYTE_SIZE);
+				int numberOfBlocksToRead = byteAddressToInt(freeSpaceManagerBlockDataSize);
+
 				// 2. Next we read that amount of blocks.
+				byte[] freeSpaceManagerData = rawReadBlock(0,0);
 				
+				// 3. We use the data we read to initialize the DiskFreeSpaceManager
+				DiskFreeSpaceManager.getInstance(freeSpaceManagerData);
 				
-				
-				
-				//int numberOfBytesToRead = 
-				
-				 
+				METADATA_LENGTH += CONFIG.FREE_SPACE_MANAGER_INITIAL_CONTROL_BYTE_SIZE;
 				
 			}
 			
@@ -146,8 +143,7 @@ public class DiskController {
 			
 			throw new DiskControllerException("Unable to initialize Free Space Manager.");
 		}
-		
-		
+
 		
 	}
 	
@@ -181,6 +177,42 @@ public class DiskController {
 		} catch (IOException e) {
 			
 			throw new DiskControllerException("");
+		}
+		
+		
+	}
+	
+public void rawWriteBlock(int address, int offset, byte[] dataToWrite) throws DiskControllerException{
+		
+		try {
+			
+			if(dataToWrite.length > CONFIG.BLOCK_SIZE){
+				throw new DiskControllerException("An error occured trying to write a block, "
+						+ "data[] size did not correspond to "+CONFIG.BLOCK_SIZE);
+			}
+			
+			int position = addressTranslation(address, offset);
+			rawDeviceRW.seek(position);
+			rawDeviceRW.write(dataToWrite, 0, dataToWrite.length);
+		} catch (IOException e) {
+		
+			throw new DiskControllerException("Could not write block.");
+		}
+		
+	}
+	
+	public byte[] rawReadBlock(int address, int offset) throws DiskControllerException{
+		
+		byte[] readBuffer = new byte[CONFIG.BLOCK_SIZE];
+		int position = addressTranslation(address, offset);
+		
+		try {
+			rawDeviceRW.seek(position);
+			rawDeviceRW.read(readBuffer, 0 , readBuffer.length);
+			return readBuffer;
+		} catch (IOException e) {
+			
+			throw new DiskControllerException("Could not read Block.");
 		}
 		
 		
