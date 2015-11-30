@@ -109,7 +109,7 @@ public class DiskController {
 		
 	}
 	
-	private void freeSpaceManagerInitialization() throws DiskControllerException{
+	private void freeSpaceManagerInitialization() throws DiskControllerException, IncorrectLengthConversionException{
 	
 		try {
 			
@@ -127,15 +127,17 @@ public class DiskController {
 				
 				// 1. First we get information about how many blocks contain the Free Space Manager data.
 				byte[] freeSpaceManagerBlockDataSize = rawRead(0,0,CONFIG.FREE_SPACE_MANAGER_INITIAL_CONTROL_BYTE_SIZE);
+				METADATA_LENGTH += CONFIG.FREE_SPACE_MANAGER_INITIAL_CONTROL_BYTE_SIZE;
+				
 				int numberOfBlocksToRead = byteAddressToInt(freeSpaceManagerBlockDataSize);
 
+				//TODO: FALTA MAS LOGICA
 				// 2. Next we read that amount of blocks.
-				byte[] freeSpaceManagerData = rawReadBlock(0,0);
+				byte[] freeSpaceManagerData = rawReadBlock(0);
+				METADATA_LENGTH += CONFIG.FREE_SPACE_MANAGER_INITIAL_CONTROL_BYTE_SIZE;
 				
 				// 3. We use the data we read to initialize the DiskFreeSpaceManager
 				DiskFreeSpaceManager.getInstance(freeSpaceManagerData);
-				
-				METADATA_LENGTH += CONFIG.FREE_SPACE_MANAGER_INITIAL_CONTROL_BYTE_SIZE;
 				
 			}
 			
@@ -183,44 +185,31 @@ public class DiskController {
 	}
 	
 public void rawWriteBlock(int address, int offset, byte[] dataToWrite) throws DiskControllerException{
-		
-		try {
 			
-			if(dataToWrite.length > CONFIG.BLOCK_SIZE){
+			if(dataToWrite.length > CONFIG.BLOCK_SIZE-CONFIG.CONTROL_BYTES_SIZE){
 				throw new DiskControllerException("An error occured trying to write a block, "
 						+ "data[] size did not correspond to "+CONFIG.BLOCK_SIZE);
 			}
 			
-			int position = addressTranslation(address, offset);
-			rawDeviceRW.seek(position);
-			rawDeviceRW.write(dataToWrite, 0, dataToWrite.length);
-		} catch (IOException e) {
-		
-			throw new DiskControllerException("Could not write block.");
-		}
+			rawWrite(address, CONFIG.BLOCK_SIZE, dataToWrite);
 		
 	}
 	
-	public byte[] rawReadBlock(int address, int offset) throws DiskControllerException{
+	public byte[] rawReadBlock(int address) throws DiskControllerException{
 		
-		byte[] readBuffer = new byte[CONFIG.BLOCK_SIZE];
-		int position = addressTranslation(address, offset);
+		byte[] readBuffer = rawRead(address, CONFIG.CONTROL_BYTES_SIZE, CONFIG.BLOCK_SIZE-CONFIG.CONTROL_BYTES_SIZE);
 		
-		try {
-			rawDeviceRW.seek(position);
-			rawDeviceRW.read(readBuffer, 0 , readBuffer.length);
-			return readBuffer;
-		} catch (IOException e) {
-			
-			throw new DiskControllerException("Could not read Block.");
-		}
+		return readBuffer;
 		
 		
 	}
 	
-	public byte[] rawAddressRead(){
+	//TODO: PARA LEER Y ESCRIBIR DIRECCIONES
+	public byte[] rawAddressRead(int address) throws IncorrectLengthConversionException{
 		
-		return intAddressToBytes(0, 1);
+		
+		
+		return intAddressToBytes(4, address);
 	}
 	
 	public void rawAddressWrite(){
@@ -240,21 +229,28 @@ public void rawWriteBlock(int address, int offset, byte[] dataToWrite) throws Di
 		return position;
 	}
 	
-	public byte[] intAddressToBytes(int length, int intAddress){
+	private byte[] intAddressToBytes(int length, int intAddress) throws IncorrectLengthConversionException{
 		
-		ByteBuffer dbuf = ByteBuffer.allocate(length);
-		dbuf.putShort((short) intAddress);
-		byte[] bytes = dbuf.array();
-		return bytes; 
+		if (length == 2) {
+			return ByteBuffer.allocate(2).putShort((short) intAddress).array(); 
+		} else if (length == 4) {
+			return ByteBuffer.allocate(4).putInt(intAddress).array();
+		} else {
+			throw new IncorrectLengthConversionException("ERROR: The number you are trying to convert is neither 2 nor 4 bytes long.");
+		}
 		
 	}
 	
-	public int byteAddressToInt(byte[] byteAddress){
+	private int byteAddressToInt(byte[] byteAddress) throws IncorrectLengthConversionException{
 		
-		ByteBuffer wrapped = ByteBuffer.wrap(byteAddress);
-		short num = wrapped.getShort(); 
+		if (byteAddress.length == 2) {
+			return ByteBuffer.wrap(byteAddress).getShort();
+		} else if(byteAddress.length == 4) {
+			return ByteBuffer.wrap(byteAddress).getInt();
+		} else {
+			throw new IncorrectLengthConversionException("ERROR: The bytes array you are trying to convert is neither 2 nor 4 bytes long.");
+		}	
 		
-		return num;
 	}
 	
 	/**********************************

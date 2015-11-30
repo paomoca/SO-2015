@@ -5,7 +5,7 @@ import java.nio.ByteBuffer;
 public class DiegoTestsMain {
 
 	public static void main(String[] args) {
-		byte[] arr = { 0x10, 0x25 };
+		byte[] arr = { 0x10, 0x25, 0x10, 0x25 };
 		ByteBuffer wrapped = ByteBuffer.wrap(arr); // big-endian by default
 		short num = wrapped.getShort(); // 1
 
@@ -16,6 +16,9 @@ public class DiegoTestsMain {
 		for (byte b : bytes) {
 			System.out.println(b);
 		}
+		
+		int x = ByteBuffer.wrap(arr).getInt();
+		System.out.println(x);
 
 	}
 
