@@ -1,17 +1,19 @@
 package so.filesystem.disk;
 
+import so.filesystem.general.FreeSpaceManager;
+
 public class DiskFreeSpaceManager extends FreeSpaceManager {
 
 	private static DiskFreeSpaceManager self = null;
 
 	public DiskFreeSpaceManager(byte[] bitmapBytes) {
-
 		super(bitmapBytes);
+		
 	}
 
 	public DiskFreeSpaceManager(int deviceBlockSize) {
-
 		super(deviceBlockSize);
+		
 	}
 
 	public static DiskFreeSpaceManager getInstance(byte[] bitmapBytes) {

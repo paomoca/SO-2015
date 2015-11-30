@@ -10,7 +10,7 @@ public class InodeTest {
 			
 			try {
 				fileInode.inodeWriteWalker(i);
-			} catch (InodeFileTooBigException e) {
+			} catch (InodeFileTooBigException | InodeNotEnoughDiskSpaceExcepcion e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}

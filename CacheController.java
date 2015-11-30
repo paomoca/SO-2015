@@ -6,9 +6,8 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map.Entry;
 
-import so.filesystem.disk.CacheFreeSpaceManager;
 import so.filesystem.disk.DeviceInitializationException;
-import so.filesystem.disk.FreeSpaceManager;
+import so.filesystem.general.FreeSpaceManager;
 
 import java.util.*;
 

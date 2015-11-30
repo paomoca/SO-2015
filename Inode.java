@@ -1,5 +1,5 @@
 import so.filesystem.disk.DiskFreeSpaceManager;
-import so.filesystem.disk.FreeSpaceManager;
+import so.filesystem.general.FreeSpaceManager;
 
 public class Inode {
 	
@@ -30,7 +30,7 @@ public class Inode {
 		
 	}
 	
-	public void inodeWriteWalker(int address) throws InodeFileTooBigException{
+	public void inodeWriteWalker(int address) throws InodeFileTooBigException, InodeNotEnoughDiskSpaceExcepcion{
 		
 		currentOffset++;
 		this.address = address;
@@ -86,11 +86,11 @@ public class Inode {
 		
 	}
 	
-	public void doubleIndirectPointers() throws InodeFileTooBigException{
+	public void doubleIndirectPointers() throws InodeFileTooBigException, InodeNotEnoughDiskSpaceExcepcion{
 		
 		if (IDB2 == -1){	
 			if ((IDB2 = fsm.firstFreeBlock()) == -1) {
-				// Throw not enough disk space exception.
+				throw new InodeNotEnoughDiskSpaceExcepcion("ERROR: There's not enough free space in the disk to write the file.");
 			}
 			// Syso. is a simulation, replace with real function.
 			System.out.println("--->IDB2 assigned: "+IDB2);
@@ -104,7 +104,7 @@ public class Inode {
 			}
 						
 			if ((currentIDB2InternalIDB = fsm.firstFreeBlock()) == -1) {
-				// Throw not enough disk space exception.
+				throw new InodeNotEnoughDiskSpaceExcepcion("ERROR: There's not enough free space in the disk to write the file.");
 			}
 			// Syso. is a simulation, replace with real function.
 			System.out.println("--->Write new currentIDB2InternalIDB: "+currentIDB2InternalIDB+" to: "+IDB2
