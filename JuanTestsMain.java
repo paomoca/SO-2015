@@ -1,4 +1,7 @@
 
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.nio.ByteBuffer;
 import java.util.Scanner;
 
 import so.filesystem.disk.DiskController;
@@ -13,6 +16,9 @@ public class JuanTestsMain {
 	private static DiskController dc;
 
 	public static void main(String[] args) {
+
+		
+		
 		scan = new Scanner(System.in);
 		// System.out.println("Escribe algo: ");
 		// String s = scan.next();
@@ -80,8 +86,6 @@ public class JuanTestsMain {
 				}
 			}
 		}
-		
-		
 		
 	}
 
