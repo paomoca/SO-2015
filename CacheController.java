@@ -6,6 +6,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map.Entry;
 
+import so.filesystem.disk.CacheFreeSpaceManager;
 import so.filesystem.disk.DeviceInitializationException;
 import so.filesystem.disk.FreeSpaceManager;
 
@@ -123,7 +124,7 @@ public class CacheController {
 
 			int numberOfBlocks = (int) ((rawDeviceRW.length() - cacheSystemKey.length) / BLOCK_SIZE);
 			System.out.println("bblocks av: " + numberOfBlocks);
-			fsm = new FreeSpaceManager(numberOfBlocks);
+			fsm = CacheFreeSpaceManager.getInstance(numberOfBlocks);
 
 		} catch (IOException e) {
 

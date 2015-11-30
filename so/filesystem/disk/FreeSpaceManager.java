@@ -8,7 +8,7 @@ public class FreeSpaceManager {
 	private int bitMapSizeInBlocks;
 	/*
 	 * By definition, 1 means free, 0 means used
-	 */
+	 */	
 	public FreeSpaceManager(byte[] bitmapBytes) {
 		this.diskSpaceBitMap = new BitSet((bitmapBytes.length * 8) + 1);
 		this.diskSpaceBitMap.set((bitmapBytes.length * 8) + 1, true);

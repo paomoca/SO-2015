@@ -1,3 +1,4 @@
+import so.filesystem.disk.DiskFreeSpaceManager;
 import so.filesystem.disk.FreeSpaceManager;
 
 public class Inode {
@@ -24,7 +25,7 @@ public class Inode {
 	
 	public Inode(){
 		
-		fsm = new FreeSpaceManager(500);
+		fsm = DiskFreeSpaceManager.getInstance(500);
 		IDB_TOTAL_ADDRESSES = BLOCK_SIZE/ADDRESS_SIZE;
 		
 	}
