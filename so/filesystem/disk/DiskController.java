@@ -2,6 +2,7 @@ package so.filesystem.disk;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.RandomAccessFile;
+import java.nio.ByteBuffer;
 import java.util.Arrays;
 
 import so.filesystem.general.CONFIG;
@@ -16,9 +17,6 @@ public class DiskController {
 
 	private RandomAccessFile rawDeviceRW;
 	private DiskDirectory directory;
-	
-	//Free Space Manager is initialized but never used within this class.
-	private FreeSpaceManager fsm;
 	
 	public DiskController() throws DiskControllerException{
 		
@@ -96,7 +94,8 @@ public class DiskController {
 			if(NEW_DISK){
 				//If a new disk is being used the Disk Free Space Manager is initialized with the total Disk Available Space in int.
 				int numberOfBlocks = (int) ((rawDeviceRW.length()-METADATA_LENGTH)/CONFIG.BLOCK_SIZE);
-				fsm = new FreeSpaceManager(numberOfBlocks);
+				//Disk Free Space Manager is initialized but never used within this class.
+				DiskFreeSpaceManager.getInstance(numberOfBlocks);
 				
 			} else {
 				
@@ -158,11 +157,42 @@ public class DiskController {
 		
 	}
 	
+	public byte[] rawAddressRead(){
+		
+		return intAddressToBytes(0, 1);
+	}
+	
+	public void rawAddressWrite(){
+		
+		//bytesToIntTranslation()
+		
+	}
+	
+	/**********************************
+	 *    Translations and conversions
+	 *********************************/
+	
 	private int addressTranslation(int address, int offset){
 		
 		int position = METADATA_LENGTH + (CONFIG.BLOCK_SIZE * address) + offset;
 		
 		return position;
+	}
+	
+	private byte[] intAddressToBytes(int length, int intAddress){
+		
+	
+		byte[] byteAddress =  ByteBuffer.allocate(length).putInt(intAddress).array();
+		
+		return byteAddress;
+		
+	}
+	
+	private int byteAddressToInt(byte[] byteAddress){
+		
+		
+		
+		return 0;
 	}
 	
 	/**********************************
@@ -171,6 +201,8 @@ public class DiskController {
 	public DiskDirectory getDirectory() {
 		return directory;
 	}
+	
+	
 	
 	//TODO: FALTA PASAR DE INT A BYTES 
 	
