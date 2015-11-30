@@ -1,10 +1,10 @@
-package so.filesystem.disk;
+package so.filesystem.testing;
 
-public class PaoTestsMain {
+public class IkerTestsMain {
 
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub
-
+		
 	}
 
 }

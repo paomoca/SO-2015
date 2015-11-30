@@ -1,12 +1,13 @@
+package so.filesystem.cache;
 
 
-public class DeviceFormatException extends Exception {
+public class CacheFormatException extends Exception {
 
 	private String message;
 
 	private static final long serialVersionUID = 1L;
 
-	public DeviceFormatException(String message) {
+	public CacheFormatException(String message) {
 
 		this.message = message;
 

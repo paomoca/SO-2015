@@ -1,5 +1,8 @@
+package so.filesystem.filemanagment;
 
-public class InodeNotEnoughDiskSpaceExcepcion extends Exception {
+
+public class InodeFileTooBigException extends Exception {
+	
 	/**
 	 * 
 	 */
@@ -7,7 +10,7 @@ public class InodeNotEnoughDiskSpaceExcepcion extends Exception {
 	
 	private String message;
 	
-	public InodeNotEnoughDiskSpaceExcepcion(String message) {
+	public InodeFileTooBigException(String message) {
 		this.message = message;
 	}
 	
@@ -15,4 +18,5 @@ public class InodeNotEnoughDiskSpaceExcepcion extends Exception {
 	public String toString() {
 		return this.message;
 	}
+
 }

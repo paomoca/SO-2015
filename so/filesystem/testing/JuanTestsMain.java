@@ -1,9 +1,13 @@
+package so.filesystem.testing;
+
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.nio.ByteBuffer;
 import java.util.Scanner;
-
+import so.filesystem.cache.CacheFormatException;
+import so.filesystem.cache.CacheController;
+import so.filesystem.cache.CacheControllerException;
 import so.filesystem.disk.DiskController;
 import so.filesystem.disk.DiskControllerException;
 import so.filesystem.disk.DiskFormatException;
@@ -37,7 +41,7 @@ public class JuanTestsMain {
 				// TODO Auto-generated catch block
 				System.out.println(e);
 				System.out.println("Some shit happend");
-			} catch (DeviceFormatException e) {
+			} catch (CacheFormatException e) {
 				// TODO Auto-generated catch block
 				System.out.println(e);
 				System.out
