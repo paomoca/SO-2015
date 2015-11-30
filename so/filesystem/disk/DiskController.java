@@ -104,6 +104,12 @@ public class DiskController {
 				// 1. First we get information about how many blocks contain the Free Space Manager data.
 				byte[] freeSpaceManagerData = rawRead(0,0,CONFIG.FREE_SPACE_MANAGER_INITIAL_CONTROL_BYTE_SIZE);
 				
+				//TODO: PASAR BYTES A INT
+				
+				
+				// 2. Next we read that amount of blocks.
+				
+				
 				
 				
 				//int numberOfBytesToRead = 
@@ -178,7 +184,7 @@ public class DiskController {
 		return position;
 	}
 	
-	private byte[] intAddressToBytes(int length, int intAddress){
+	public byte[] intAddressToBytes(int length, int intAddress){
 		
 	
 		byte[] byteAddress =  ByteBuffer.allocate(length).putInt(intAddress).array();
@@ -187,7 +193,7 @@ public class DiskController {
 		
 	}
 	
-	private int byteAddressToInt(byte[] byteAddress){
+	public int byteAddressToInt(byte[] byteAddress){
 		
 		
 		
@@ -201,16 +207,6 @@ public class DiskController {
 		return directory;
 	}
 	
-	
-	
-	//TODO: FALTA PASAR DE INT A BYTES 
-	
-	/*byte[] bytes = ByteBuffer.allocate(4).putInt(325647187).array();
-
-	for (byte b : bytes) 
-	{	
-	System.out.format("0x%x ", b);
-	}*/
 		
 
 }
