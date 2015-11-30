@@ -35,7 +35,7 @@ public class JuanTestsMain {
 
 		while (cacheContinueFlag) {
 			try {
-				cc = new CacheController(cacheFormatFlag);
+				cc = CacheController.getInstance(cacheFormatFlag);
 				cacheContinueFlag = false;
 			} catch (CacheControllerException e) {
 				// TODO Auto-generated catch block
@@ -67,7 +67,7 @@ public class JuanTestsMain {
 		
 		while (diskContinueFlag) {
 			try {
-				dc = new DiskController(diskFormatFlag);
+				dc = DiskController.getInstance(diskFormatFlag);
 				diskContinueFlag = false;
 			} catch (DiskControllerException e) {
 				// TODO Auto-generated catch block

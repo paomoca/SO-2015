@@ -13,7 +13,7 @@ public class FileController {
 	public FileController(){
 		
 		try {
-			disk = new DiskController();
+			disk = DiskController.getInstance();
 		} catch(DiskControllerException e){
 			System.out.println(e.toString());
 			

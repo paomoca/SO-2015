@@ -15,6 +15,8 @@ import so.filesystem.general.FreeSpaceManager;
 import java.util.*;
 
 public class CacheController {
+	
+	private static CacheController self = null;
 
 	private int METADATA_LENGTH;
 	private int cacheHits;
@@ -23,11 +25,11 @@ public class CacheController {
 			.getBytes();
 
 	private RandomAccessFile rawDeviceRW;
-	private FreeSpaceManager fsm;
+	private CacheFreeSpaceManager fsm;
 	private HashMap<Integer, Integer> diskVSCache;
 	private HashMap<Integer, Integer> diskVSFrequency;
 
-	public CacheController(boolean formatFlag)
+	private CacheController(boolean formatFlag)
 			throws CacheControllerException, CacheFormatException {
 
 		diskVSCache = new HashMap<Integer, Integer>();
@@ -54,6 +56,21 @@ public class CacheController {
 			throw new CacheControllerException(e.toString());
 		}
 	}
+	
+	public static CacheController getInstance(boolean formatFlag) throws CacheControllerException, CacheFormatException {
+		if (self == null) {
+			self = new CacheController(formatFlag);
+		}
+		return self;
+	}
+	
+	public static CacheController getInstance() throws CacheControllerException {
+		if (self == null) {
+			throw new CacheControllerException("ERROR: Cache Controller not yet init.");
+		}
+		return self;
+	}
+
 
 
 	public void deviceIdentification() throws DeviceInitializationException, CacheFormatException {
