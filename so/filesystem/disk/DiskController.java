@@ -73,12 +73,13 @@ public class DiskController {
 		
 		try {
 			
-			inKey = rawMetadataRead(systemKey.length);
+			inKey = rawMetadataRead(systemKey.length, true);
 			
 			if(!Arrays.equals(systemKey, inKey)){
 				
 				//TODO: ESCRIBIR EL KEY AL PRINCIPIO HAY QUE HACER UN RESET DE LA METADATA A CERO OTRA VEZ PORQUE VAMOS A ESCRIBIR.
 				NEW_DISK = true;
+				metadataLengthRewind(systemKey.length);
 				
 				throw new DiskFormatException("This device is already initialized with a different FileSystem");
 				
@@ -97,7 +98,7 @@ public class DiskController {
 
 		try {
 
-			rawMetadataWrite(systemKey);
+			rawMetadataWrite(systemKey, systemKey.length, true);
 			
 			NEW_DISK = true;
 
@@ -114,12 +115,9 @@ public class DiskController {
 			//TODO: Uses free space manager to allocate a block for the Directory Inode?
 		} else {
 			//TODO: gets the directory inode 4 byte address
-			int directoryAddress = rawAddressRead(METADATA_LENGTH, 0);
+			//falta read address del directorio
 		}
-		
-		
-		
-		
+	
 	}
 	
 	private void freeSpaceManagerInitialization() throws DiskControllerException, IncorrectLengthConversionException, IOException{
@@ -137,14 +135,14 @@ public class DiskController {
 				 * the Disk Free Space Manager is initialized with with that information. */
 				
 				// 1. First we get byte[] information about how many blocks contain the Free Space Manager data.
-				byte[] freeSpaceManagerBlockDataSize = rawMetadataRead(CONFIG.FREE_SPACE_MANAGER_INITIAL_CONTROL_BYTE_SIZE);
+				byte[] freeSpaceManagerBlockDataSize = rawMetadataRead(CONFIG.FREE_SPACE_MANAGER_INITIAL_CONTROL_BYTE_SIZE,true);
 				
 				//We get an int from those bytes so we can know the actual number of blocks.
 				int numberOfBlocksToRead = bytesToInt(freeSpaceManagerBlockDataSize);
 				
 				//TODO: FALTA MAS LOGICA
 				// 2. Next we read that amount of blocks through a rawMetadataRead;
-				byte[] freeSpaceManagerData = rawMetadataRead(CONFIG.BLOCK_SIZE*numberOfBlocksToRead);
+				byte[] freeSpaceManagerData = rawMetadataRead(CONFIG.BLOCK_SIZE*numberOfBlocksToRead,true);
 				
 				// 3. We use the data we read as an argument to initialize the DiskFreeSpaceManager
 				DiskFreeSpaceManager.getInstance(freeSpaceManagerData);
@@ -157,109 +155,270 @@ public class DiskController {
 	/**********************************
 	 *    Raw Read-Write.
 	 *    USED BY THE REST OF THE RAW FUNCTIONS. THIS ARE THE LOWEST LEVEL METHODS REACHED BEFORE GETTING THE ACTUAL DATA.
+	 * @throws DiskControllerException 
 	 *********************************/
-	
-	//Function used whenever we need to write to disk. This is the only function that actually writes into the raw device.
-	public void rawWrite(int address, int offset, byte[] dataToWrite, int length) throws DiskControllerException{
-		
-		try {
-			int position = addressTranslation(address, offset);
-			rawDeviceRW.seek(position);
-			rawDeviceRW.write(dataToWrite, 0, length);
-		} catch (IOException e) {
-		
-			throw new DiskControllerException("");
-		}
-		
-	}
-	
-	public byte[] rawRead(int address, int offset, int length) throws DiskControllerException{
-		
-		byte[] readBuffer = new byte[length];
-		int position = addressTranslation(address, offset);
-		
-		try {
-			rawDeviceRW.seek(position);
-			rawDeviceRW.read(readBuffer, 0 , readBuffer.length);
-			return readBuffer;
-		} catch (IOException e) {
+
+	private void rawWrite(int position, byte[] dataToWrite, int length) throws DiskControllerException{
+
+		if(CONFIG.DEBUG_SESSION){
 			
-			throw new DiskControllerException("");
+			System.out.println("DEBUG SESSION: RAW WRITE"
+					+ "\nPOSITION: "+position
+					+ "\nDATA TO WRITE: "+ new String(dataToWrite)
+					+ "\nDATA LENGTH: "+dataToWrite.length
+					+ "\nUSER GIVEN LENGTH: "+length
+					+ "\nFIN RAW WRITE LINEA 175");
+		} else {
+			try {
+				//OFFSET is already considered within the position variable
+				rawDeviceRW.seek(position);
+				rawDeviceRW.write(dataToWrite, 0, length);
+			} catch (IOException e) {
+			
+				throw new DiskControllerException("");
+			}
+		}	
+		
+	}
+	
+	private byte[] rawRead(int position, int length) throws DiskControllerException{
+		
+		
+		if(CONFIG.DEBUG_SESSION){
+			
+			System.out.println("DEBUG SESSION: RAW READ"
+					+ "\nPOSITION: "+position
+					+ "\nUSER GIVEN LENGTH: "+length
+					+ "\nFIN RAW WRITE LINEA 193");
+			return new byte[1];
+		} else {
+			
+			byte[] readBuffer = new byte[length];
+			
+			try {
+				rawDeviceRW.seek(position);
+				//OFFSET is already considered within the position variable
+				rawDeviceRW.read(readBuffer, 0 , length);
+				return readBuffer;
+				
+			} catch (IOException e) {
+				
+				throw new DiskControllerException("");
+			}
+			
 		}
 		
 		
+		
 	}
+	
+	/*****************************************************************************************
+	 * USED TO READ ENTIRE BLOCKS BASED ON BLOCK SIZE
+	 *****************************************************************************************/
+	
+	public void rawWriteBlock(int address, byte[] dataToWrite, int length) throws DiskControllerException{
+			
+			if(length > CONFIG.BLOCK_SIZE){
+				throw new DiskControllerException("An error occured trying to write a block, "
+						+ "data[] size did not correspond to "+CONFIG.BLOCK_SIZE);
+			}
+			
+			//We take no offset since we are reading the entire block.
+			int position = addressTranslation(address);
+			
+			rawWrite(position, dataToWrite, length);
+		
+	}
+	
+	public byte[] rawReadBlock(int address) throws DiskControllerException{
+		
+		//We take no offset since we are reading the entire block.
+		int position = addressTranslation(address);
+		
+		byte[] readBuffer = rawRead(position, CONFIG.BLOCK_SIZE);
+		
+		return readBuffer;
+		
+		
+	}
+
+	/*****************************************************************************************
+	 * USED TO READ AND WRITE BLOCK CONTROL DATA ONLY
+	 *****************************************************************************************/
+	
+	public void setDeduplicationCounter(int address, int counter) throws DiskControllerException, IncorrectLengthConversionException{
+		
+		int position = addressTranslation(address, CONFIG.DEDUPLICATION_CONTROL_OFFSET);
+		byte[] byteCounter = intToBytes(CONFIG.DEDUPLICATION_CONTROL_SIZE, counter);
+		
+		//Would ideally write in address block position 0.
+		rawWrite(position, byteCounter, CONFIG.DEDUPLICATION_CONTROL_SIZE);
+		
+	}
+	
+	public void setBlockAccessFrecuency(int address, int frequency) throws DiskControllerException, IncorrectLengthConversionException{
+		
+		int position = addressTranslation(address, CONFIG.FREQUENCY_CONTROL_OFFSET);
+		byte[] byteFrequency = intToBytes(CONFIG.FREQUENCY_CONTROL_SIZE, address);
+		
+		//Would ideally write in address block position 2.
+		rawWrite(position, byteFrequency, CONFIG.FREQUENCY_CONTROL_SIZE);
+	}
+	
+	public int getDeduplicationCounter(int address) throws IncorrectLengthConversionException, DiskControllerException{
+		
+		int position = addressTranslation(address, CONFIG.DEDUPLICATION_CONTROL_OFFSET);
+		byte[] byteCounter = rawRead(position, CONFIG.DEDUPLICATION_CONTROL_SIZE);
+		
+		return bytesToInt(byteCounter);
+		
+	}
+	
+	public int getBlockAccessFrecuency(int address) throws DiskControllerException, IncorrectLengthConversionException{
+		
+		int position = addressTranslation(address, CONFIG.FREQUENCY_CONTROL_OFFSET);
+		byte[] byteFrequency = rawRead(position, CONFIG.FREQUENCY_CONTROL_SIZE);
+		
+		return bytesToInt(byteFrequency);
+		
+	}
+	
+	public void incrementDeduplicationCounter(int address) throws IncorrectLengthConversionException, DiskControllerException{
+		
+		//GETS THE CURRENT DEDUPLICATION CONTROL VALUE
+		int currentValue = getDeduplicationCounter(address);
+		currentValue += 1;
+		//SETS NEW COUNTER VALUE
+		setDeduplicationCounter(address, currentValue);
+		
+	}
+	
+	public void incrementBlockAccessFrecuency(int address) throws DiskControllerException, IncorrectLengthConversionException{
+		
+		//GETS THE CURRENT FREQUENCY CONTROL VALUE
+		int currentValue = getBlockAccessFrecuency(address);
+		currentValue += 1;
+		//SETS NEW COUNTER VALUE
+		setBlockAccessFrecuency(address, currentValue);
+		
+	}
+	
+	
+	/*****************************************************************************************
+	 * USED TO READ BLOCK PAYLOADS ONLY
+	 *****************************************************************************************/
 	
 	public void rawWriteBlockPayload(int address, byte[] dataToWrite, int length) throws DiskControllerException{
 			
-			if(dataToWrite.length > CONFIG.BLOCK_PAYLOAD_SIZE){
-				throw new DiskControllerException("An error occured trying to write a block, "
+			if(length > CONFIG.BLOCK_PAYLOAD_SIZE){
+				throw new DiskControllerException("An error occured trying to write a block PAYLOAD, "
 						+ "data[] size did not correspond to "+CONFIG.BLOCK_PAYLOAD_SIZE);
 			}
 			
-			rawWrite(address, CONFIG.CONTROL_BYTES_SIZE, dataToWrite, length);
+			//We take as offset the amount of control bytes whenever we want to write te actual payload.
+			int position = addressTranslation(address, CONFIG.CONTROL_BYTES_SIZE);
+			
+			rawWrite(position, dataToWrite, length);
 		
 	}
 	
 	public byte[] rawReadBlockPayload(int address) throws DiskControllerException{
 		
-		byte[] readBuffer = rawRead(address, CONFIG.CONTROL_BYTES_SIZE, CONFIG.BLOCK_PAYLOAD_SIZE);
+		//We take the amount of control bytes as offset to translate address.
+		int position = addressTranslation(address, CONFIG.CONTROL_BYTES_SIZE);
+		
+		byte[] readBuffer = rawRead(position, CONFIG.BLOCK_PAYLOAD_SIZE);
 		
 		return readBuffer;
 		
 		
 	}
 	
-	
-	//TODO: PARA LEER Y ESCRIBIR DIRECCIONES
 	/*****************************************************************************************
-	 * USED WHENEVER WE ARE READING AND WRITING IDB INFORMATION. (USUALLY 4 BYTE ADDRESSES)
+	 * USED WHENEVER WE ARE READING AND WRITING IDB INFORMATION. (USUALLY 4 BYTE ADDRESSES BUT
+	 * THIS PARAMETER IS CONFIGURABLE WITHIN CONFIG.
 	 *****************************************************************************************/
 	
-	public int rawAddressRead(int idbAddress, int offset) throws IncorrectLengthConversionException, DiskControllerException{
+	public int rawAddressRead(int idbAddress, int idbOffset) throws IncorrectLengthConversionException, DiskControllerException{
 		
-		byte[] blockAddressReference = rawRead(idbAddress, offset, CONFIG.ADDRESS_SIZE);
+		int position = IDBPositionTranslation(idbAddress, idbOffset);
+		
+		byte[] blockAddressReference = rawRead(position, CONFIG.ADDRESS_SIZE);
 		return bytesToInt(blockAddressReference);
 		
 	}
 	
-	public void rawAddressWrite(int idbAddress, int offset, int blockAddressReference) throws IncorrectLengthConversionException, DiskControllerException{
+	public void rawAddressWrite(int idbAddress, int idbOffset, int blockAddressReferenceToWrite) throws IncorrectLengthConversionException, DiskControllerException{
 		
-		byte[] byteBlockAddressReference = intToBytes(CONFIG.ADDRESS_SIZE, blockAddressReference);
-		rawWrite(idbAddress, offset, byteBlockAddressReference, CONFIG.ADDRESS_SIZE);
+		byte[] byteBlockAddressReference = intToBytes(CONFIG.ADDRESS_SIZE, blockAddressReferenceToWrite);
+		int position = IDBPositionTranslation(idbAddress, idbOffset);
+
+		rawWrite(position, byteBlockAddressReference, CONFIG.ADDRESS_SIZE);
 		
 		
 	}
 	
 	
+	//TODO: TODAVIA NO ESTA BIEN
 	/*****************************************************************************************
 	 * METHODS IN CHARGE OF METADATA MANIPULATION (READ/WRITE).
 	 * This class is important because it allows the amount of meta data content at the beginning
 	 * of the disk to be dynamically updated. 
+	 * IT IS IMPORTANT TO NOTE THAT WITHIN EACH CALL TO THIS FUNCTION THE METADATA LENGTH INCREASES.
 	 *****************************************************************************************/
 	
-	public byte[] rawMetadataRead(int length) throws DiskControllerException{
+	private byte[] rawMetadataRead(int length, boolean increaseMetadataLength) throws DiskControllerException{
 		
-		byte metadata[] = rawRead(0,0,length);
-		METADATA_LENGTH += metadata.length;
+		byte metadata[] = rawRead(METADATA_LENGTH, length);
+		
+		if(increaseMetadataLength){
+			METADATA_LENGTH += length;
+		}
+		
 		
 		return  metadata;
 	}
 	
-	public void rawMetadataWrite(byte[] data) throws DiskControllerException{
+	private void rawMetadataWrite(byte[] data, int length, boolean increaseMetadataLength) throws DiskControllerException{
 		
-		rawWrite(0, 0, data, data.length);
-		METADATA_LENGTH+=data.length;
+		rawWrite(METADATA_LENGTH, data, length);
+		
+		if(increaseMetadataLength){
+			METADATA_LENGTH += length;
+		}
 		
 	}
+	
+	private void metadataLengthRewind(int length){
+		METADATA_LENGTH -= length;
+	}
+	
 	
 	/**********************************
 	 *  Translations and conversions
 	 *********************************/
 	
+	/*FOR A GIVEN OFFSET*/
 	private int addressTranslation(int address, int offset){
 		
 		int position = METADATA_LENGTH + (CONFIG.BLOCK_SIZE * address) + offset;
+		
+		return position;
+	}
+	
+	/*OFFSET 0*/
+	private int addressTranslation(int address){
+		
+		int position = METADATA_LENGTH + (CONFIG.BLOCK_SIZE * address);
+		
+		return position;
+	}
+	
+	/* The offset given to this function is based on the actual address offset (there is no consideration for bytes),
+	 * this function translates this position in terms of bytes taking into consideration the address size. */
+	private int IDBPositionTranslation(int address, int offset){
+		
+		int position = METADATA_LENGTH + (CONFIG.BLOCK_SIZE * address) + (offset * CONFIG.ADDRESS_SIZE);
 		
 		return position;
 	}
