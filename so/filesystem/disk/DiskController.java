@@ -3,20 +3,24 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.nio.ByteBuffer;
-import java.util.Arrays;
 
 import so.filesystem.general.CONFIG;
-import so.filesystem.general.FreeSpaceManager;
+
+
+//TODO: metadata new disk initialization en secuencia
+//TODO: metadata known disk initialization
 
 public class DiskController {
 	
 	private static DiskController self = null;
 	
 	private int METADATA_LENGTH;
+	private byte[] METADATA_DISK_KEY;
+	private int METADATA_DIRECTORY_ADDRESS;
+	private int METADATA_NUMBER_DISK_FSM_BLOCKS;
+	
 	private boolean NEW_DISK = false;
 	
-	byte[] systemKey = "0KYHNzQbaIRPe6APYx3NLg5kX3VsEvN52eOYAmJl7YlrahtGOI8xy22RrUUhMyMtPNYWAOEfes376IQIMmHPf1JUE8cwm26xBTN69pF9hCk6jc2f23mXNE2Z8CQLEU9RcJGGXO9Zb3vgzyHB2JhQs0zNf08DEPt6kEWgB0yrXpCcYoljprSVtjGh2rJfJOXmSR2oz8gSADU7y7nBPhznVGMKCKyeCfiUCQWIZ4BHCqq1ul4P1Nlcj9g1K8YorxCF3NAsMELBMlINU9oaNgc04nAX7VqmulOOhAUUCs4D2AV1yJ8aQSkjloBkwBp8StAWgpaP9fuuy4FBKGtHeTRwf4XNZqT3TyNre0PLP7usiijDo2RaXDARleKaEbsISYQBUBUYhrH3QtPV2qJ7bwtcj2uAvlUP4KSDSE5yAuGEoSXs69quHk3OR2aWarXhuvQ7kVeKincMNzo2UzR0XRuW5zq1K1vl0yWR4jXaGurzyjYG0JYRlPk5Ba2sDjHmSOakgjGPAD55OxRTc5ztglNmSXMjU8zrSEGa1slM5LjjxI9e1HUVD4yMc0QZBC6PtLI6snkWGq8fWHTm22q797O5vOyjWiQlDwee2RQM3vreKX1s85mMmgy6a3wzIREuH2ivwJjimp3KjUyUZe3h5tkhQtRnMSfCqw57IZ5IGbOt9b3to44Ghj5k3T8RUX43G0cheT81DYT1VpATlAgQlXCARjyBDEpIuiAB6x9Nfpg1b5SskvJ3oM7Kyl0AM9GTlZOLy1tNRtFejtgfwvZm7inWEFK1AGzftB2RsGlODbKaaNDErZaqYFKnxAkcsmJ0pQtQLo25fUYS9N577F8Hs6BrFc7axv4kkIbLUytFvNUAkIwpWsbTDJ4fCQz9VQXChO4Qsog8wxCILspfR5qb0QNV9a9V8zUYVnSKjBVCtPyyrZpXqz1WmhuYUaWa0XNyKR45wyN2mjXyfOlopxtwhK3BsXBs5jrnREuQMl83gpWxDHTzNYjOgiJCU6eYhAFxjBOl".getBytes();
-
 	private RandomAccessFile rawDeviceRW;
 	private DiskDirectory directory;
 		
@@ -45,10 +49,7 @@ public class DiskController {
 		} catch (IncorrectLengthConversionException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+		} 
 
 	}
 	
@@ -82,19 +83,56 @@ public class DiskController {
 		}
 	}
 	
+	//TODO: AQUI ESTAN LAS FORMAS DE LEER Y ESCRIBIR LA METADATA NO SE DONDE VAN, DEPENDE DE LA INICIALIZACION DE JUAN
+	private void metadataNewDiskInitialization() throws UnidentifiedMetadataTypeException, DiskControllerException, IncorrectLengthConversionException, IOException{
+		
+		//Saves the key at the beginning of the disk.
+		METADATA_DISK_KEY = CONFIG.DISK_SYSTEMKEY;
+		rawMetadataWrite(METADATA_DISK_KEY, "DISK_KEY");
+		 
+		//TODO: CÓMO COMENZAR EL DIRECTORIO
+		//Directory Inode Address is always cero.
+		METADATA_DIRECTORY_ADDRESS = 0;
+		rawMetadataWrite(Integer.valueOf(METADATA_DIRECTORY_ADDRESS), "DIRECTORY_ADDRESS");
+		//TODO:
+		//Create directory Inode and write it on the corresponding block?.
+			 
+		//Initializes the DiskFreeSpaceManager with the number of blocks remaining after the meta data bytes.
+		//Final meta data length is dependent on the result of this initialization.
+		int numberOfBlocks = (int) ((rawDeviceRW.length()-CONFIG.INITIAL_METADATA_SIZE)/CONFIG.BLOCK_SIZE);
+		DiskFreeSpaceManager.getInstance(numberOfBlocks);
+		METADATA_NUMBER_DISK_FSM_BLOCKS  = DiskFreeSpaceManager.getInstance().getBitMapSizeInBlocks();
+		rawMetadataWrite(Integer.valueOf(METADATA_NUMBER_DISK_FSM_BLOCKS), "FSM_NUMBER_OF_BLOCKS");
+		METADATA_LENGTH = CONFIG.INITIAL_METADATA_SIZE + (METADATA_NUMBER_DISK_FSM_BLOCKS * CONFIG.BLOCK_SIZE);
+		
+	}
+	
+	//TODO: AQUI ESTAN LAS FORMAS DE LEER Y ESCRIBIR LA METADATA NO SE DONDE VAN, DEPENDE DE LA INICIALIZACION DE JUAN
+	private void metadataKnownDiskInitialization()  throws UnidentifiedMetadataTypeException, DiskControllerException, IncorrectLengthConversionException{
+		
+		//How to read each meta data value
+		
+		METADATA_DISK_KEY = (byte[]) rawMetadataRead("DISK_KEY");
+		
+		METADATA_DIRECTORY_ADDRESS = (int) rawMetadataRead("DIRECTORY_ADDRESS");
+		
+		//Final meta data length is dependent on the result of this read.
+		METADATA_NUMBER_DISK_FSM_BLOCKS = (int) rawMetadataRead("FSM_NUMBER_OF_BLOCKS");
+		METADATA_LENGTH = CONFIG.INITIAL_METADATA_SIZE + (METADATA_NUMBER_DISK_FSM_BLOCKS * CONFIG.BLOCK_SIZE);
+		
+	}
+	
 	private void deviceIdentification() throws DeviceInitializationException, DiskFormatException{
 		
-		byte[] inKey;
+		/*byte[] inKey;
 		
 		try {
 			
-			inKey = rawMetadataRead(systemKey.length, true);
 			
-			if(!Arrays.equals(systemKey, inKey)){
+			if(!Arrays.equals(METADATA_DISK_KEY, inKey)){
 				
 				//TODO: ESCRIBIR EL KEY AL PRINCIPIO HAY QUE HACER UN RESET DE LA METADATA A CERO OTRA VEZ PORQUE VAMOS A ESCRIBIR.
 				NEW_DISK = true;
-				metadataLengthRewind(systemKey.length);
 				
 				throw new DiskFormatException("This device is already initialized with a different FileSystem");
 				
@@ -105,24 +143,21 @@ public class DiskController {
 		} catch (DiskControllerException e) {
 			throw new DeviceInitializationException("An error occured trying to identify the device.");
 		}
-		
+	*/	
 	}
 	
-	public void formatDevice() throws DeviceInitializationException, DiskFormatException {
-		METADATA_LENGTH = 0;
+	public void formatDevice() {
 
-		try {
 
-			rawMetadataWrite(systemKey, systemKey.length, true);
+	
+
+			//TODO: SE PUEDEN TOMAR COSAS DE LAS FUNCIONES QUE PUSE DE METADATA
 			
 			NEW_DISK = true;
-
-
-		} catch (DiskControllerException e) {
-			throw new DiskFormatException(
-					"An error occured trying formatting the device.");
-		}
 	}
+
+
+	
 	
 	private void directoryInitialization() throws IncorrectLengthConversionException, DiskControllerException{
 		
@@ -135,35 +170,9 @@ public class DiskController {
 	
 	}
 	
-	private void freeSpaceManagerInitialization() throws DiskControllerException, IncorrectLengthConversionException, IOException{
+	private void freeSpaceManagerInitialization(){
 			
-			if(NEW_DISK){
-				//If a new disk is being used the Disk Free Space Manager is initialized with the total Disk Available Space in int.
-				int numberOfBlocks = (int) ((rawDeviceRW.length()-METADATA_LENGTH)/CONFIG.BLOCK_SIZE);
-
-				//Disk Free Space Manager is initialized but never used within this class.
-				DiskFreeSpaceManager.getInstance(numberOfBlocks);
-				
-			} else {
-				
-				/* If it is not a new disk and the disk already contains free space information,
-				 * the Disk Free Space Manager is initialized with with that information. */
-				
-				// 1. First we get byte[] information about how many blocks contain the Free Space Manager data.
-				byte[] freeSpaceManagerBlockDataSize = rawMetadataRead(CONFIG.FREE_SPACE_MANAGER_INITIAL_CONTROL_BYTE_SIZE,true);
-				
-				//We get an int from those bytes so we can know the actual number of blocks.
-				int numberOfBlocksToRead = bytesToInt(freeSpaceManagerBlockDataSize);
-				
-				//TODO: FALTA MAS LOGICA
-				// 2. Next we read that amount of blocks through a rawMetadataRead;
-				byte[] freeSpaceManagerData = rawMetadataRead(CONFIG.BLOCK_SIZE*numberOfBlocksToRead,true);
-				
-				// 3. We use the data we read as an argument to initialize the DiskFreeSpaceManager
-				DiskFreeSpaceManager.getInstance(freeSpaceManagerData);
-				
-			}
-
+			
 		
 	}
 	
@@ -380,34 +389,60 @@ public class DiskController {
 	 * This class is important because it allows the amount of meta data content at the beginning
 	 * of the disk to be dynamically updated. 
 	 * IT IS IMPORTANT TO NOTE THAT WITHIN EACH CALL TO THIS FUNCTION THE METADATA LENGTH INCREASES.
+	 * @throws UnidentifiedMetadataTypeException 
+	 * @throws DiskControllerException 
+	 * @throws IncorrectLengthConversionException 
 	 *****************************************************************************************/
 	
-	private byte[] rawMetadataRead(int length, boolean increaseMetadataLength) throws DiskControllerException{
+	private Object rawMetadataRead(String type) throws UnidentifiedMetadataTypeException, DiskControllerException, IncorrectLengthConversionException{
 		
-		byte metadata[] = rawRead(METADATA_LENGTH, length);
+		switch (type){
 		
-		if(increaseMetadataLength){
-			METADATA_LENGTH += length;
+			case "DISK_KEY":
+				
+				byte[] diskKey = rawRead(CONFIG.METADATA_DISKSYSTEMKEY_OFFSET, CONFIG.METADATA_DISKSYSTEMKEY_SIZE);
+				return diskKey;
+
+			case "DIRECTORY_ADDRESS":
+				
+				byte[] dirAddr = rawRead(CONFIG.METADATA_DIRECTORY_ADDRESS_REFERENCE_OFFSET, CONFIG.METADATA_DIRECTORY_ADDRESS_REFERENCE_SIZE);
+				return new Integer(bytesToInt(dirAddr));
+				
+			case "FSM_NUMBER_OF_BLOCKS":
+				
+				byte[] fsmNumberBlocks = rawRead(CONFIG.METADATA_DISKFSM_INITIAL_CONTROL_BYTE_OFFSET, CONFIG.METADATA_DISKFSM_INITIAL_CONTROL_BYTE_SIZE);
+				return new Integer(bytesToInt(fsmNumberBlocks));
+				
+			default:
+				throw new UnidentifiedMetadataTypeException("Unidentified requested metadata type.");
 		}
 		
-		
-		return  metadata;
 	}
+
+	private void rawMetadataWrite(Object data, String type) throws UnidentifiedMetadataTypeException, DiskControllerException, IncorrectLengthConversionException{
+		
+		switch (type){
+		
+			case "DISK_KEY":
+				
+				byte[] diskKey = (byte[]) data;
+				rawWrite(CONFIG.METADATA_DISKSYSTEMKEY_OFFSET, diskKey ,CONFIG.METADATA_DISKSYSTEMKEY_SIZE);
+			
+			case "DIRECTORY_ADDRESS":
+				
+				byte[] dirAddr = intToBytes(CONFIG.METADATA_DIRECTORY_ADDRESS_REFERENCE_SIZE,  (int) data);				
+				rawWrite(CONFIG.METADATA_DIRECTORY_ADDRESS_REFERENCE_OFFSET, dirAddr ,CONFIG.METADATA_DIRECTORY_ADDRESS_REFERENCE_SIZE);
 	
-	private void rawMetadataWrite(byte[] data, int length, boolean increaseMetadataLength) throws DiskControllerException{
-		
-		rawWrite(METADATA_LENGTH, data, length);
-		
-		if(increaseMetadataLength){
-			METADATA_LENGTH += length;
+			case "FSM_NUMBER_OF_BLOCKS":
+				
+				byte[] fsmNumberOfBlocks = intToBytes(CONFIG.METADATA_DISKFSM_INITIAL_CONTROL_BYTE_SIZE,  (int) data);
+				rawWrite(CONFIG.METADATA_DISKFSM_INITIAL_CONTROL_BYTE_OFFSET,fsmNumberOfBlocks,CONFIG.METADATA_DISKFSM_INITIAL_CONTROL_BYTE_SIZE);
+				
+			default:
+				throw new UnidentifiedMetadataTypeException("Unidentified requested metadata type.");
 		}
 		
 	}
-	
-	private void metadataLengthRewind(int length){
-		METADATA_LENGTH -= length;
-	}
-	
 	
 	/**********************************
 	 *  Translations and conversions
