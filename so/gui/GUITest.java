@@ -1,8 +1,9 @@
 package so.gui;
 
+import so.gui.fsframe.FSFrame;
+
 import javax.swing.*;
 import java.awt.*;
-import so.gui.grid.Grid;
 
 class GUITest {
 
@@ -14,17 +15,10 @@ class GUITest {
                     UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
                 } catch (ClassNotFoundException | InstantiationException | IllegalAccessException | UnsupportedLookAndFeelException ex) {
                 }
-
-                Grid grid = new Grid();
-                JFrame window = new JFrame();
-                window.setSize(840, 560);
-                window.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-                window.add(grid);
-                window.setVisible(true);
-
-                grid.fillCell(0, 10);
-
+                FSFrame fs = new FSFrame();
+                fs.setVisible(true);
             }
+
         });
     }
 }
