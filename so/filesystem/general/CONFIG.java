@@ -1,7 +1,7 @@
 package so.filesystem.general;
 public class CONFIG {
 
-	public static boolean DEBUG_SESSION = true;
+	public static boolean DEBUG_SESSION = false;
 	
 	public static byte[] DISK_SYSTEMKEY = "0KYHNzQbaIRPe6APYx3NLg5kX3VsEvN52eOYAmJl7YlrahtGOI8xy22RrUUhMyMtPNYWAOEfes376IQIMmHPf1JUE8cwm26xBTN69pF9hCk6jc2f23mXNE2Z8CQLEU9RcJGGXO9Zb3vgzyHB2JhQs0zNf08DEPt6kEWgB0yrXpCcYoljprSVtjGh2rJfJOXmSR2oz8gSADU7y7nBPhznVGMKCKyeCfiUCQWIZ4BHCqq1ul4P1Nlcj9g1K8YorxCF3NAsMELBMlINU9oaNgc04nAX7VqmulOOhAUUCs4D2AV1yJ8aQSkjloBkwBp8StAWgpaP9fuuy4FBKGtHeTRwf4XNZqT3TyNre0PLP7usiijDo2RaXDARleKaEbsISYQBUBUYhrH3QtPV2qJ7bwtcj2uAvlUP4KSDSE5yAuGEoSXs69quHk3OR2aWarXhuvQ7kVeKincMNzo2UzR0XRuW5zq1K1vl0yWR4jXaGurzyjYG0JYRlPk5Ba2sDjHmSOakgjGPAD55OxRTc5ztglNmSXMjU8zrSEGa1slM5LjjxI9e1HUVD4yMc0QZBC6PtLI6snkWGq8fWHTm22q797O5vOyjWiQlDwee2RQM3vreKX1s85mMmgy6a3wzIREuH2ivwJjimp3KjUyUZe3h5tkhQtRnMSfCqw57IZ5IGbOt9b3to44Ghj5k3T8RUX43G0cheT81DYT1VpATlAgQlXCARjyBDEpIuiAB6x9Nfpg1b5SskvJ3oM7Kyl0AM9GTlZOLy1tNRtFejtgfwvZm7inWEFK1AGzftB2RsGlODbKaaNDErZaqYFKnxAkcsmJ0pQtQLo25fUYS9N577F8Hs6BrFc7axv4kkIbLUytFvNUAkIwpWsbTDJ4fCQz9VQXChO4Qsog8wxCILspfR5qb0QNV9a9V8zUYVnSKjBVCtPyyrZpXqz1WmhuYUaWa0XNyKR45wyN2mjXyfOlopxtwhK3BsXBs5jrnREuQMl83gpWxDHTzNYjOgiJCU6eYhAFxjBOl".getBytes();
 
@@ -17,7 +17,7 @@ public class CONFIG {
 	
 	public static int INITIAL_METADATA_SIZE = METADATA_DISKSYSTEMKEY_SIZE+METADATA_DIRECTORY_ADDRESS_REFERENCE_SIZE+METADATA_DISKFSM_INITIAL_CONTROL_BYTE_SIZE;
 	
-	public static int BLOCK_SIZE = 40;
+	public static int BLOCK_SIZE = 4096;
 	
 	//There must be a correspondence between the offset and the amount of control bytes.
 	public static int DEDUPLICATION_CONTROL_OFFSET = 0;
@@ -32,7 +32,7 @@ public class CONFIG {
 	public static int DIRECT_POINTERS = 2;
 	public static int IDB_TOTAL_ADDRESSES = BLOCK_SIZE/ADDRESS_SIZE;
 
-	public static String DISK_LOCATION = "diskRawDeviceTestFile";
+	public static String DISK_LOCATION = "Simulacion";
 	public static String CACHE_LOCATION = "cacheRawDeviceTestFile";
 	
 	
