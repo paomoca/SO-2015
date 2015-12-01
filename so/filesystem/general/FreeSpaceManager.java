@@ -1,10 +1,10 @@
 package so.filesystem.general;
 
-
+import java.util.ArrayList;
 import java.util.BitSet;
 
 public class FreeSpaceManager {
-	BitSet diskSpaceBitMap;
+	private BitSet diskSpaceBitMap;
 	private int bitMapSizeInBlocks;
 	/*
 	 * By definition, 1 means free, 0 means used
@@ -13,6 +13,7 @@ public class FreeSpaceManager {
 		this.diskSpaceBitMap = new BitSet((bitmapBytes.length * 8) + 1);
 		this.diskSpaceBitMap.set((bitmapBytes.length * 8) + 1, true);
 		this.diskSpaceBitMap = BitSet.valueOf(bitmapBytes);
+		this.diskSpaceBitMap.set(CONFIG.METADATA_DIRECTORY_ADDRESS_REFERENCE, false);
 	}
 	
 	public FreeSpaceManager(int deviceBlockSize) {
@@ -20,6 +21,8 @@ public class FreeSpaceManager {
 		this.diskSpaceBitMap = new BitSet((deviceBlockSize-this.bitMapSizeInBlocks)+1);
 		this.diskSpaceBitMap.set(0, (deviceBlockSize-this.bitMapSizeInBlocks)+1, true);
 		System.out.print("lengthBit: " + this.diskSpaceBitMap.length());
+		this.diskSpaceBitMap.set(CONFIG.METADATA_DIRECTORY_ADDRESS_REFERENCE, false);
+
 		//RandomAccessFile randomAccessFile = new RandomAccessFile("bitmap.txt", "rw");
 	}
 	
@@ -39,6 +42,21 @@ public class FreeSpaceManager {
 		for (int i = 0 ; i< this.diskSpaceBitMap.toByteArray().length; ++i) {
 			System.out.print(logn[i] + "\n");
 		}
+	}
+	
+	public boolean[] printbits(int begin, int end) {
+		ArrayList<Boolean> arrayBits = new ArrayList<Boolean>();
+		boolean[] bits;
+		
+		for(int i = begin; i < end; ++i) {
+			arrayBits.add(this.diskSpaceBitMap.get(i));
+		}
+		bits = new boolean[arrayBits.size()];
+		for(int i = 0; i < arrayBits.size(); ++i) {
+			bits[i] = !arrayBits.get(i);
+		}
+		
+		return bits;
 	}
 	
 	public byte[] updateFreeSpace() {
