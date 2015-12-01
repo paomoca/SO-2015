@@ -9,16 +9,15 @@ import so.gui.grid.Grid;
  */
 public class FSFrame extends JFrame {
 
-    private Grid grid;
+    private Grid section;
 
     public FSFrame() {
 
-        grid = new Grid();
-
         JPanel content = new JPanel();
-        content.setLayout(new BorderLayout());
-        content.add(grid, BorderLayout.CENTER);
 
+        section = new Grid(480,480,10,10);
+        content.setLayout(new BorderLayout());
+        content.add(section, BorderLayout.WEST);
 
         this.add(content, BorderLayout.CENTER);
         this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);

@@ -12,45 +12,53 @@ import java.util.*;
 public class Grid extends JPanel {
 
 
-    private int gridWidth = 500;
-    private int gridHeight = 500;
+    private int gridWidth;
+    private int gridHeight;
 
-    private int cellWidth = 10;
-    private int cellHeight = 10;
+    private int cellWidth ;
+    private int cellHeight;
 
-    private int gridOffset = 10;
-    private int columns = gridWidth/cellWidth;
+    private int columns;
+    private int rows;
+
     private java.util.List<Point> fillCells;
 
-    public Grid() {
+    public Grid(int gridWidth, int gridHeight, int cellWidth, int cellHeight) {
         fillCells = new ArrayList<>();
 
-        this.setPreferredSize(new Dimension(gridWidth + (gridOffset * 2), gridHeight + (gridOffset * 2)));
+        this.cellWidth = cellWidth;
+        this.cellHeight = cellHeight;
+        this.gridWidth = gridWidth;
+        this.gridHeight = gridHeight;
 
+        this.columns = gridWidth/cellWidth;
+        this.rows = gridHeight/cellHeight;
+
+        this.setPreferredSize(new Dimension(gridWidth, gridHeight));
         this.addMouseListener(new BlockClickListener());
 
-        System.out.print("Total blocks = " + (gridWidth/cellWidth)*(gridHeight/cellHeight) + "\n");
+        System.out.print("Total blocks = " + (rows*columns) + "\n");
     }
 
     @Override
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
         for (Point fillCell : fillCells) {
-            int cellX = gridOffset + (fillCell.x * cellWidth);
-            int cellY = gridOffset + (fillCell.y * cellHeight);
+            int cellX = fillCell.x * cellWidth;
+            int cellY = fillCell.y * cellHeight;
             g.setColor(Color.RED);
             g.fillRect(cellX, cellY, cellWidth, cellHeight);
         }
 
         g.setColor(Color.BLACK);
-        g.drawRect(gridOffset, gridOffset, gridWidth, gridHeight);
+        g.drawRect(0, 0, gridWidth, gridHeight);
 
-        for (int i = gridOffset; i <= gridWidth + gridOffset; i += cellWidth) {
-            g.drawLine(i, gridOffset, i, gridHeight + gridOffset);
+        for (int i = 0; i <= gridWidth; i += cellWidth) {
+            g.drawLine(i, 0, i, gridHeight);
         }
 
-        for (int i = gridOffset; i <= gridHeight + gridOffset; i += cellHeight) {
-            g.drawLine(gridOffset, i, gridWidth + gridOffset, i);
+        for (int i = 0; i <= gridHeight; i += cellHeight) {
+            g.drawLine(0, i, gridWidth, i);
         }
 
     }
@@ -69,17 +77,18 @@ public class Grid extends JPanel {
 
         @Override
         public void mousePressed(MouseEvent e) {
-            int row = (e.getY()/cellWidth) - 1;
-            int column = (e.getX()/cellHeight) - 1;
+            System.out.println("Click detected.");
 
-
+            int row = (e.getY()/cellWidth);
+            System.out.println("Row = " + row);
+            int column = (e.getX()/cellHeight);
+            System.out.println("Column = " + column);
             int section = (columns * row) + column ;
 
-            if (section >= 0 && section < 2500) {
+            if (section >= 0 && section < (columns * rows)) {
                 System.out.println(section);
+                fillCell(column, row);
             }
-
-            fillCell(column,row);
 
         }
 
