@@ -53,7 +53,7 @@ public class DeduplicationPlugin {
 		byte[] block = DiskController.getInstance().rawReadBlockPayload(blockAddr);
 		hashGenerator.update(block);
 		long keyRemove = hashGenerator.getValue();	
-		
+
 		if (this.blockHash.get(keyRemove).size() == 1) {
 			this.blockHash.remove(keyRemove);
 		} else if (this.blockHash.get(keyRemove).size() > 1) {

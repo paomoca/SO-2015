@@ -12,7 +12,40 @@ public class IkerTestsMain {
 	public static void main(String[] args) throws IncorrectLengthConversionException, DiskControllerException {
 		// TODO Auto-generated method stub
 		CRC32 gen = new CRC32();
-		FreeSpaceManager fsm = new FreeSpaceManager(50000);
+		FreeSpaceManager fsm = new FreeSpaceManager(5248005);
+		
+		System.out.println(fsm.getBitMapSizeInBlocks());
+		System.out.println(fsm.getNumberFreeBlocks());
+		fsm.firstFreeBlock();
+		fsm.firstFreeBlock();
+		fsm.firstFreeBlock();
+		fsm.firstFreeBlock();
+		fsm.firstFreeBlock();
+		fsm.firstFreeBlock();
+		fsm.firstFreeBlock();
+		fsm.firstFreeBlock();
+		fsm.firstFreeBlock();
+		fsm.firstFreeBlock();
+		fsm.firstFreeBlock();
+		fsm.firstFreeBlock();
+		fsm.firstFreeBlock();
+		fsm.firstFreeBlock();
+		fsm.firstFreeBlock();
+		fsm.firstFreeBlock();
+		fsm.firstFreeBlock();
+		fsm.firstFreeBlock();
+		fsm.firstFreeBlock();
+		fsm.firstFreeBlock();
+		fsm.firstFreeBlock();
+		fsm.firstFreeBlock();
+		fsm.firstFreeBlock();
+		fsm.firstFreeBlock();
+		fsm.firstFreeBlock();
+		fsm.firstFreeBlock();
+		fsm.firstFreeBlock();
+		fsm.firstFreeBlock();
+		fsm.firstFreeBlock();
+		fsm.firstFreeBlock();
 		fsm.firstFreeBlock();
 		fsm.firstFreeBlock();
 		fsm.firstFreeBlock();
@@ -21,11 +54,11 @@ public class IkerTestsMain {
 		fsm.firstFreeBlock();
 
 		
-		boolean[] hola = fsm.printbits(0, 20);
-		for (int i = 0; i < hola.length; i++) {
-			System.out.println(hola[i]);
-		}
-		
+		boolean[] hola = fsm.printbits(0, 2499);
+//		for (int i = 0; i < hola.length; i++) {
+//			System.out.println(hola[i]);
+//		}
+		System.out.println(hola.length);
 		
 		gen.update("holaprobandohhshsgfiddhhskhhdjdfsdnsfklallskjdksfdvcnserbvcnjbashingdeinfo".getBytes());
 		System.out.println(gen.getValue());

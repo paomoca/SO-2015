@@ -20,7 +20,6 @@ public class FreeSpaceManager {
 		this.bitMapSizeInBlocks = ((deviceBlockSize/8)/4096)+1;
 		this.diskSpaceBitMap = new BitSet((deviceBlockSize-this.bitMapSizeInBlocks)+1);
 		this.diskSpaceBitMap.set(0, (deviceBlockSize-this.bitMapSizeInBlocks)+1, true);
-		System.out.print("lengthBit: " + this.diskSpaceBitMap.length());
 		this.diskSpaceBitMap.set(CONFIG.METADATA_DIRECTORY_ADDRESS_REFERENCE, false);
 
 		//RandomAccessFile randomAccessFile = new RandomAccessFile("bitmap.txt", "rw");
@@ -48,7 +47,7 @@ public class FreeSpaceManager {
 		ArrayList<Boolean> arrayBits = new ArrayList<Boolean>();
 		boolean[] bits;
 		
-		for(int i = begin; i < end; ++i) {
+		for(int i = begin; i <= end; ++i) {
 			arrayBits.add(this.diskSpaceBitMap.get(i));
 		}
 		bits = new boolean[arrayBits.size()];
