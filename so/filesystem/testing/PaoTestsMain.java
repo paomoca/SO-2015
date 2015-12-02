@@ -1,6 +1,10 @@
 package so.filesystem.testing;
 
+import java.io.BufferedReader;
+import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
+import java.nio.file.Files;
 import java.util.Arrays;
 
 import so.filesystem.disk.DiskController;
@@ -9,28 +13,24 @@ import so.filesystem.disk.DiskFormatException;
 import so.filesystem.disk.DiskFreeSpaceManager;
 import so.filesystem.disk.IncorrectLengthConversionException;
 import so.filesystem.disk.UnidentifiedMetadataTypeException;
-<<<<<<< HEAD
-=======
 import so.filesystem.filemanagment.InodeDirectPointerIndexOutOfRange;
 import so.filesystem.filemanagment.InodeFileTooBigException;
 import so.filesystem.filemanagment.InodeNotEnoughDiskSpaceExcepcion;
 import so.filesystem.filemanagment.InodeReader;
 import so.filesystem.filemanagment.InodeWriter;
->>>>>>> 1ea966ce8337833cfd7564bbfb10ea46d9dacf31
 import so.filesystem.general.CONFIG;
 
 public class PaoTestsMain {
 
-<<<<<<< HEAD
-	public static void main(String[] args) throws UnidentifiedMetadataTypeException, IOException {
-=======
+
 	public static void main(String[] args) throws UnidentifiedMetadataTypeException, IOException, InodeNotEnoughDiskSpaceExcepcion, InodeDirectPointerIndexOutOfRange, InodeFileTooBigException {
->>>>>>> 1ea966ce8337833cfd7564bbfb10ea46d9dacf31
-		
+
 		try {
+
 			
 			String string = "aei aei aei";
-			DiskController dc = DiskController.getInstance(true);
+			System.out.println(new File("/Volumes/SO").getTotalSpace());
+			DiskController dc = DiskController.getInstance(false);
 			System.out.println("Metadata length: "+dc.METADATA_LENGTH);
 			
 			boolean write = false;
@@ -103,21 +103,21 @@ public class PaoTestsMain {
 			System.out.println(dc.rawAddressRead(1, 20));
 			System.out.println(dc.bytesToInt(dc.intToBytes(4, 12)));*/
 			
-			DiskFreeSpaceManager.getInstance(40000);
+			//DiskFreeSpaceManager.getInstance(40000000);
 			
 			
-			//InodeWriter inodeW = new InodeWriter();
+			/*InodeWriter inodeW = new InodeWriter();
 			
-			for(int i = 0; i< 20; i++){
-				//inodeW.inodeWriteWalker(i);
-				System.out.println(DiskFreeSpaceManager.getInstance().firstFreeBlock());
-			}
-			
-			/*InodeReader inodeR = new InodeReader(1);
-			
-			for(int i = 0; i< 2200; i++){
-				inodeR.inodeReadWalkerNext();
+			for(int i = 1000; i< 5000; i++){
+				inodeW.inodeWriteWalker(i);
+				
 			}*/
+			
+			InodeReader inodeR = new InodeReader(1);
+			
+			for(int i = 1000; i< 2019; i++){
+				inodeR.inodeReadWalkerNext();
+			}
 			
 				
 			dc.finalize();
@@ -135,7 +135,10 @@ public class PaoTestsMain {
 		} /*catch (IncorrectLengthConversionException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
-		}*/ 
+		}*/ catch (IncorrectLengthConversionException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} 
 
 	}
 

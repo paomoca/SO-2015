@@ -1,4 +1,5 @@
 package so.filesystem.disk;
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.RandomAccessFile;
@@ -33,15 +34,15 @@ public class DiskController {
 			
 			//Initialize METADATA_LENGTH in 0 so we can start reading in the actual position 0. 
 			//(Check addressTranslation function to see why this is important)
-			METADATA_LENGTH = 10;
+			METADATA_LENGTH = 0;
 			
 			/***** The order is important please do not modify. ******/
 			mountDevice();
 			if(formatFlag){
-				//metadataNewDiskInitialization();
+				metadataNewDiskInitialization();
 			}else{
 				deviceIdentification();
-				//metadataKnownDiskInitialization();
+				metadataKnownDiskInitialization();
 			}
 	
 			//freeSpaceManagerInitialization();
@@ -86,7 +87,7 @@ public class DiskController {
 				System.out.println("Length"+rawDeviceRW.length());
 			}
 		} catch (FileNotFoundException e) {
-			
+			e.printStackTrace();
 			throw new DeviceInitializationException("Unable to mount device.");
 			
 		} catch (IOException e) {
@@ -111,8 +112,9 @@ public class DiskController {
 			 
 		//Initializes the DiskFreeSpaceManager with the number of blocks remaining after the meta data bytes.
 		//Final meta data length is dependent on the result of this initialization.
-		int numberOfBlocks = (int) ((rawDeviceRW.length()-CONFIG.INITIAL_METADATA_SIZE)/CONFIG.BLOCK_SIZE);
-		DiskFreeSpaceManager.getInstance(numberOfBlocks);
+		long byteSize = (long) 22655952486.0;
+		long numberOfBlocks = ((byteSize - new Long(CONFIG.INITIAL_METADATA_SIZE))/ new Long(CONFIG.BLOCK_SIZE));
+		DiskFreeSpaceManager.getInstance((int) numberOfBlocks);
 		METADATA_NUMBER_DISK_FSM_BLOCKS  = DiskFreeSpaceManager.getInstance().getBitMapSizeInBlocks();
 		rawMetadataWrite(Integer.valueOf(METADATA_NUMBER_DISK_FSM_BLOCKS), "FSM_NUMBER_OF_BLOCKS");
 		METADATA_LENGTH = CONFIG.INITIAL_METADATA_SIZE + (METADATA_NUMBER_DISK_FSM_BLOCKS * CONFIG.BLOCK_SIZE);
@@ -189,13 +191,26 @@ public class DiskController {
 
 		if(CONFIG.DEBUG_SESSION){
 			
-			System.out.println("DEBUG SESSION: RAW WRITE"
+			System.out.println("\n\n-------------DEBUG SESSION: RAW WRITE"
 					+ "\nPOSITION: "+position
-					+ "\nDATA TO WRITE: "+ new String(dataToWrite)
+					+ "\nDATA TO WRITE String: "+ new String(dataToWrite)
 					+ "\nDATA LENGTH: "+dataToWrite.length
 					+ "\nUSER GIVEN LENGTH: "+length
-					+ "\nFIN RAW WRITE LINEA 175");
-		} else {
+					+ "\n-----------------------------------");
+			
+	
+				try {
+					System.out.println("\n------- DATA TO WRITE INT: "+bytesToInt(dataToWrite)+"---------");
+					byte[] test = rawRead(position, length);
+					System.out.println("\n----------------COMPROBACION: "+bytesToInt(test)+"----------\n\n");
+				} catch (IncorrectLengthConversionException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				
+				
+			
+		} 
 			try {
 				//OFFSET is already considered within the position variable
 				rawDeviceRW.seek(position);
@@ -204,21 +219,14 @@ public class DiskController {
 			
 				throw new DiskControllerException("");
 			}
-		}	
+		
 		
 	}
 	
 	private byte[] rawRead(int position, int length) throws DiskControllerException{
 		
 		
-		if(CONFIG.DEBUG_SESSION){
-			
-			System.out.println("DEBUG SESSION: RAW READ"
-					+ "\nPOSITION: "+position
-					+ "\nUSER GIVEN LENGTH: "+length
-					+ "\nFIN RAW WRITE LINEA 193");
-			return new byte[1];
-		} else {
+		
 			
 			byte[] readBuffer = new byte[length];
 			
@@ -226,6 +234,25 @@ public class DiskController {
 				rawDeviceRW.seek(position);
 				//OFFSET is already considered within the position variable
 				rawDeviceRW.read(readBuffer, 0 , length);
+				
+				
+				if(CONFIG.DEBUG_SESSION){
+					
+					System.out.println("\n\n****DEBUG SESSION: RAW READ"
+							+ "\nPOSITION: "+position
+							+ "\nUSER GIVEN LENGTH: "+length
+							+"\nDATA READ: "+new String(readBuffer)
+							+ "\n****************");
+					//return new byte[1];
+					try {
+						System.out.println("\n*********** DATA TO READ INT: "+bytesToInt(readBuffer)+"***********\n\n");
+					} catch (IncorrectLengthConversionException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+				} 
+				
+				
 				return readBuffer;
 				
 			} catch (IOException e) {
@@ -233,7 +260,7 @@ public class DiskController {
 				throw new DiskControllerException("");
 			}
 			
-		}
+		
 		
 		
 		
@@ -267,14 +294,33 @@ public class DiskController {
 		
 		int position = directPointerAddressTranslation(inodeAddress, inodeOffset);
 		byte[] bytePointToAddress = intToBytes(CONFIG.ADDRESS_SIZE, pointToAddress);
+		
+		if(CONFIG.DEBUG_SESSION){
+			System.out.println("Request write Direct Pointer Inode Address: "+inodeAddress
+					+"\noffset: "+inodeOffset
+					+"\nposition: "+position
+					+"wrote address: "+pointToAddress);
+		}
+		
 		rawWrite(position, bytePointToAddress, CONFIG.ADDRESS_SIZE);
 	}
 	
 	public int readDirectPointer(int inodeAddress, int inodeOffset) throws IncorrectLengthConversionException, DiskControllerException, InodeDirectPointerIndexOutOfRange{
 		
+		
+		
 		int position = directPointerAddressTranslation(inodeAddress, inodeOffset);
 		byte[] directPointer = rawRead(position, CONFIG.ADDRESS_SIZE);
+		
+		if(CONFIG.DEBUG_SESSION){
+			System.out.println("Read Direct Pointer Inode Address: "+inodeAddress
+					+"\noffset: "+inodeOffset
+					+"\nposition: "+position);
+		}
+		
 		return bytesToInt(directPointer);
+		
+		
 	
 	}
 	
@@ -582,7 +628,12 @@ public class DiskController {
 		}
 		
 		//Offset is handled in a per/pointer fashion. Address size must be taken into consideration during translation.
-		int position = (CONFIG.BLOCK_SIZE*inodeAddress)+CONFIG.INODE_INFO_MAX_SIZE+(directPointerOffset*CONFIG.ADDRESS_SIZE);
+		int position = METADATA_LENGTH+(CONFIG.BLOCK_SIZE*inodeAddress)+CONFIG.INODE_INFO_MAX_SIZE+(directPointerOffset*CONFIG.ADDRESS_SIZE);
+		
+		if(CONFIG.DEBUG_SESSION){
+			
+			System.out.println("Translated DIRECT POINTER FROM ADDRESS: "+inodeAddress+" OFFSET: "+directPointerOffset+" TO: "+position);
+		}
 		
 		return position;
 	}

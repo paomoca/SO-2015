@@ -88,7 +88,7 @@ public class InodeReader {
 	
 	private int directPointers() throws DiskControllerException, IncorrectLengthConversionException, InodeDirectPointerIndexOutOfRange{
 
-		System.out.println("\nRead direct pointer in Inode: "+currentDataAddress+" offset: "+currentOffset);
+		System.out.println("\nRead direct pointer in Inode: "+INODE_ADDRESS+" offset: "+currentOffset);
 		int pointer = DiskController.getInstance().readDirectPointer(INODE_ADDRESS, currentOffset);
 		
 		if(currentOffset == CONFIG.DIRECT_POINTERS-1){
