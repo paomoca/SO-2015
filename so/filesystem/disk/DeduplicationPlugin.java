@@ -21,7 +21,6 @@ public class DeduplicationPlugin {
 	public DeduplicationPlugin() {
 
 		try {
-			System.out.println("Hola");
 			FileInputStream fos = new FileInputStream("t.tmp");
 			ObjectInputStream oos = new ObjectInputStream(fos);
 			try {
@@ -34,7 +33,7 @@ public class DeduplicationPlugin {
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			this.blockHash = new HashMap<Long, ArrayList<Integer>>();
-			//e.printStackTrace();
+			// e.printStackTrace();
 		}
 
 	}
@@ -47,7 +46,7 @@ public class DeduplicationPlugin {
 		hashGenerator.update(block);
 		long keyAdd = hashGenerator.getValue();
 		if (this.blockHash.containsKey(keyAdd)) {
-			if(!this.blockHash.get(keyAdd).contains(blockAddr)) {
+			if (!this.blockHash.get(keyAdd).contains(blockAddr)) {
 				this.blockHash.get(keyAdd).add(blockAddr);
 			} else {
 				System.out.println("This block already exists!!");
@@ -83,10 +82,12 @@ public class DeduplicationPlugin {
 		hashGenerator.update(block);
 		long keyRemove = hashGenerator.getValue();
 
-		if (this.blockHash.get(keyRemove).size() == 1) {
-			this.blockHash.remove(keyRemove);
-		} else if (this.blockHash.get(keyRemove).size() > 1) {
-			this.blockHash.get(keyRemove).remove(new Integer(blockAddr));
+		if (this.blockHash.containsKey(keyRemove)) {
+			if (this.blockHash.get(keyRemove).size() == 1) {
+				this.blockHash.remove(keyRemove);
+			} else if (this.blockHash.get(keyRemove).size() > 1) {
+				this.blockHash.get(keyRemove).remove(new Integer(blockAddr));
+			}
 		}
 	}
 
@@ -95,15 +96,18 @@ public class DeduplicationPlugin {
 		CRC32 hashGenerator = new CRC32();
 		hashGenerator.update(block);
 		long keyRemove = hashGenerator.getValue();
+
 		if (this.blockHash.containsKey(keyRemove)) {
-			if (this.blockHash.get(keyRemove).size() == 1) {
-				this.blockHash.remove(keyRemove);
-			} else if (this.blockHash.get(keyRemove).size() > 1) {
-				this.blockHash.get(keyRemove).remove(new Integer(blockAddr));
-			}
-		} else {
-			if (CONFIG.DEBUG_SESSION) {
-				System.out.println("Block Not in Hash");
+			if (this.blockHash.containsKey(keyRemove)) {
+				if (this.blockHash.get(keyRemove).size() == 1) {
+					this.blockHash.remove(keyRemove);
+				} else if (this.blockHash.get(keyRemove).size() > 1) {
+					this.blockHash.get(keyRemove).remove(new Integer(blockAddr));
+				}
+			} else {
+				if (CONFIG.DEBUG_SESSION) {
+					System.out.println("Block Not in Hash");
+				}
 			}
 		}
 	}
@@ -119,4 +123,5 @@ public class DeduplicationPlugin {
 			e.printStackTrace();
 		}
 	}
+
 }
