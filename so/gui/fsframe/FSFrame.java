@@ -19,6 +19,7 @@ public class FSFrame extends JFrame {
 
 	private static final long serialVersionUID = 1L;
 	private Grid section;
+	private Grid blocks;
     private Shell shell;
     private Interpreter intr;
     private FileSystemController fileSystemController;
@@ -26,6 +27,8 @@ public class FSFrame extends JFrame {
     public FSFrame() {
 
         JPanel content = new JPanel();
+        JPanel gridsHolder = new JPanel();
+        
         
         shell = new Shell();
         shell.getCurCommand().addKeyListener(new GetCurCommandKeyListener());
@@ -37,8 +40,15 @@ public class FSFrame extends JFrame {
 		shell.getHistory().setBackground(Color.BLACK);
 
         section = new Grid(480,480,10,10);
-        content.setLayout(new BorderLayout());
-        content.add(section, BorderLayout.WEST);
+        blocks = new Grid(480, 480, 10, 10);
+        
+        gridsHolder.setLayout(new BorderLayout());
+        gridsHolder.add(section,BorderLayout.WEST);
+        gridsHolder.add(Box.createHorizontalStrut(20));
+        gridsHolder.add(blocks, BorderLayout.EAST);
+        
+        content.setLayout(new BorderLayout());        
+        content.add(gridsHolder, BorderLayout.NORTH);
         content.add(shell, BorderLayout.SOUTH);
 
         this.add(content, BorderLayout.CENTER);

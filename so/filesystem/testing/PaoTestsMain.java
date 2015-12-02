@@ -1,16 +1,18 @@
 package so.filesystem.testing;
 
+import java.io.IOException;
 import java.util.Arrays;
 
 import so.filesystem.disk.DiskController;
 import so.filesystem.disk.DiskControllerException;
 import so.filesystem.disk.DiskFormatException;
 import so.filesystem.disk.IncorrectLengthConversionException;
+import so.filesystem.disk.UnidentifiedMetadataTypeException;
 import so.filesystem.general.CONFIG;
 
 public class PaoTestsMain {
 
-	public static void main(String[] args) {
+	public static void main(String[] args) throws UnidentifiedMetadataTypeException, IOException {
 		
 		try {
 			
