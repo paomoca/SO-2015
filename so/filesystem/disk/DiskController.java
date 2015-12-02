@@ -17,7 +17,8 @@ public class DiskController {
 	
 	private static DiskController self = null;
 	
-	public int METADATA_LENGTH;
+	//Initialize METADATA_LENGTH in 0 so we can start reading in the actual position 0. 
+	public int METADATA_LENGTH=0;
 	private byte[] METADATA_DISK_KEY;
 	private int METADATA_DIRECTORY_ADDRESS;
 	private int METADATA_NUMBER_DISK_FSM_BLOCKS;
@@ -32,9 +33,7 @@ public class DiskController {
 
 		try {
 			
-			//Initialize METADATA_LENGTH in 0 so we can start reading in the actual position 0. 
 			//(Check addressTranslation function to see why this is important)
-			METADATA_LENGTH = 0;
 			
 			/***** The order is important please do not modify. ******/
 			mountDevice();
@@ -45,7 +44,6 @@ public class DiskController {
 				metadataKnownDiskInitialization();
 			}
 	
-			//freeSpaceManagerInitialization();
 			//directoryInitialization();
 			
 			
@@ -119,6 +117,9 @@ public class DiskController {
 		rawMetadataWrite(Integer.valueOf(METADATA_NUMBER_DISK_FSM_BLOCKS), "FSM_NUMBER_OF_BLOCKS");
 		METADATA_LENGTH = CONFIG.INITIAL_METADATA_SIZE + (METADATA_NUMBER_DISK_FSM_BLOCKS * CONFIG.BLOCK_SIZE);
 		
+		byte[] disk_fsm_bitmap = DiskFreeSpaceManager.getInstance().updateFreeSpace();
+		rawMetadataWrite(disk_fsm_bitmap, "FSM_BITMAP");
+		
 	}
 	
 	//TODO: AQUI ESTAN LAS FORMAS DE LEER Y ESCRIBIR LA METADATA NO SE DONDE VAN, DEPENDE DE LA INICIALIZACION DE JUAN
@@ -134,10 +135,9 @@ public class DiskController {
 		METADATA_NUMBER_DISK_FSM_BLOCKS = (int) rawMetadataRead("FSM_NUMBER_OF_BLOCKS");
 		METADATA_LENGTH = CONFIG.INITIAL_METADATA_SIZE + (METADATA_NUMBER_DISK_FSM_BLOCKS * CONFIG.BLOCK_SIZE);
 		
-	}
-	
-	private void deiceFormat() throws DeviceInitializationException, DiskFormatException{
-		NEW_DISK = true;
+		byte[] fsmBitmap = (byte[]) rawMetadataRead("FSM_BITMAP");
+		DiskFreeSpaceManager.getInstance(fsmBitmap);
+		
 	}
 	
 	private void deviceIdentification() throws DeviceInitializationException, DiskFormatException, UnidentifiedMetadataTypeException, DiskControllerException, IncorrectLengthConversionException{
@@ -195,14 +195,14 @@ public class DiskController {
 					+ "\nPOSITION: "+position
 					+ "\nDATA TO WRITE String: "+ new String(dataToWrite)
 					+ "\nDATA LENGTH: "+dataToWrite.length
-					+ "\nUSER GIVEN LENGTH: "+length
-					+ "\n-----------------------------------");
+					+ "\nUSER GIVEN LENGTH: "+length);
 			
 	
 				try {
-					System.out.println("\n------- DATA TO WRITE INT: "+bytesToInt(dataToWrite)+"---------");
+					System.out.println("\nDATA TO WRITE INT: "+bytesToInt(dataToWrite)+"---------");
 					byte[] test = rawRead(position, length);
-					System.out.println("\n----------------COMPROBACION: "+bytesToInt(test)+"----------\n\n");
+					System.out.println("\nCOMPROBACION READ STRING: "+new String(test)+"---------------------");
+					System.out.println("\nCOMPROBACION READ INT: "+bytesToInt(test)+"---------------------\n\n");
 				} catch (IncorrectLengthConversionException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
@@ -235,14 +235,13 @@ public class DiskController {
 				
 				if(CONFIG.DEBUG_SESSION){
 					
-					System.out.println("\n\n****DEBUG SESSION: RAW READ"
+					System.out.println("\n\n***********DEBUG SESSION: RAW READ"
 							+ "\nPOSITION: "+position
 							+ "\nUSER GIVEN LENGTH: "+length
-							+"\nDATA READ: "+new String(readBuffer)
-							+ "\n****************");
-					//return new byte[1];
+							+"\nDATA READ: "+new String(readBuffer));
+					
 					try {
-						System.out.println("\n*********** DATA TO READ INT: "+bytesToInt(readBuffer)+"***********\n\n");
+						System.out.println("\nDATA READ INT: "+bytesToInt(readBuffer)+"***********\n\n");
 					} catch (IncorrectLengthConversionException e) {
 						// TODO Auto-generated catch block
 						e.printStackTrace();
@@ -256,10 +255,6 @@ public class DiskController {
 				
 				throw new DiskControllerException("");
 			}
-			
-		
-		
-		
 		
 	}
 	
@@ -554,6 +549,11 @@ public class DiskController {
 				byte[] fsmNumberBlocks = rawRead(CONFIG.METADATA_DISKFSM_INITIAL_CONTROL_BYTE_OFFSET, CONFIG.METADATA_DISKFSM_INITIAL_CONTROL_BYTE_SIZE);
 				return new Integer(bytesToInt(fsmNumberBlocks));
 				
+			case "FSM_BITMAP":
+				byte[] fsmBitmap = rawRead(CONFIG.INITIAL_METADATA_SIZE, (METADATA_NUMBER_DISK_FSM_BLOCKS*CONFIG.BLOCK_PAYLOAD_SIZE));
+				return fsmBitmap;
+				
+				
 			default:
 				throw new UnidentifiedMetadataTypeException("Unidentified requested metadata type.");
 		}
@@ -581,6 +581,11 @@ public class DiskController {
 				
 				byte[] fsmNumberOfBlocks = intToBytes(CONFIG.METADATA_DISKFSM_INITIAL_CONTROL_BYTE_SIZE,(Integer) data);
 				rawWrite(CONFIG.METADATA_DISKFSM_INITIAL_CONTROL_BYTE_OFFSET,fsmNumberOfBlocks,CONFIG.METADATA_DISKFSM_INITIAL_CONTROL_BYTE_SIZE);
+				break;
+				
+			case "FSM_BITMAP":
+				byte[] bitMap = (byte[]) data;
+				rawWrite(CONFIG.INITIAL_METADATA_SIZE, bitMap, (METADATA_NUMBER_DISK_FSM_BLOCKS*CONFIG.BLOCK_SIZE));
 				break;
 				
 			default:
