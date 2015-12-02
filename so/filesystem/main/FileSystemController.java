@@ -6,8 +6,10 @@ import so.filesystem.cache.CacheFormatException;
 import so.filesystem.disk.DiskController;
 import so.filesystem.disk.DiskControllerException;
 import so.filesystem.disk.DiskFormatException;
+import so.filesystem.disk.IncorrectLengthConversionException;
 import so.filesystem.disk.UnidentifiedMetadataTypeException;
 import so.filesystem.filemanagment.FileController;
+import so.filesystem.filemanagment.InodeDirectPointerIndexOutOfRange;
 import so.filesystem.filemanagment.InodeFileTooBigException;
 import so.filesystem.filemanagment.InodeNotEnoughDiskSpaceExcepcion;
 import so.filesystem.general.CONFIG;
@@ -154,7 +156,7 @@ public class FileSystemController {
 
     }
 
-    public void importFile(String fileName) {
+    public void importFile(String fileName) throws IncorrectLengthConversionException, InodeDirectPointerIndexOutOfRange {
         try {
             fileController.importFile(fileName);
         } catch (IOException e) {
