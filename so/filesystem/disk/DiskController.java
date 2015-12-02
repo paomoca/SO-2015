@@ -38,7 +38,6 @@ public class DiskController {
 			if(formatFlag){
 				metadataNewDiskInitialization();
 			}else{
-				//metadataKnownDiskInitialization();
 				deviceIdentification();
 				metadataKnownDiskInitialization();
 			}
