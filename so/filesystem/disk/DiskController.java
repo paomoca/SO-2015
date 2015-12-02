@@ -103,7 +103,7 @@ public class DiskController {
 		METADATA_DISK_KEY = CONFIG.DISK_SYSTEMKEY;
 		rawMetadataWrite(METADATA_DISK_KEY, "DISK_KEY");
 		 
-		//TODO: C�MO COMENZAR EL DIRECTORIO
+		//TODO: COMO COMENZAR EL DIRECTORIO
 		//Directory Inode Address is always cero.
 		METADATA_DIRECTORY_ADDRESS = 0;
 		rawMetadataWrite(Integer.valueOf(METADATA_DIRECTORY_ADDRESS), "DIRECTORY_ADDRESS");
@@ -224,9 +224,6 @@ public class DiskController {
 	
 	private byte[] rawRead(int position, int length) throws DiskControllerException{
 		
-		
-		
-			
 			byte[] readBuffer = new byte[length];
 			
 			try {
