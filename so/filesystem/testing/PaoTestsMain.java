@@ -4,6 +4,7 @@ import so.filesystem.disk.DiskController;
 import so.filesystem.disk.DiskControllerException;
 import so.filesystem.disk.DiskFormatException;
 import so.filesystem.disk.IncorrectLengthConversionException;
+import so.filesystem.general.CONFIG;
 
 public class PaoTestsMain {
 
@@ -85,6 +86,11 @@ public class PaoTestsMain {
 			System.out.println(dc.bytesToInt(dc.intToBytes(4, 12)));*/
 			
 			dc.finalize();
+			
+			int i = (int) Math.ceil(30456/CONFIG.BLOCK_SIZE);
+			
+			System.out.println("SGSDG "+(int) t);
+			System.out.println("DDDDD "+(CONFIG.BLOCK_SIZE * (int) Math.ceil(30456/CONFIG.BLOCK_SIZE))-30456);
 			
 			
 		} catch (DiskControllerException e) {

@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.nio.ByteBuffer;
 
+import so.filesystem.filemanagment.InodeDirectPointerIndexOutOfRange;
 import so.filesystem.general.CONFIG;
 
 
@@ -246,7 +247,40 @@ public class DiskController {
 	 * USED TO GET AND SET THE INODE DIRECT, SINGLE INDIRECT AND DOUBLE INDIRECT POINTERS.
 	 * @throws IncorrectLengthConversionException 
 	 * @throws DiskControllerException 
+	 * @throws InodeDirectPointerIndexOutOfRange 
 	 *****************************************************************************************/
+	
+	public void writeFileSize(int inodeAddress, int fileSizeInTermsOfBytes) throws IncorrectLengthConversionException, DiskControllerException{
+		
+		int position = addressTranslation(inodeAddress);
+		byte[] byteFileSize = intToBytes(CONFIG.INODE_INFO_FILE_SIZE_IN_BYTES, fileSizeInTermsOfBytes);
+		
+		rawWrite(position, byteFileSize, CONFIG.INODE_INFO_FILE_SIZE_IN_BYTES);
+	
+	}
+	
+	public int readFileSize(int inodeAddress) throws IncorrectLengthConversionException, DiskControllerException{
+		
+		int position = addressTranslation(inodeAddress);
+		byte[] fileSize = rawRead(position, CONFIG.INODE_INFO_FILE_SIZE_IN_BYTES);
+	
+		return bytesToInt(fileSize);
+	}
+	
+	public void writeDirectPointer(int inodeAddress, int inodeOffset, int pointToAddress) throws DiskControllerException, IncorrectLengthConversionException, InodeDirectPointerIndexOutOfRange{
+		
+		int position = directPointerAddressTranslation(inodeAddress, inodeOffset);
+		byte[] bytePointToAddress = intToBytes(CONFIG.ADDRESS_SIZE, pointToAddress);
+		rawWrite(position, bytePointToAddress, CONFIG.ADDRESS_SIZE);
+	}
+	
+	public int readDirectPointer(int inodeAddress, int inodeOffset) throws IncorrectLengthConversionException, DiskControllerException, InodeDirectPointerIndexOutOfRange{
+		
+		int position = directPointerAddressTranslation(inodeAddress, inodeOffset);
+		byte[] directPointer = rawRead(position, CONFIG.ADDRESS_SIZE);
+		return bytesToInt(directPointer);
+	
+	}
 	
 	public void writeIDB1(int inodeAddress, int idb1Address) throws IncorrectLengthConversionException, DiskControllerException{
 		
@@ -526,6 +560,18 @@ public class DiskController {
 	private int IDBPositionTranslation(int address, int offset){
 		
 		int position = METADATA_LENGTH + (CONFIG.BLOCK_SIZE * address) + (offset * CONFIG.ADDRESS_SIZE);
+		
+		return position;
+	}
+	
+	private int directPointerAddressTranslation(int inodeAddress, int directPointerOffset) throws InodeDirectPointerIndexOutOfRange{
+		
+		if(directPointerOffset > CONFIG.DIRECT_POINTERS-1){
+			throw new InodeDirectPointerIndexOutOfRange("Direct pointer index out of range. Inode: "+inodeAddress+" Offset: "+directPointerOffset);
+		}
+		
+		//Offset is handled in a per/pointer fashion. Address size must be taken into consideration during translation.
+		int position = (CONFIG.BLOCK_SIZE*inodeAddress)+CONFIG.INODE_INFO_MAX_SIZE+(directPointerOffset*CONFIG.ADDRESS_SIZE);
 		
 		return position;
 	}

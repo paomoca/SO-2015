@@ -30,8 +30,6 @@ public class CONFIG {
 	
 	public static int BLOCK_PAYLOAD_SIZE = BLOCK_SIZE-CONTROL_BYTES_SIZE;
 	public static int ADDRESS_SIZE = 4;
-	public static int DIRECT_POINTERS = 2;
-	public static int IDB_TOTAL_ADDRESSES = BLOCK_SIZE/ADDRESS_SIZE;
 
 	public static String DISK_LOCATION = "Simulacion";
 	public static String CACHE_LOCATION = "cacheRawDeviceTestFile";
@@ -41,7 +39,12 @@ public class CONFIG {
 	
 	//iNode Info
 	public static int INODE_INFO_FILE_SIZE_IN_BYTES = 4;
+	public static int INODE_INFO_FILE_SIZE_OFFSET = 0;
 	public static int INODE_INFO_FILE_ID = 2;
-	public static int INODE_INFO_FILE_MAX_SIZE = INODE_INFO_FILE_ID + INODE_INFO_FILE_SIZE_IN_BYTES;
+	public static int INODE_INFO_MAX_SIZE = INODE_INFO_FILE_ID + INODE_INFO_FILE_SIZE_IN_BYTES;
+	
+	public static int DIRECT_POINTERS = (BLOCK_SIZE-ADDRESS_SIZE*2-INODE_INFO_MAX_SIZE)/ADDRESS_SIZE;
+	public static int IDB_TOTAL_ADDRESSES = BLOCK_SIZE/ADDRESS_SIZE;
+	
 	
 }

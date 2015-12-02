@@ -7,11 +7,27 @@ import so.filesystem.general.CONFIG;
 
 public class Inode {
 	
+	/*********************
+	 * INODE INFO
+	 ********************/
+	
+	//Must be set by whoever creates the new INODE()
+	int FILE_SIZE_IN_BYTES = 0;
+	
+	/*********************
+	 * END OF INODE INFO
+	 ********************/
+	
+	int TOTAL_ADDRESSED_BLOCKS = 0;
+	int INTERNAL_FRAGMENTATION = 0;
+	
+	int flag = 1;
+	
 	private int INODE_ADDRESS = -1;
 	int IDB1 = -1;
 	int IDB2 = -1;
 	
-	/* OFFSET INCREASES ON EACH INDODE WALKER ITERATION AND IS USED AS A REFERENCE
+	/* OFFSET INCREASES ON EACH INODE WALKER ITERATION AND IS USED AS A REFERENCE
 	 * TO KNOW WHEN TO ALTER THE FLAG TO SWITCH BETWEEN OUR CASES.
 	 *  */
 	int currentOffset = -1;
@@ -20,29 +36,35 @@ public class Inode {
 	
 	int IDB2InternalOffset = -1;
 	int currentIDB2InternalIDB=-1;
-
-	int flag = 1;
+	
 	int currentDataAddress = -1;
 	
 	
-	public Inode() throws InodeNotEnoughDiskSpaceExcepcion, IncorrectLengthConversionException, DiskControllerException{
+	public Inode() throws InodeNotEnoughDiskSpaceExcepcion, IncorrectLengthConversionException, DiskControllerException, InodeDirectPointerIndexOutOfRange{
 		
 		//We ask the Free Space Manager for an available block.
 		INODE_ADDRESS = requestBlock();
+		
 		//Saves -1 on each IDB reference on initialization. If the inode exists this value will be overridden.
-		DiskController.getInstance().writeIDB1(INODE_ADDRESS, -1);
-		DiskController.getInstance().writeIDB2(INODE_ADDRESS, -1);
+		//DiskController.getInstance().writeIDB1(INODE_ADDRESS, -1);
+		//DiskController.getInstance().writeIDB2(INODE_ADDRESS, -1);	
 		
 	}
 	
-	public Inode(int inodeBlockAddress) throws DiskControllerException {
+	public Inode(int inodeBlockAddress) throws DiskControllerException, IncorrectLengthConversionException {
+		
+		INODE_ADDRESS = inodeBlockAddress;
+		FILE_SIZE_IN_BYTES = DiskController.getInstance().readFileSize(INODE_ADDRESS);
+		TOTAL_ADDRESSED_BLOCKS = (int) Math.ceil(FILE_SIZE_IN_BYTES/CONFIG.BLOCK_SIZE);
+		INTERNAL_FRAGMENTATION= (TOTAL_ADDRESSED_BLOCKS*CONFIG.BLOCK_SIZE)-FILE_SIZE_IN_BYTES;
 		
 		IDB1 = DiskController.getInstance().readIDB1(inodeBlockAddress);
 		IDB2 = DiskController.getInstance().readIDB2(inodeBlockAddress);
 		
 	}
 	
-	public void inodeWriteWalker(int currentDataAddress) throws InodeFileTooBigException, InodeNotEnoughDiskSpaceExcepcion, IncorrectLengthConversionException, DiskControllerException{
+	public void inodeWriteWalker(int currentDataAddress) throws InodeFileTooBigException,
+	InodeNotEnoughDiskSpaceExcepcion, IncorrectLengthConversionException, DiskControllerException, InodeDirectPointerIndexOutOfRange{
 		
 		currentOffset++;
 		this.currentDataAddress = currentDataAddress;
@@ -65,11 +87,12 @@ public class Inode {
 		totalReferencedAddresses++;
 	}
 		
-	public void directPointers(){
+	public void directPointers() throws DiskControllerException, IncorrectLengthConversionException, InodeDirectPointerIndexOutOfRange{
 		
 		//TODO: Syso. is a simulation, replace with real function.
 
 		System.out.println("\nWrite direct pointer in Inode: "+currentDataAddress+" offset: "+currentOffset);
+		DiskController.getInstance().writeDirectPointer(INODE_ADDRESS, currentOffset, currentDataAddress);
 		
 		if(currentOffset == CONFIG.DIRECT_POINTERS-1){
 			flag = 2;
@@ -138,6 +161,10 @@ public class Inode {
 		return INODE_ADDRESS;
 	}
 	
+	/****************************************************************
+	 * USED AS AN INTERMEDIARY BETWEEN THE DISK FREE SPACE MANAGER
+	 * AND ANY FUNCTION WITHIN THIS CLASS THAT ASKS FOR A FREE BLOCK
+	 ****************************************************************/
 	private int requestBlock() throws InodeNotEnoughDiskSpaceExcepcion{
 		
 		int blockAddr;
@@ -151,15 +178,30 @@ public class Inode {
 	
 	/***************************************************
 	 * REGENERATE INODE VALUES FROM BLOCK
+	 * @throws IncorrectLengthConversionException 
 	 * @throws DiskControllerException 
 	 ***************************************************/
-	
-	public int inodeReadWalker(){
+	public int inodeReadWalkerNext() throws IncorrectLengthConversionException, DiskControllerException{
+		
+		//Starts in 0
+		currentOffset++;
+		
+		
 		
 		
 		
 		return 0;
 	}
+	
+	public int getFileSize(){
+		return FILE_SIZE_IN_BYTES;
+	}
+	
+	public void setFileSize(int fileSize){
+		FILE_SIZE_IN_BYTES = fileSize;
+	}
+	
+	
 	
 	public void regenerateInode() throws DiskControllerException{
 		
