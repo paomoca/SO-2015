@@ -244,13 +244,14 @@ public class DiskController {
 							+"\nDATA READ: "+new String(readBuffer)
 							+ "\n****************");
 					//return new byte[1];
+					try {
+						System.out.println("\n*********** DATA TO READ INT: "+bytesToInt(readBuffer)+"***********\n\n");
+					} catch (IncorrectLengthConversionException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
 				} 
-				try {
-					System.out.println("\n*********** DATA TO READ INT: "+bytesToInt(readBuffer)+"***********\n\n");
-				} catch (IncorrectLengthConversionException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
+				
 				
 				return readBuffer;
 				
