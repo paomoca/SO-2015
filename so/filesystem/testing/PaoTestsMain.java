@@ -1,5 +1,7 @@
 package so.filesystem.testing;
 
+import java.util.Arrays;
+
 import so.filesystem.disk.DiskController;
 import so.filesystem.disk.DiskControllerException;
 import so.filesystem.disk.DiskFormatException;
@@ -87,6 +89,13 @@ public class PaoTestsMain {
 			
 			dc.finalize();
 			
+			byte[] dbGrande = "hola hola hola hola ohjsdc ksdjc sjkdbc ksjdbc kjsbc  KK".getBytes();
+			byte[] dbChica = new byte[7];
+			
+			dbChica = Arrays.copyOfRange(dbGrande, 0, dbChica.length);
+			
+			System.out.println("TEST BYTES: "+new String(dbChica));
+			
 			int TOTAL_ADDRESSED_BLOCKS = 30456;
 			double INTERNAL_FRAGMENTATION = 0;
 			
@@ -95,7 +104,7 @@ public class PaoTestsMain {
 			
 			System.out.println("SGSDG "+ t);
 			System.out.println("DDDDD "+ r);
-			System.out.println("sdvsd "+ mod);
+			
 			
 			
 		} catch (DiskControllerException e) {
