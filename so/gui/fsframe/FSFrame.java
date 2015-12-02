@@ -71,7 +71,7 @@ public class FSFrame extends JFrame {
 			}
     }
     
-    private void loadImport(){
+    private void reqImport(){
     	int flag = fileChooser.showOpenDialog(this);
 		if (flag == JFileChooser.APPROVE_OPTION) {
 			
@@ -79,7 +79,7 @@ public class FSFrame extends JFrame {
 			//JOptionPane.showMessageDialog(myWindow, file.getName()+ ": File loaded.\n");
 			shell.getHistory().append("\nTo import: "+file.getAbsolutePath());
 		}else{
-			shell.getHistory().append("\nError loading FileChooser.");
+			shell.getHistory().append("\nAction Canceled.");
 		}
     }
     
@@ -143,7 +143,8 @@ public class FSFrame extends JFrame {
 					shell.getHistory().append("\n"+e.toString());
 				} catch (RequestImportException e){
 					shell.getHistory().append("\n"+e.toString());
-					loadImport();
+					reqImport();
+					//shell.getScroller().getVerticalScrollBar().setValue(shell.getScroller().getVerticalScrollBar().getMaximum());;		
 				}
 			}
 		}

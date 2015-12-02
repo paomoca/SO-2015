@@ -59,8 +59,12 @@ public class Interpreter {
 			}
 		}
 		
-		else if(cmd.equals("import")){
-			throw new RequestImportException("Choose File");
+		else if(cmd.equals("reqImport")){
+			if(fs.isDiskLoadedFlag()){
+				throw new RequestImportException("Choose File");
+			}else{
+				throw new ShellAnswerException("Could not perform action Import. No disk loaded.");
+			}
 		}
 		
 		else if(cmd.equals("-1")&&param.equals("-1")){
