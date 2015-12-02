@@ -36,6 +36,9 @@ public class CONFIG {
 	public static String DISK_LOCATION = "Simulacion";
 	public static String CACHE_LOCATION = "cacheRawDeviceTestFile";
 	
+	public static int IDB1_OFFSET = BLOCK_SIZE-2*ADDRESS_SIZE;
+	public static int IDB2_OFFSET = BLOCK_SIZE-ADDRESS_SIZE;
+	
 	
 	
 }

@@ -243,6 +243,45 @@ public class DiskController {
 	}
 	
 	/*****************************************************************************************
+	 * USED TO GET AND SET THE INODE DIRECT, SINGLE INDIRECT AND DOUBLE INDIRECT POINTERS.
+	 * @throws IncorrectLengthConversionException 
+	 * @throws DiskControllerException 
+	 *****************************************************************************************/
+	
+	public void writeIDB1(int inodeAddress, int idb1Address) throws IncorrectLengthConversionException, DiskControllerException{
+		
+		int position = addressTranslation(inodeAddress, CONFIG.IDB1_OFFSET);
+		byte[] byteIDB1Address = intToBytes(CONFIG.ADDRESS_SIZE, idb1Address);
+		rawWrite(position, byteIDB1Address, CONFIG.ADDRESS_SIZE);
+		
+	}
+	
+	public int readIDB1(int inodeAddress) throws DiskControllerException{
+		
+		int position = addressTranslation(inodeAddress, CONFIG.IDB2_OFFSET);
+		rawRead(position, CONFIG.ADDRESS_SIZE);
+		
+		return 0;
+	}
+	
+	public void writeIDB2(int inodeAddress, int idb2address) throws IncorrectLengthConversionException, DiskControllerException{
+		
+		int position = addressTranslation(inodeAddress, CONFIG.IDB2_OFFSET);
+		byte[] byteIDB2Address = intToBytes(CONFIG.ADDRESS_SIZE, idb2address);
+		rawWrite(position, byteIDB2Address, CONFIG.ADDRESS_SIZE);
+		
+	}
+	
+	public int readIDB2(int inodeAddress) throws DiskControllerException{
+	
+		int position = addressTranslation(inodeAddress, CONFIG.IDB2_OFFSET);
+		rawRead(position, CONFIG.ADDRESS_SIZE);
+		
+		return 0;
+	}
+	
+	
+	/*****************************************************************************************
 	 * USED TO READ ENTIRE BLOCKS BASED ON BLOCK SIZE
 	 *****************************************************************************************/
 	
@@ -400,13 +439,8 @@ public class DiskController {
 
 		rawWrite(position, byteBlockAddressReference, CONFIG.ADDRESS_SIZE);
 		
-		
-		
-		
 	}
 	
-	
-	//TODO: TODAVIA NO ESTA BIEN
 	/*****************************************************************************************
 	 * METHODS IN CHARGE OF METADATA MANIPULATION (READ/WRITE).
 	 * This class is important because it allows the amount of meta data content at the beginning
