@@ -32,7 +32,7 @@ public class CONFIG {
 	public static int BLOCK_PAYLOAD_SIZE = BLOCK_SIZE-CONTROL_BYTES_SIZE;
 	public static int ADDRESS_SIZE = 4;
 
-	public static String DISK_LOCATION = "archivoDev";
+	public static String DISK_LOCATION = "/dev/disk2s2";
 	public static String CACHE_LOCATION = "cacheRawDeviceTestFile";
 	
 	public static int IDB1_OFFSET = BLOCK_SIZE-2*ADDRESS_SIZE;
@@ -44,7 +44,7 @@ public class CONFIG {
 	public static int INODE_INFO_FILE_ID = 2;
 	public static int INODE_INFO_MAX_SIZE = INODE_INFO_FILE_ID + INODE_INFO_FILE_SIZE_IN_BYTES;
 	
-	public static int DIRECT_POINTERS = (BLOCK_SIZE-ADDRESS_SIZE*2-INODE_INFO_MAX_SIZE)/ADDRESS_SIZE;
+	public static int DIRECT_POINTERS = (BLOCK_SIZE-(ADDRESS_SIZE*2)-INODE_INFO_MAX_SIZE)/ADDRESS_SIZE;
 	public static int IDB_TOTAL_ADDRESSES = BLOCK_SIZE/ADDRESS_SIZE;
 	
 	

@@ -1,6 +1,10 @@
 package so.filesystem.testing;
 
+import java.io.BufferedReader;
+import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
+import java.nio.file.Files;
 import java.util.Arrays;
 
 import so.filesystem.disk.DiskController;
@@ -21,6 +25,7 @@ public class PaoTestsMain {
 	public static void main(String[] args) throws UnidentifiedMetadataTypeException, IOException, InodeNotEnoughDiskSpaceExcepcion, InodeDirectPointerIndexOutOfRange, InodeFileTooBigException {
 		
 		try {
+
 			
 			String string = "aei aei aei";
 			DiskController dc = DiskController.getInstance(true);
@@ -96,22 +101,22 @@ public class PaoTestsMain {
 			System.out.println(dc.rawAddressRead(1, 20));
 			System.out.println(dc.bytesToInt(dc.intToBytes(4, 12)));*/
 			
-			DiskFreeSpaceManager.getInstance(40000);
+			//DiskFreeSpaceManager.getInstance(40000000);
 			
 			
-			//InodeWriter inodeW = new InodeWriter();
+			InodeWriter inodeW = new InodeWriter();
 			
-			for(int i = 0; i< 20; i++){
-				//inodeW.inodeWriteWalker(i);
-				System.out.println(DiskFreeSpaceManager.getInstance().firstFreeBlock());
+			for(int i = 1000; i< 5000; i++){
+				inodeW.inodeWriteWalker(i);
+				
 			}
+			/*
+			InodeReader inodeR = new InodeReader(1);
 			
-			/*InodeReader inodeR = new InodeReader(1);
-			
-			for(int i = 0; i< 2200; i++){
+			for(int i = 1000; i< 4000; i++){
 				inodeR.inodeReadWalkerNext();
-			}*/
-			
+			}
+			*/
 				
 			dc.finalize();
 			
@@ -128,7 +133,10 @@ public class PaoTestsMain {
 		} /*catch (IncorrectLengthConversionException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
-		}*/ 
+		}*/ catch (IncorrectLengthConversionException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} 
 
 	}
 

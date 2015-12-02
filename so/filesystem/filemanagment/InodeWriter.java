@@ -40,6 +40,11 @@ public class InodeWriter {
 		//We ask the Free Space Manager for an available block.
 		INODE_ADDRESS = requestBlock();
 		
+		if(CONFIG.DEBUG_SESSION){
+			System.out.println("Inode Address defined: "+INODE_ADDRESS
+					+ "Direct pointers: "+CONFIG.DIRECT_POINTERS);
+		}
+		
 	}
 	
 	public void inodeWriteWalker(int currentDataAddress) throws InodeFileTooBigException,
