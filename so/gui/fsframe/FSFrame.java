@@ -7,6 +7,7 @@ import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
+import java.io.File;
 
 import so.filesystem.main.FileSystemController;
 import so.gui.grid.Grid;
@@ -19,13 +20,17 @@ public class FSFrame extends JFrame {
 
 	private static final long serialVersionUID = 1L;
 	private Grid section;
+	private Grid blocks;
     private Shell shell;
     private Interpreter intr;
     private FileSystemController fileSystemController;
+    private JFileChooser fileChooser;
 
     public FSFrame() {
 
         JPanel content = new JPanel();
+        JPanel gridsHolder = new JPanel();
+        
         
         shell = new Shell();
         shell.getCurCommand().addKeyListener(new GetCurCommandKeyListener());
@@ -35,10 +40,19 @@ public class FSFrame extends JFrame {
 		shell.getCurCommand().setBackground(Color.BLACK);
 		shell.getHistory().setForeground(Color.GREEN.darker());
 		shell.getHistory().setBackground(Color.BLACK);
+		
+		fileChooser = new JFileChooser();
 
         section = new Grid(480,480,10,10);
-        content.setLayout(new BorderLayout());
-        content.add(section, BorderLayout.WEST);
+        blocks = new Grid(480, 480, 10, 10);
+        
+        gridsHolder.setLayout(new BorderLayout());
+        gridsHolder.add(section,BorderLayout.WEST);
+        gridsHolder.add(Box.createHorizontalStrut(20));
+        gridsHolder.add(blocks, BorderLayout.EAST);
+        
+        content.setLayout(new BorderLayout());        
+        content.add(gridsHolder, BorderLayout.NORTH);
         content.add(shell, BorderLayout.SOUTH);
 
         this.add(content, BorderLayout.CENTER);
@@ -55,6 +69,18 @@ public class FSFrame extends JFrame {
 				// TODO Auto-generated catch block
 				this.shell.getHistory().append(e.toString());
 			}
+    }
+    
+    private void loadImport(){
+    	int flag = fileChooser.showOpenDialog(this);
+		if (flag == JFileChooser.APPROVE_OPTION) {
+			
+			File file = fileChooser.getSelectedFile();
+			//JOptionPane.showMessageDialog(myWindow, file.getName()+ ": File loaded.\n");
+			shell.getHistory().append("\nTo import: "+file.getAbsolutePath());
+		}else{
+			shell.getHistory().append("\nError loading FileChooser.");
+		}
     }
     
     class ShellClickListener implements MouseListener {
@@ -115,6 +141,9 @@ public class FSFrame extends JFrame {
 					shell.getHistory().append("\n"+e.toString());
 				} catch (ShellAnswerException e){
 					shell.getHistory().append("\n"+e.toString());
+				} catch (RequestImportException e){
+					shell.getHistory().append("\n"+e.toString());
+					loadImport();
 				}
 			}
 		}

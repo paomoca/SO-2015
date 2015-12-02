@@ -5,7 +5,7 @@ import so.filesystem.main.FileSystemController;
 
 public class Interpreter {
 
-	public void readCommand(String curCommand, FileSystemController fs) throws WrongCommandException, ShellAnswerException{
+	public void readCommand(String curCommand, FileSystemController fs) throws WrongCommandException, ShellAnswerException, RequestImportException{
 		
 		String[] in = this.divideCurCommand(curCommand);
 		String cmd = in[0];
@@ -57,6 +57,10 @@ public class Interpreter {
 			}else{
 				fs.enableCache();
 			}
+		}
+		
+		else if(cmd.equals("import")){
+			throw new RequestImportException("Choose File");
 		}
 		
 		else if(cmd.equals("-1")&&param.equals("-1")){

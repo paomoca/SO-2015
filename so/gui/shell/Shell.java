@@ -58,7 +58,7 @@ public class Shell extends JPanel{
 		Scroller.getVerticalScrollBar().addAdjustmentListener(new ScrollerListener());
 		Scroller.getHorizontalScrollBar().setPreferredSize (new Dimension(0,0));
 		
-		
+		//this.g
 		this.setLayout(new BoxLayout(this,BoxLayout.Y_AXIS));
 		this.add(Scroller);
 		
