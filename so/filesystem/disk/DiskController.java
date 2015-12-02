@@ -324,12 +324,12 @@ public class DiskController {
 		
 	}
 	
-	public int readIDB1(int inodeAddress) throws DiskControllerException{
+	public int readIDB1(int inodeAddress) throws DiskControllerException, IncorrectLengthConversionException{
 		
 		int position = addressTranslation(inodeAddress, CONFIG.IDB1_OFFSET);
-		rawRead(position, CONFIG.ADDRESS_SIZE);
+		byte[] byteIDB1 = rawRead(position, CONFIG.ADDRESS_SIZE);
 		
-		return 0;
+		return bytesToInt(byteIDB1);
 	}
 	
 	public void writeIDB2(int inodeAddress, int idb2address) throws IncorrectLengthConversionException, DiskControllerException{
@@ -340,12 +340,12 @@ public class DiskController {
 		
 	}
 	
-	public int readIDB2(int inodeAddress) throws DiskControllerException{
+	public int readIDB2(int inodeAddress) throws DiskControllerException, IncorrectLengthConversionException{
 	
 		int position = addressTranslation(inodeAddress, CONFIG.IDB2_OFFSET);
-		rawRead(position, CONFIG.ADDRESS_SIZE);
+		byte[] byteIDB2 = rawRead(position, CONFIG.ADDRESS_SIZE);
 		
-		return 0;
+		return bytesToInt(byteIDB2);
 	}
 	
 	

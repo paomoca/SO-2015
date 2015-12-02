@@ -101,7 +101,7 @@ public class InodeReader {
 		
 	private int singleIndirectPointers() throws DiskControllerException, IncorrectLengthConversionException {
 		
-		if (IDB1 != -1){	
+		if (IDB1 == -1){	
 			IDB1 = DiskController.getInstance().readIDB1(IDB1);
 			System.out.println("--->IDB1 assigned to address: "+IDB1);
 		}
