@@ -21,8 +21,6 @@ public class CacheController {
 	private int METADATA_LENGTH;
 	private int cacheHits;
 	private Entry<Integer, Integer> lowestEntry;
-	byte[] cacheSystemKey = "acCiWJJwrNg6RRyCyOns8zOmYTjK06GFZaLRkttMYHUXGUBcXZ8VvqBbPGwch9UMyaPFmVGRMfZujgiJzAwLsBWIfzKmAHHsqJZ5L5jg4iUo7VvGED8JbTgGXMHKZqTiyp1Cj8c2A8E9KbG2tnRkoKk56oHl2w3a1XF0Dz82It6pEmVfKLzLbp1ogZu2LEuUVcONkNkI0fvYEWlzCoeXAwIvEvVwKG2yZq1fYCB8HPwNfMka9Gv10x29shCWMoOaOq63RrD5xAsINqONtlCnFOkmct1rE53Wos8UXx8ZuqYXps7gbMCNhPFvO8UGLB1XWDRcAcbqvtxoYLMTqAEvQ2crCP708GuMcTiINoUymJbecGfJhxyy9yha248vGW0BzUG14ccptuaILzlOt3PEsSnofmC9J9u8JMRls1RS1cPeAiPxG5tt8O2234wK5teSJCAKYs93qa2bzElA8MrPpokF7v2qN0b4UPpCl34l3TDCnpj0mHx8jILlKHCBwuSXnqeecjcte16HDbbRiB1WoTUcrwusCnubxYrUfK5FMZEpOgYhlFmysPZ4Ym2L4zUXTHlRBEeuNjBuKRExigyquvtDlVCi0eZczxfHvoKcKDr1wMynG4PS6KIaqf0byScxHMsgTTuALoWxsrlW8oiXRuy8KmL9BnCOY5CbNA4TFLw2ljzhjNEoCWrpl28YS1Z256yzq9SSGVDVvmTiAqDpYR8mgUZ71nvE8eiz9L39kUphyqSYLZR5lqYuDrlaOJz4x7ciInl2KqlJeRM9azrF5wb2fA2iD7Fm1Q2acRt9MO3XuRwgazI1DktaF0ghOUKYTwamGttUqJoxyX1c83znnA1j6c7mtZD18ZAMtNJl4y6VxGhk8ZN3XeSoSrUscke1OjN84p54ggU0iY50nWvOjFK3CB5QJbOfZDHxLqMi9mLk0vkDJ6c9rzk5w9FhE5ub4O5n5JsaLMgzMYDlPCSwQnpH1BKWkcsOIEcEZesiF1TikxieQNloZrjqX6RpYpZl"
-			.getBytes();
 
 	private RandomAccessFile rawDeviceRW;
 	private CacheFreeSpaceManager fsm;
@@ -83,15 +81,15 @@ public class CacheController {
 
 		try {
 
-			inKey = rawRead(0, 0, cacheSystemKey.length);
-			if (!Arrays.equals(cacheSystemKey, inKey)) {
+			inKey = rawRead(0, 0, CONFIG.CACHE_SYSTEMKEY.length);
+			if (!Arrays.equals(CONFIG.CACHE_SYSTEMKEY, inKey)) {
 				throw new CacheFormatException(
 						"This device is already initialized with a different FileSystem.");
 			}
 
 			// If everything went well we add the size of the key to
 			// METADATA_LENGTH.
-			METADATA_LENGTH += cacheSystemKey.length;
+			METADATA_LENGTH += CONFIG.CACHE_SYSTEMKEY.length;
 
 		} catch (CacheControllerException e) {
 			throw new DeviceInitializationException(
@@ -117,11 +115,11 @@ public class CacheController {
 
 		try {
 
-			rawWrite(0, 0, cacheSystemKey);
+			rawWrite(0, 0, CONFIG.CACHE_SYSTEMKEY);
 
 			// If everything went well we add the size of the key to
 			// METADATA_LENGTH.
-			METADATA_LENGTH += cacheSystemKey.length;
+			METADATA_LENGTH += CONFIG.CACHE_SYSTEMKEY.length;
 
 		} catch (CacheControllerException e) {
 			throw new CacheFormatException(
@@ -134,7 +132,7 @@ public class CacheController {
 
 		try {
 
-			int numberOfBlocks = (int) ((rawDeviceRW.length() - cacheSystemKey.length) / CONFIG.BLOCK_SIZE);
+			int numberOfBlocks = (int) ((rawDeviceRW.length() - CONFIG.CACHE_SYSTEMKEY.length) / CONFIG.BLOCK_SIZE);
 			System.out.println("bblocks av: " + numberOfBlocks);
 			fsm = CacheFreeSpaceManager.getInstance(numberOfBlocks);
 

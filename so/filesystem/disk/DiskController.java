@@ -3,6 +3,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.nio.ByteBuffer;
+import java.util.Arrays;
 
 import so.filesystem.filemanagment.InodeDirectPointerIndexOutOfRange;
 import so.filesystem.general.CONFIG;
@@ -25,7 +26,7 @@ public class DiskController {
 	private RandomAccessFile rawDeviceRW;
 	private DiskDirectory directory;
 		
-	private DiskController(boolean formatFlag) throws DiskControllerException, DiskFormatException{
+	private DiskController(boolean formatFlag) throws DiskControllerException, DiskFormatException, UnidentifiedMetadataTypeException, IOException{
 		try {
 			
 			//Initialize METADATA_LENGTH in 0 so we can start reading in the actual position 0. 
@@ -35,13 +36,15 @@ public class DiskController {
 			/**** The order is important please do not modify. ******/
 			mountDevice();
 			if(formatFlag){
-				formatDevice();
+				metadataNewDiskInitialization();
 			}else{
+				//metadataKnownDiskInitialization();
 				deviceIdentification();
+				metadataKnownDiskInitialization();
 			}
 	
-			freeSpaceManagerInitialization();
-			directoryInitialization();
+			//freeSpaceManagerInitialization();
+			//directoryInitialization();
 			
 			
 		} catch (DeviceInitializationException e) {
@@ -54,7 +57,7 @@ public class DiskController {
 
 	}
 	
-	public static DiskController getInstance(boolean formatFlag) throws DiskControllerException, DiskFormatException {
+	public static DiskController getInstance(boolean formatFlag) throws DiskControllerException, DiskFormatException, UnidentifiedMetadataTypeException, IOException {
 		if (self == null) {
 			self = new DiskController(formatFlag);
 		}
@@ -77,7 +80,10 @@ public class DiskController {
 		//Reference to the raw device	
 		try {
 			rawDeviceRW = new RandomAccessFile(CONFIG.DISK_LOCATION, "rw");
-			System.out.println("Length"+rawDeviceRW.length());
+			if(CONFIG.DEBUG_SESSION){
+				System.out.println("Device "+CONFIG.DISK_LOCATION+" mounted successfully.");
+				System.out.println("Length"+rawDeviceRW.length());
+			}
 		} catch (FileNotFoundException e) {
 			
 			throw new DeviceInitializationException("Unable to mount device.");
@@ -86,8 +92,6 @@ public class DiskController {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		
-		System.out.println("Device "+CONFIG.DISK_LOCATION+" mounted successfully.");
 	}
 	
 	//TODO: AQUI ESTAN LAS FORMAS DE LEER Y ESCRIBIR LA METADATA NO SE DONDE VAN, DEPENDE DE LA INICIALIZACION DE JUAN
@@ -97,7 +101,7 @@ public class DiskController {
 		METADATA_DISK_KEY = CONFIG.DISK_SYSTEMKEY;
 		rawMetadataWrite(METADATA_DISK_KEY, "DISK_KEY");
 		 
-		//TODO: CÓMO COMENZAR EL DIRECTORIO
+		//TODO: Cï¿½MO COMENZAR EL DIRECTORIO
 		//Directory Inode Address is always cero.
 		METADATA_DIRECTORY_ADDRESS = 0;
 		rawMetadataWrite(Integer.valueOf(METADATA_DIRECTORY_ADDRESS), "DIRECTORY_ADDRESS");
@@ -129,14 +133,20 @@ public class DiskController {
 		
 	}
 	
-	private void deviceIdentification() throws DeviceInitializationException, DiskFormatException{
+	private void deiceFormat() throws DeviceInitializationException, DiskFormatException{
+		NEW_DISK = true;
+	}
+	
+	private void deviceIdentification() throws DeviceInitializationException, DiskFormatException, UnidentifiedMetadataTypeException, DiskControllerException, IncorrectLengthConversionException{
 		
-		/*byte[] inKey;
+		byte[] inKey = (byte[]) rawMetadataRead("DISK_KEY");
 		
-		try {
+		//try {
 			
-			
-			if(!Arrays.equals(METADATA_DISK_KEY, inKey)){
+			if(CONFIG.DEBUG_SESSION){
+				System.out.println("INKEY: "+new String(inKey));
+			}
+			if(!Arrays.equals(CONFIG.DISK_SYSTEMKEY, inKey)){
 				
 				//TODO: ESCRIBIR EL KEY AL PRINCIPIO HAY QUE HACER UN RESET DE LA METADATA A CERO OTRA VEZ PORQUE VAMOS A ESCRIBIR.
 				NEW_DISK = true;
@@ -144,26 +154,11 @@ public class DiskController {
 				throw new DiskFormatException("This device is already initialized with a different FileSystem");
 				
 			}
-			
-			
-			
-		} catch (DiskControllerException e) {
-			throw new DeviceInitializationException("An error occured trying to identify the device.");
-		}
-	*/	
+				
+//		} catch (DiskControllerException e) {
+//			throw new DeviceInitializationException("An error occured trying to identify the device.");
+//		}
 	}
-	
-	public void formatDevice() {
-
-
-	
-
-			//TODO: SE PUEDEN TOMAR COSAS DE LAS FUNCIONES QUE PUSE DE METADATA
-			
-			NEW_DISK = true;
-	}
-
-
 	
 	
 	private void directoryInitialization() throws IncorrectLengthConversionException, DiskControllerException{
