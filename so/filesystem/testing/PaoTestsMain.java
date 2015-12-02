@@ -9,16 +9,23 @@ import so.filesystem.disk.DiskFormatException;
 import so.filesystem.disk.DiskFreeSpaceManager;
 import so.filesystem.disk.IncorrectLengthConversionException;
 import so.filesystem.disk.UnidentifiedMetadataTypeException;
+<<<<<<< HEAD
+=======
 import so.filesystem.filemanagment.InodeDirectPointerIndexOutOfRange;
 import so.filesystem.filemanagment.InodeFileTooBigException;
 import so.filesystem.filemanagment.InodeNotEnoughDiskSpaceExcepcion;
 import so.filesystem.filemanagment.InodeReader;
 import so.filesystem.filemanagment.InodeWriter;
+>>>>>>> 1ea966ce8337833cfd7564bbfb10ea46d9dacf31
 import so.filesystem.general.CONFIG;
 
 public class PaoTestsMain {
 
+<<<<<<< HEAD
+	public static void main(String[] args) throws UnidentifiedMetadataTypeException, IOException {
+=======
 	public static void main(String[] args) throws UnidentifiedMetadataTypeException, IOException, InodeNotEnoughDiskSpaceExcepcion, InodeDirectPointerIndexOutOfRange, InodeFileTooBigException {
+>>>>>>> 1ea966ce8337833cfd7564bbfb10ea46d9dacf31
 		
 		try {
 			
