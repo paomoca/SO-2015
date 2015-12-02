@@ -16,7 +16,7 @@ public class DiskController {
 	
 	private static DiskController self = null;
 	
-	private int METADATA_LENGTH;
+	public int METADATA_LENGTH;
 	private byte[] METADATA_DISK_KEY;
 	private int METADATA_DIRECTORY_ADDRESS;
 	private int METADATA_NUMBER_DISK_FSM_BLOCKS;
@@ -289,7 +289,7 @@ public class DiskController {
 	
 	public int readIDB1(int inodeAddress) throws DiskControllerException{
 		
-		int position = addressTranslation(inodeAddress, CONFIG.IDB2_OFFSET);
+		int position = addressTranslation(inodeAddress, CONFIG.IDB1_OFFSET);
 		rawRead(position, CONFIG.ADDRESS_SIZE);
 		
 		return 0;
@@ -526,16 +526,20 @@ public class DiskController {
 				
 				byte[] diskKey = (byte[]) data;
 				rawWrite(CONFIG.METADATA_DISKSYSTEMKEY_OFFSET, diskKey ,CONFIG.METADATA_DISKSYSTEMKEY_SIZE);
+				break;
 			
 			case "DIRECTORY_ADDRESS":
 				
-				byte[] dirAddr = intToBytes(CONFIG.METADATA_DIRECTORY_ADDRESS_REFERENCE_SIZE,  (int) data);				
+				
+				byte[] dirAddr = intToBytes(CONFIG.METADATA_DIRECTORY_ADDRESS_REFERENCE_SIZE,(Integer) data);				
 				rawWrite(CONFIG.METADATA_DIRECTORY_ADDRESS_REFERENCE_OFFSET, dirAddr ,CONFIG.METADATA_DIRECTORY_ADDRESS_REFERENCE_SIZE);
+				break;
 	
 			case "FSM_NUMBER_OF_BLOCKS":
 				
-				byte[] fsmNumberOfBlocks = intToBytes(CONFIG.METADATA_DISKFSM_INITIAL_CONTROL_BYTE_SIZE,  (int) data);
+				byte[] fsmNumberOfBlocks = intToBytes(CONFIG.METADATA_DISKFSM_INITIAL_CONTROL_BYTE_SIZE,(Integer) data);
 				rawWrite(CONFIG.METADATA_DISKFSM_INITIAL_CONTROL_BYTE_OFFSET,fsmNumberOfBlocks,CONFIG.METADATA_DISKFSM_INITIAL_CONTROL_BYTE_SIZE);
+				break;
 				
 			default:
 				throw new UnidentifiedMetadataTypeException("Unidentified requested metadata type.");
@@ -567,7 +571,7 @@ public class DiskController {
 	 * this function translates this position in terms of bytes taking into consideration the address size. */
 	private int IDBPositionTranslation(int address, int offset){
 		
-		int position = METADATA_LENGTH + (CONFIG.BLOCK_SIZE * address) + (offset * CONFIG.ADDRESS_SIZE);
+		int position = METADATA_LENGTH + (CONFIG.BLOCK_SIZE * address) + offset;
 		
 		return position;
 	}

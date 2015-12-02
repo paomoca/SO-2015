@@ -25,8 +25,7 @@ public class InodeWriter {
 	int IDB2 = -1;
 	
 	/* OFFSET INCREASES ON EACH INODE WALKER ITERATION AND IS USED AS A REFERENCE
-	 * TO KNOW WHEN TO ALTER THE FLAG TO SWITCH BETWEEN OUR CASES.
-	 *  */
+	 * TO KNOW WHEN TO ALTER THE FLAG TO SWITCH BETWEEN OUR CASES. */
 	int currentOffset = -1;
 	
 	int totalReferencedAddresses = 0;
@@ -148,7 +147,7 @@ public class InodeWriter {
 		int blockAddr;
 		
 		if((blockAddr = DiskFreeSpaceManager.getInstance().firstFreeBlock()) == -1){
-			throw new InodeNotEnoughDiskSpaceExcepcion("");
+			throw new InodeNotEnoughDiskSpaceExcepcion("Not enough disk space.");
 		}
 		
 		return blockAddr;
