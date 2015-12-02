@@ -5,7 +5,7 @@ import so.filesystem.disk.DiskFreeSpaceManager;
 import so.filesystem.disk.IncorrectLengthConversionException;
 import so.filesystem.general.CONFIG;
 
-public class Inode {
+public class InodeWriter {
 	
 	/*********************
 	 * INODE INFO
@@ -17,11 +17,7 @@ public class Inode {
 	/*********************
 	 * END OF INODE INFO
 	 ********************/
-	
-	int TOTAL_ADDRESSED_BLOCKS = 0;
-	double INTERNAL_FRAGMENTATION = 0;
-	int blockCount = 0;
-	
+
 	int flag = 1;
 	
 	private int INODE_ADDRESS = -1;
@@ -40,8 +36,7 @@ public class Inode {
 	
 	int currentDataAddress = -1;
 	
-	
-	public Inode() throws InodeNotEnoughDiskSpaceExcepcion, IncorrectLengthConversionException, DiskControllerException, InodeDirectPointerIndexOutOfRange{
+	public InodeWriter() throws InodeNotEnoughDiskSpaceExcepcion, IncorrectLengthConversionException, DiskControllerException, InodeDirectPointerIndexOutOfRange{
 		
 		//We ask the Free Space Manager for an available block.
 		INODE_ADDRESS = requestBlock();
@@ -165,52 +160,8 @@ public class Inode {
 		return blockAddr;
 	}
 	
-	/***************************************************
-	 * REGENERATE INODE VALUES FROM BLOCK
-	 * @throws IncorrectLengthConversionException 
-	 * @throws DiskControllerException 
-	 ***************************************************/
-	
-	public Inode(int inodeBlockAddress) throws DiskControllerException, IncorrectLengthConversionException {
-		
-		INODE_ADDRESS = inodeBlockAddress;
-		FILE_SIZE_IN_BYTES = DiskController.getInstance().readFileSize(INODE_ADDRESS);
-		
-		//When blockCount is equal to TOTAL_ADDRESSED_BLOCKS INTERNAL_FRAGMENTATION is taken into consideration
-		TOTAL_ADDRESSED_BLOCKS = (int) Math.ceil((double)FILE_SIZE_IN_BYTES/CONFIG.BLOCK_SIZE);
-		INTERNAL_FRAGMENTATION= (TOTAL_ADDRESSED_BLOCKS*CONFIG.BLOCK_SIZE)-FILE_SIZE_IN_BYTES;
-		
-		IDB1 = DiskController.getInstance().readIDB1(inodeBlockAddress);
-		IDB2 = DiskController.getInstance().readIDB2(inodeBlockAddress);
-		
-	}
-	
-	public int inodeReadWalkerNext() throws IncorrectLengthConversionException, DiskControllerException{
-		
-		//Starts in 0
-		currentOffset++;
-		
-		
-		
-		
-		
-		
-		
-		return 0;
-	}
-	
-	public int getFileSize(){
-		return FILE_SIZE_IN_BYTES;
-	}
-	
 	public void setFileSize(int fileSize){
 		FILE_SIZE_IN_BYTES = fileSize;
 	}
 	
-	
-	
-	public void regenerateInode() throws DiskControllerException{
-		
-	
-	}
 }

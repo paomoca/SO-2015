@@ -87,10 +87,15 @@ public class PaoTestsMain {
 			
 			dc.finalize();
 			
-			int i = (int) Math.ceil(30456/CONFIG.BLOCK_SIZE);
+			int TOTAL_ADDRESSED_BLOCKS = 30456;
+			double INTERNAL_FRAGMENTATION = 0;
 			
-			System.out.println("SGSDG "+(int) t);
-			System.out.println("DDDDD "+(CONFIG.BLOCK_SIZE * (int) Math.ceil(30456/CONFIG.BLOCK_SIZE))-30456);
+			int t = (int) Math.ceil((double)TOTAL_ADDRESSED_BLOCKS/CONFIG.BLOCK_SIZE);
+			double r = (CONFIG.BLOCK_SIZE*t)-TOTAL_ADDRESSED_BLOCKS;
+			
+			System.out.println("SGSDG "+ t);
+			System.out.println("DDDDD "+ r);
+			System.out.println("sdvsd "+ mod);
 			
 			
 		} catch (DiskControllerException e) {
