@@ -30,6 +30,11 @@ public class FSFrame extends JFrame {
         shell = new Shell();
         shell.getCurCommand().addKeyListener(new GetCurCommandKeyListener());
 		shell.getHistory().addMouseListener(new ShellClickListener());
+		shell.getCurCommand().setForeground(Color.GREEN.darker());
+		shell.getCurCommand().setCaretColor(Color.GREEN.darker());
+		shell.getCurCommand().setBackground(Color.BLACK);
+		shell.getHistory().setForeground(Color.GREEN.darker());
+		shell.getHistory().setBackground(Color.BLACK);
 
         section = new Grid(480,480,10,10);
         content.setLayout(new BorderLayout());
