@@ -41,10 +41,6 @@ public class InodeWriter {
 		//We ask the Free Space Manager for an available block.
 		INODE_ADDRESS = requestBlock();
 		
-		//Saves -1 on each IDB reference on initialization. If the inode exists this value will be overridden.
-		//DiskController.getInstance().writeIDB1(INODE_ADDRESS, -1);
-		//DiskController.getInstance().writeIDB2(INODE_ADDRESS, -1);	
-		
 	}
 	
 	public void inodeWriteWalker(int currentDataAddress) throws InodeFileTooBigException,
@@ -72,8 +68,6 @@ public class InodeWriter {
 	}
 		
 	public void directPointers() throws DiskControllerException, IncorrectLengthConversionException, InodeDirectPointerIndexOutOfRange{
-		
-		//TODO: Syso. is a simulation, replace with real function.
 
 		System.out.println("\nWrite direct pointer in Inode: "+currentDataAddress+" offset: "+currentOffset);
 		DiskController.getInstance().writeDirectPointer(INODE_ADDRESS, currentOffset, currentDataAddress);

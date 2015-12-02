@@ -26,13 +26,14 @@ public class DiskController {
 	private DiskDirectory directory;
 		
 	private DiskController(boolean formatFlag) throws DiskControllerException, DiskFormatException{
+		
 		try {
 			
 			//Initialize METADATA_LENGTH in 0 so we can start reading in the actual position 0. 
 			//(Check addressTranslation function to see why this is important)
 			METADATA_LENGTH = 10;
 			
-			/**** The order is important please do not modify. ******/
+			/***** The order is important please do not modify. ******/
 			mountDevice();
 			if(formatFlag){
 				formatDevice();
@@ -433,9 +434,20 @@ public class DiskController {
 		byte[] readBuffer = rawRead(position, CONFIG.BLOCK_PAYLOAD_SIZE);
 		
 		return readBuffer;
-		
-		
+			
 	}
+	
+	public byte[] rawReadBlockPayload(int address, int length) throws DiskControllerException{
+		
+		//We take the amount of control bytes as offset to translate address.
+		int position = addressTranslation(address, CONFIG.CONTROL_BYTES_SIZE);
+		
+		byte[] readBuffer = rawRead(position, length);
+		
+		return readBuffer;
+			
+	}
+	
 	
 	/*****************************************************************************************
 	 * USED WHENEVER WE ARE READING AND WRITING IDB INFORMATION. (USUALLY 4 BYTE ADDRESSES BUT
