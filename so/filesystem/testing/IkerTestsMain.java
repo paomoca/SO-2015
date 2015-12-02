@@ -1,15 +1,12 @@
 package so.filesystem.testing;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.RandomAccessFile;
 
-import so.filesystem.cache.CacheController;
 import so.filesystem.disk.DiskControllerException;
 import so.filesystem.disk.IncorrectLengthConversionException;
 import so.filesystem.general.FreeSpaceManager;
-import so.filesystem.pruebas.DeduplicationPlugin;
+import so.filesystem.disk.DeduplicationPlugin;
 
 public class IkerTestsMain {
 

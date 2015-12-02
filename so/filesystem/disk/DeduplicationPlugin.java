@@ -1,4 +1,4 @@
-package so.filesystem.pruebas;
+package so.filesystem.disk;
 
 import java.io.FileInputStream;
 import java.io.FileOutputStream;

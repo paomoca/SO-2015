@@ -7,12 +7,12 @@ public class CacheFreeSpaceManager extends FreeSpaceManager {
 	
 	private static CacheFreeSpaceManager self = null;
 
-	public CacheFreeSpaceManager(byte[] bitmapBytes) {
+	private CacheFreeSpaceManager(byte[] bitmapBytes) {
 		super(bitmapBytes);
 		
 	}
 
-	public CacheFreeSpaceManager(int deviceBlockSize) {
+	private CacheFreeSpaceManager(int deviceBlockSize) {
 		super(deviceBlockSize);
 		
 	}
