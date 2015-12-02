@@ -19,7 +19,7 @@ public class CONFIG {
 	
 	public static int INITIAL_METADATA_SIZE = METADATA_DISKSYSTEMKEY_SIZE+METADATA_DIRECTORY_ADDRESS_REFERENCE_SIZE+METADATA_DISKFSM_INITIAL_CONTROL_BYTE_SIZE;
 	
-	public static int BLOCK_SIZE = 40;
+	public static int BLOCK_SIZE = 4096;
 	
 	//There must be a correspondence between the offset and the amount of control bytes.
 	public static int DEDUPLICATION_CONTROL_OFFSET = 0;
@@ -32,7 +32,7 @@ public class CONFIG {
 	public static int BLOCK_PAYLOAD_SIZE = BLOCK_SIZE-CONTROL_BYTES_SIZE;
 	public static int ADDRESS_SIZE = 4;
 
-	public static String DISK_LOCATION = "diskRawDeviceTestFile";
+	public static String DISK_LOCATION = "archivoDev";
 	public static String CACHE_LOCATION = "cacheRawDeviceTestFile";
 	
 	public static int IDB1_OFFSET = BLOCK_SIZE-2*ADDRESS_SIZE;

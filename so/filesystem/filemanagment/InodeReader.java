@@ -48,6 +48,7 @@ public class InodeReader {
 	public InodeReader(int inodeBlockAddress) throws DiskControllerException, IncorrectLengthConversionException {
 		
 		INODE_ADDRESS = inodeBlockAddress;
+		System.out.println("Reading Inode Address: "+inodeBlockAddress);
 		
 		//Through the file size in bytes we can determine the amount of blocks that should be read.
 		FILE_SIZE_IN_BYTES = DiskController.getInstance().readFileSize(INODE_ADDRESS);

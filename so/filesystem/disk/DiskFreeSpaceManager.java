@@ -6,12 +6,12 @@ public class DiskFreeSpaceManager extends FreeSpaceManager {
 
 	private static DiskFreeSpaceManager self = null;
 
-	public DiskFreeSpaceManager(byte[] bitmapBytes) {
+	private DiskFreeSpaceManager(byte[] bitmapBytes) {
 		super(bitmapBytes);
 		
 	}
 
-	public DiskFreeSpaceManager(int deviceBlockSize) {
+	private DiskFreeSpaceManager(int deviceBlockSize) {
 		super(deviceBlockSize);
 		
 	}

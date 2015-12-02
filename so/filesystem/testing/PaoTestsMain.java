@@ -6,23 +6,37 @@ import java.util.Arrays;
 import so.filesystem.disk.DiskController;
 import so.filesystem.disk.DiskControllerException;
 import so.filesystem.disk.DiskFormatException;
+import so.filesystem.disk.DiskFreeSpaceManager;
 import so.filesystem.disk.IncorrectLengthConversionException;
 import so.filesystem.disk.UnidentifiedMetadataTypeException;
+<<<<<<< HEAD
+=======
+import so.filesystem.filemanagment.InodeDirectPointerIndexOutOfRange;
+import so.filesystem.filemanagment.InodeFileTooBigException;
+import so.filesystem.filemanagment.InodeNotEnoughDiskSpaceExcepcion;
+import so.filesystem.filemanagment.InodeReader;
+import so.filesystem.filemanagment.InodeWriter;
+>>>>>>> 1ea966ce8337833cfd7564bbfb10ea46d9dacf31
 import so.filesystem.general.CONFIG;
 
 public class PaoTestsMain {
 
+<<<<<<< HEAD
 	public static void main(String[] args) throws UnidentifiedMetadataTypeException, IOException {
+=======
+	public static void main(String[] args) throws UnidentifiedMetadataTypeException, IOException, InodeNotEnoughDiskSpaceExcepcion, InodeDirectPointerIndexOutOfRange, InodeFileTooBigException {
+>>>>>>> 1ea966ce8337833cfd7564bbfb10ea46d9dacf31
 		
 		try {
 			
 			String string = "aei aei aei";
 			DiskController dc = DiskController.getInstance(true);
+			System.out.println("Metadata length: "+dc.METADATA_LENGTH);
 			
 			boolean write = false;
-			boolean counter = true;
+			boolean counter = false;
 			
-			if(write){
+			/*if(write){
 				dc.rawWriteBlockPayload(10, string.getBytes(), string.length());
 				dc.rawWriteBlockPayload(37, string.getBytes(), string.length());
 				dc.rawWriteBlockPayload(57, string.getBytes(), string.length());
@@ -80,7 +94,7 @@ public class PaoTestsMain {
 				System.out.println(dc.getBlockAccessFrequency(77));
 			
 			
-			
+			*/
 			
 			/*System.out.println(new String(dc.rawReadBlock(20)));
 			dc.rawWriteBlockPayload(21, "hola como estas".getBytes(), "hola como estas".length());
@@ -89,23 +103,26 @@ public class PaoTestsMain {
 			System.out.println(dc.rawAddressRead(1, 20));
 			System.out.println(dc.bytesToInt(dc.intToBytes(4, 12)));*/
 			
+			DiskFreeSpaceManager.getInstance(40000);
+			
+			
+			//InodeWriter inodeW = new InodeWriter();
+			
+			for(int i = 0; i< 20; i++){
+				//inodeW.inodeWriteWalker(i);
+				System.out.println(DiskFreeSpaceManager.getInstance().firstFreeBlock());
+			}
+			
+			/*InodeReader inodeR = new InodeReader(1);
+			
+			for(int i = 0; i< 2200; i++){
+				inodeR.inodeReadWalkerNext();
+			}*/
+			
+				
 			dc.finalize();
 			
-			byte[] dbGrande = "hola hola hola hola ohjsdc ksdjc sjkdbc ksjdbc kjsbc  KK".getBytes();
-			byte[] dbChica = new byte[7];
-			
-			dbChica = Arrays.copyOfRange(dbGrande, 0, dbChica.length);
-			
-			System.out.println("TEST BYTES: "+new String(dbChica));
-			
-			int TOTAL_ADDRESSED_BLOCKS = 30456;
-			double INTERNAL_FRAGMENTATION = 0;
-			
-			int t = (int) Math.ceil((double)TOTAL_ADDRESSED_BLOCKS/CONFIG.BLOCK_SIZE);
-			double r = (CONFIG.BLOCK_SIZE*t)-TOTAL_ADDRESSED_BLOCKS;
-			
-			System.out.println("SGSDG "+ t);
-			System.out.println("DDDDD "+ r);
+
 			
 			
 			
@@ -118,10 +135,7 @@ public class PaoTestsMain {
 		} /*catch (IncorrectLengthConversionException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
-		}*/ catch (IncorrectLengthConversionException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+		}*/ 
 
 	}
 
