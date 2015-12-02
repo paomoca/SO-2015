@@ -71,10 +71,10 @@ public class FileController {
 				
 				//TODO: Como definimos que hacer cuando no leimos un bloque completo. 
 				//We write the data on the given block
-				disk.rawWriteBlockPayload(blockAddress, dataBuffer, numberOfBytesRead);
+				//disk.rawWriteBlockPayload(blockAddress, dataBuffer, numberOfBytesRead);
 				
 				//We save the reference to the new address in the inode.
-				fileInode.inodeWriteWalker(blockAddress);
+				//fileInode.inodeWriteWalker(blockAddress);
 				
 			} else {
 				

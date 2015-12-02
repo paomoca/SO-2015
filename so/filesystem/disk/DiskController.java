@@ -29,7 +29,7 @@ public class DiskController {
 			
 			//Initialize METADATA_LENGTH in 0 so we can start reading in the actual position 0. 
 			//(Check addressTranslation function to see why this is important)
-			METADATA_LENGTH = 0;
+			METADATA_LENGTH = 10;
 			
 			/**** The order is important please do not modify. ******/
 			mountDevice();
@@ -76,11 +76,17 @@ public class DiskController {
 		//Reference to the raw device	
 		try {
 			rawDeviceRW = new RandomAccessFile(CONFIG.DISK_LOCATION, "rw");
+			System.out.println("Length"+rawDeviceRW.length());
 		} catch (FileNotFoundException e) {
 			
 			throw new DeviceInitializationException("Unable to mount device.");
 			
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
+		
+		System.out.println("Device "+CONFIG.DISK_LOCATION+" mounted successfully.");
 	}
 	
 	//TODO: AQUI ESTAN LAS FORMAS DE LEER Y ESCRIBIR LA METADATA NO SE DONDE VAN, DEPENDE DE LA INICIALIZACION DE JUAN
@@ -237,6 +243,45 @@ public class DiskController {
 	}
 	
 	/*****************************************************************************************
+	 * USED TO GET AND SET THE INODE DIRECT, SINGLE INDIRECT AND DOUBLE INDIRECT POINTERS.
+	 * @throws IncorrectLengthConversionException 
+	 * @throws DiskControllerException 
+	 *****************************************************************************************/
+	
+	public void writeIDB1(int inodeAddress, int idb1Address) throws IncorrectLengthConversionException, DiskControllerException{
+		
+		int position = addressTranslation(inodeAddress, CONFIG.IDB1_OFFSET);
+		byte[] byteIDB1Address = intToBytes(CONFIG.ADDRESS_SIZE, idb1Address);
+		rawWrite(position, byteIDB1Address, CONFIG.ADDRESS_SIZE);
+		
+	}
+	
+	public int readIDB1(int inodeAddress) throws DiskControllerException{
+		
+		int position = addressTranslation(inodeAddress, CONFIG.IDB2_OFFSET);
+		rawRead(position, CONFIG.ADDRESS_SIZE);
+		
+		return 0;
+	}
+	
+	public void writeIDB2(int inodeAddress, int idb2address) throws IncorrectLengthConversionException, DiskControllerException{
+		
+		int position = addressTranslation(inodeAddress, CONFIG.IDB2_OFFSET);
+		byte[] byteIDB2Address = intToBytes(CONFIG.ADDRESS_SIZE, idb2address);
+		rawWrite(position, byteIDB2Address, CONFIG.ADDRESS_SIZE);
+		
+	}
+	
+	public int readIDB2(int inodeAddress) throws DiskControllerException{
+	
+		int position = addressTranslation(inodeAddress, CONFIG.IDB2_OFFSET);
+		rawRead(position, CONFIG.ADDRESS_SIZE);
+		
+		return 0;
+	}
+	
+	
+	/*****************************************************************************************
 	 * USED TO READ ENTIRE BLOCKS BASED ON BLOCK SIZE
 	 *****************************************************************************************/
 	
@@ -280,10 +325,10 @@ public class DiskController {
 		
 	}
 	
-	public void setBlockAccessFrecuency(int address, int frequency) throws DiskControllerException, IncorrectLengthConversionException{
+	public void setBlockAccessFrequency(int address, int frequency) throws DiskControllerException, IncorrectLengthConversionException{
 		
 		int position = addressTranslation(address, CONFIG.FREQUENCY_CONTROL_OFFSET);
-		byte[] byteFrequency = intToBytes(CONFIG.FREQUENCY_CONTROL_SIZE, address);
+		byte[] byteFrequency = intToBytes(CONFIG.FREQUENCY_CONTROL_SIZE, frequency);
 		
 		//Would ideally write in address block position 2.
 		rawWrite(position, byteFrequency, CONFIG.FREQUENCY_CONTROL_SIZE);
@@ -298,7 +343,7 @@ public class DiskController {
 		
 	}
 	
-	public int getBlockAccessFrecuency(int address) throws DiskControllerException, IncorrectLengthConversionException{
+	public int getBlockAccessFrequency(int address) throws DiskControllerException, IncorrectLengthConversionException{
 		
 		int position = addressTranslation(address, CONFIG.FREQUENCY_CONTROL_OFFSET);
 		byte[] byteFrequency = rawRead(position, CONFIG.FREQUENCY_CONTROL_SIZE);
@@ -317,13 +362,13 @@ public class DiskController {
 		
 	}
 	
-	public void incrementBlockAccessFrecuency(int address) throws DiskControllerException, IncorrectLengthConversionException{
+	public void incrementBlockAccessFrequency(int address) throws DiskControllerException, IncorrectLengthConversionException{
 		
 		//GETS THE CURRENT FREQUENCY CONTROL VALUE
-		int currentValue = getBlockAccessFrecuency(address);
+		int currentValue = getBlockAccessFrequency(address);
 		currentValue += 1;
 		//SETS NEW COUNTER VALUE
-		setBlockAccessFrecuency(address, currentValue);
+		setBlockAccessFrequency(address, currentValue);
 		
 	}
 	
@@ -368,6 +413,14 @@ public class DiskController {
 		int position = IDBPositionTranslation(idbAddress, idbOffset);
 		
 		byte[] blockAddressReference = rawRead(position, CONFIG.ADDRESS_SIZE);
+		
+		if(CONFIG.DEBUG_SESSION){
+			System.out.println("\nREAD ADDRESS"
+			+"\nIDBBLOCK: "+idbAddress
+			+"\nIDBOFFSET: "+idbOffset
+			+"\nTRANSLATED POSITION: "+position);
+		}
+		
 		return bytesToInt(blockAddressReference);
 		
 	}
@@ -376,14 +429,18 @@ public class DiskController {
 		
 		byte[] byteBlockAddressReference = intToBytes(CONFIG.ADDRESS_SIZE, blockAddressReferenceToWrite);
 		int position = IDBPositionTranslation(idbAddress, idbOffset);
+		
+		if(CONFIG.DEBUG_SESSION){
+			System.out.println("\nADDRESS: "+bytesToInt(byteBlockAddressReference)
+			+"\nIDBBLOCK: "+idbAddress
+			+"\nIDBOFFSET: "+idbOffset
+			+"\nTRANSLATED POSITION: "+position);
+		}
 
 		rawWrite(position, byteBlockAddressReference, CONFIG.ADDRESS_SIZE);
 		
-		
 	}
 	
-	
-	//TODO: TODAVIA NO ESTA BIEN
 	/*****************************************************************************************
 	 * METHODS IN CHARGE OF METADATA MANIPULATION (READ/WRITE).
 	 * This class is important because it allows the amount of meta data content at the beginning
@@ -473,7 +530,7 @@ public class DiskController {
 		return position;
 	}
 	
-	private byte[] intToBytes(int length, int intAddress) throws IncorrectLengthConversionException{
+	public byte[] intToBytes(int length, int intAddress) throws IncorrectLengthConversionException{
 		
 		if (length == 2) {
 			return ByteBuffer.allocate(2).putShort((short) intAddress).array(); 
@@ -485,7 +542,7 @@ public class DiskController {
 		
 	}
 	
-	private int bytesToInt(byte[] byteAddress) throws IncorrectLengthConversionException{
+	public int bytesToInt(byte[] byteAddress) throws IncorrectLengthConversionException{
 		
 		if (byteAddress.length == 2) {
 			return ByteBuffer.wrap(byteAddress).getShort();
@@ -510,6 +567,17 @@ public class DiskController {
 		
 		directory.newFile(fileName, inodeAddress);
 		
+	}
+	
+	//TODO: mejorar exception
+	public void finalize(){
+		try {
+			rawDeviceRW.close();
+			System.out.println("Finalized.");
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			System.out.println("Could not finalize.");
+		}
 	}
 	
 		

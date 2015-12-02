@@ -1,48 +1,51 @@
 package so.filesystem.filemanagment;
+import so.filesystem.disk.DiskController;
+import so.filesystem.disk.DiskControllerException;
 import so.filesystem.disk.DiskFreeSpaceManager;
-import so.filesystem.general.FreeSpaceManager;
+import so.filesystem.disk.IncorrectLengthConversionException;
+import so.filesystem.general.CONFIG;
 
 public class Inode {
 	
-	private int inodeAddress = -1;
-	
-	private int BLOCK_SIZE = 40;
-	private int ADDRESS_SIZE = 4;
-	private int DIRECT_POINTERS = 2;
-	private int IDB_TOTAL_ADDRESSES;
-	
-	int totalReferencedAddresses = 0;
-		
+	private int INODE_ADDRESS = -1;
 	int IDB1 = -1;
 	int IDB2 = -1;
 	
-	int IDB2InternalOffset = -1;
-	int currentIDB2InternalIDB=-1;
-	
+	/* OFFSET INCREASES ON EACH INDODE WALKER ITERATION AND IS USED AS A REFERENCE
+	 * TO KNOW WHEN TO ALTER THE FLAG TO SWITCH BETWEEN OUR CASES.
+	 *  */
 	int currentOffset = -1;
 	
+	int totalReferencedAddresses = 0;
+	
+	int IDB2InternalOffset = -1;
+	int currentIDB2InternalIDB=-1;
+
 	int flag = 1;
-	FreeSpaceManager fsm;
-	int address = -1;
+	int currentDataAddress = -1;
 	
 	
-	public Inode(){
+	public Inode() throws InodeNotEnoughDiskSpaceExcepcion, IncorrectLengthConversionException, DiskControllerException{
 		
 		//We ask the Free Space Manager for an available block.
-		if((inodeAddress = DiskFreeSpaceManager.getInstance().firstFreeBlock()) == -1){
-			
-			//TODO: THROW EXCEPTION
-		}
-		
-		fsm = DiskFreeSpaceManager.getInstance(500);
-		IDB_TOTAL_ADDRESSES = BLOCK_SIZE/ADDRESS_SIZE;
+		INODE_ADDRESS = requestBlock();
+		//Saves -1 on each IDB reference on initialization. If the inode exists this value will be overridden.
+		DiskController.getInstance().writeIDB1(INODE_ADDRESS, -1);
+		DiskController.getInstance().writeIDB2(INODE_ADDRESS, -1);
 		
 	}
 	
-	public void inodeWriteWalker(int address) throws InodeFileTooBigException, InodeNotEnoughDiskSpaceExcepcion{
+	public Inode(int inodeBlockAddress) throws DiskControllerException {
+		
+		IDB1 = DiskController.getInstance().readIDB1(inodeBlockAddress);
+		IDB2 = DiskController.getInstance().readIDB2(inodeBlockAddress);
+		
+	}
+	
+	public void inodeWriteWalker(int currentDataAddress) throws InodeFileTooBigException, InodeNotEnoughDiskSpaceExcepcion, IncorrectLengthConversionException, DiskControllerException{
 		
 		currentOffset++;
-		this.address = address;
+		this.currentDataAddress = currentDataAddress;
 		
 		switch(flag){
 		
@@ -64,30 +67,29 @@ public class Inode {
 		
 	public void directPointers(){
 		
-		// Syso. is a simulation, replace with real function.
-		System.out.println("\nWrite direct pointer in Inode: "+address+" offset: "+currentOffset);
+		//TODO: Syso. is a simulation, replace with real function.
+
+		System.out.println("\nWrite direct pointer in Inode: "+currentDataAddress+" offset: "+currentOffset);
 		
-		if(currentOffset == DIRECT_POINTERS-1){
+		if(currentOffset == CONFIG.DIRECT_POINTERS-1){
 			flag = 2;
 			resetOffset();
 		}
 		
 	}
 		
-	public void singleIndirectPointers(){
+	public void singleIndirectPointers() throws InodeNotEnoughDiskSpaceExcepcion, IncorrectLengthConversionException, DiskControllerException{
 		
 		if (IDB1 == -1){	
-			if ((IDB1 = fsm.firstFreeBlock()) == -1) {
-				// Throw not enough disk space exception.
-			}
-			// Syso. is a simulation, replace with real function.
-			System.out.println("--->IDB1 assigned to: "+IDB1);
+			IDB1 = requestBlock();
+			DiskController.getInstance().writeIDB1(INODE_ADDRESS, IDB1);
+			System.out.println("--->IDB1 assigned to address: "+IDB1);
 		}
 		
-		// Syso. is a simulation, replace with real function.
-		System.out.println("Write address: "+address+" to "+IDB1+" OFFSET: "+currentOffset);
+		DiskController.getInstance().rawAddressWrite(IDB1, currentOffset, currentDataAddress);
+		System.out.println("Write address: "+currentDataAddress+" to "+IDB1+" OFFSET: "+currentOffset);
 		
-		if(currentOffset == IDB_TOTAL_ADDRESSES-1){
+		if(currentOffset == CONFIG.IDB_TOTAL_ADDRESSES-1){
 			flag = 3;
 			resetOffset();
 		}
@@ -95,34 +97,32 @@ public class Inode {
 		
 	}
 	
-	public void doubleIndirectPointers() throws InodeFileTooBigException, InodeNotEnoughDiskSpaceExcepcion{
+	public void doubleIndirectPointers() throws InodeFileTooBigException, InodeNotEnoughDiskSpaceExcepcion, IncorrectLengthConversionException, DiskControllerException{
 		
 		if (IDB2 == -1){	
-			if ((IDB2 = fsm.firstFreeBlock()) == -1) {
-				throw new InodeNotEnoughDiskSpaceExcepcion("ERROR: There's not enough free space in the disk to write the file.");
-			}
-			// Syso. is a simulation, replace with real function.
-			System.out.println("--->IDB2 assigned: "+IDB2);
+			IDB2 = requestBlock();
+			DiskController.getInstance().writeIDB2(INODE_ADDRESS, IDB2);
+			System.out.println("--->IDB2 assigned to address: "+IDB2);
 		}
 		
 		if (currentIDB2InternalIDB == -1){	
 			IDB2InternalOffset++;
 			
-			if(IDB2InternalOffset == IDB_TOTAL_ADDRESSES){	
+			if(IDB2InternalOffset == CONFIG.IDB_TOTAL_ADDRESSES){	
 				throw new InodeFileTooBigException("ERROR: File is too big to be allocated by the FileSystem.");
 			}
 						
-			if ((currentIDB2InternalIDB = fsm.firstFreeBlock()) == -1) {
-				throw new InodeNotEnoughDiskSpaceExcepcion("ERROR: There's not enough free space in the disk to write the file.");
-			}
+			currentIDB2InternalIDB = requestBlock();
+			DiskController.getInstance().rawAddressWrite(IDB2, IDB2InternalOffset, currentIDB2InternalIDB);
 			// Syso. is a simulation, replace with real function.
 			System.out.println("--->Write new currentIDB2InternalIDB: "+currentIDB2InternalIDB+" to: "+IDB2
 					+" internal IDB2 offset"+ IDB2InternalOffset);
 
 		}
-		// Syso. is a simulation, replace with real function.
-		System.out.println("Write ADDRESS:"+address+" to internal IDB "+currentIDB2InternalIDB+" OFFSET: "+currentOffset);
-		if(currentOffset == IDB_TOTAL_ADDRESSES-1){
+		
+		DiskController.getInstance().rawAddressWrite(currentIDB2InternalIDB, currentOffset, currentDataAddress);
+		System.out.println("Write ADDRESS:"+currentDataAddress+" to internal IDB "+currentIDB2InternalIDB+" OFFSET: "+currentOffset);
+		if(currentOffset == CONFIG.IDB_TOTAL_ADDRESSES-1){
 			currentIDB2InternalIDB = -1;
 			resetOffset();
 		}	
@@ -135,8 +135,34 @@ public class Inode {
 	}
 	
 	public int getInodeAddress(){
-		return inodeAddress;
+		return INODE_ADDRESS;
 	}
 	
-
+	private int requestBlock() throws InodeNotEnoughDiskSpaceExcepcion{
+		
+		int blockAddr;
+		
+		if((blockAddr = DiskFreeSpaceManager.getInstance().firstFreeBlock()) == -1){
+			throw new InodeNotEnoughDiskSpaceExcepcion("");
+		}
+		
+		return blockAddr;
+	}
+	
+	/***************************************************
+	 * REGENERATE INODE VALUES FROM BLOCK
+	 * @throws DiskControllerException 
+	 ***************************************************/
+	
+	public int inodeReadWalker(){
+		
+		
+		
+		return 0;
+	}
+	
+	public void regenerateInode() throws DiskControllerException{
+		
+	
+	}
 }
