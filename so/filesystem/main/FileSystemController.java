@@ -6,6 +6,7 @@ import so.filesystem.cache.CacheFormatException;
 import so.filesystem.disk.DiskController;
 import so.filesystem.disk.DiskControllerException;
 import so.filesystem.disk.DiskFormatException;
+import so.filesystem.disk.UnidentifiedMetadataTypeException;
 import so.filesystem.filemanagment.FileController;
 import so.filesystem.filemanagment.InodeFileTooBigException;
 import so.filesystem.filemanagment.InodeNotEnoughDiskSpaceExcepcion;
@@ -24,19 +25,27 @@ public class FileSystemController {
     private boolean cacheLoadedFlag = false;
     private boolean cacheEnabledFlag = false;
 
-    public FileSystemController() {
-        //init();
+	public FileSystemController() {
     }
 
     public void init() throws ShellAnswerException {
 
-    	//loadDisk();
-    	loadCache();
-    	if(!cacheLoadedFlag){
-    		throw new ShellAnswerException("Error Initializing :(\n");
+    	loadDisk();
+    	try{
+    		loadCache();
+    	}catch (ShellAnswerException e){
+    		System.out.println(e.toString());
     	}
-    	fileController = new FileController(cacheEnabledFlag);
-    	throw new ShellAnswerException("FS Load SuccesFull!");
+    	if(!diskLoadedFlag){
+    		throw new ShellAnswerException("Error Initializing Disk :(\n");
+    	}else{
+			fileController = new FileController(cacheEnabledFlag);
+    		if(cacheEnabledFlag){
+        		throw new ShellAnswerException("FS Loaded  on disk succesfully with Cache enabled.");
+    		}else{
+        		throw new ShellAnswerException("FS Loaded on disk succesfully with Cache disabled.");
+    		}
+    	}
 
     }
     
@@ -82,8 +91,55 @@ public class FileSystemController {
         }
     }
     
-    public void loadDisk(){
-    	
+    public void loadDisk() throws ShellAnswerException{
+    	try {
+			diskController = diskController.getInstance(false);
+            // If there are no exception cache will be considered loaded
+            diskLoadedFlag = true;
+    	}catch (UnidentifiedMetadataTypeException e) {
+        	throw new ShellAnswerException(e.toString());
+		} catch (DiskControllerException e) {
+			System.out.println(e);
+            diskLoadedFlag = false;
+            throw new ShellAnswerException(e.toString());
+		}catch (DiskFormatException e) {
+			diskLoadedFlag = false;
+			if(CONFIG.DEBUG_SESSION){
+				e.printStackTrace();
+			}
+            throw new ShellAnswerException("Disk FileSystem unknown for: '"
+                            + CONFIG.DISK_LOCATION
+                            + "'\n type formatDisk to load new FileSystem on the device.");
+		}catch (IOException e) {
+			e.printStackTrace();
+        	throw new ShellAnswerException(e.toString());
+
+		}
+    }
+    
+    public void formatDisk() throws ShellAnswerException{
+    	try {
+            diskController = DiskController.getInstance(true);
+            // If there are no exception cache will be considered loaded
+            diskLoadedFlag = true;
+            throw new ShellAnswerException("Disk loaded succefully on: '"+CONFIG.DISK_LOCATION+"'");
+        } catch (DiskControllerException e) {
+            System.out.println(e);
+            diskLoadedFlag = false;
+            throw new ShellAnswerException(e.toString());
+        } catch (DiskFormatException e) {
+            // TODO Auto-generated catch block
+            System.out.println(e);
+            diskLoadedFlag = false;
+            throw new ShellAnswerException("Error formating Disk on device: '"
+                            + CONFIG.DISK_LOCATION
+                            + "'\n type formatDisk to load FileSystem on the device again.");
+        } catch (UnidentifiedMetadataTypeException e) {
+        	throw new ShellAnswerException(e.toString());
+		} catch (IOException e) {
+			e.printStackTrace();
+        	throw new ShellAnswerException(e.toString());
+		}
     }
 
     public void randomlyAccessFile() {
@@ -135,5 +191,31 @@ public class FileSystemController {
     public void disableCache() {
 
     }
+    
+    
+    // Getters & Setters for flags
+    public boolean isDiskLoadedFlag() {
+		return diskLoadedFlag;
+	}
+
+	public void setDiskLoadedFlag(boolean diskLoadedFlag) {
+		this.diskLoadedFlag = diskLoadedFlag;
+	}
+
+	public boolean isCacheLoadedFlag() {
+		return cacheLoadedFlag;
+	}
+
+	public void setCacheLoadedFlag(boolean cacheLoadedFlag) {
+		this.cacheLoadedFlag = cacheLoadedFlag;
+	}
+
+	public boolean isCacheEnabledFlag() {
+		return cacheEnabledFlag;
+	}
+
+	public void setCacheEnabledFlag(boolean cacheEnabledFlag) {
+		this.cacheEnabledFlag = cacheEnabledFlag;
+	}
 
 }

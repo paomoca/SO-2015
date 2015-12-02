@@ -50,7 +50,6 @@ public class FSFrame extends JFrame {
 				// TODO Auto-generated catch block
 				this.shell.getHistory().append(e.toString());
 			}
-
     }
     
     class ShellClickListener implements MouseListener {

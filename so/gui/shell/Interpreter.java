@@ -1,5 +1,6 @@
 package so.gui.shell;
 
+import so.filesystem.general.CONFIG;
 import so.filesystem.main.FileSystemController;
 
 public class Interpreter {
@@ -12,17 +13,57 @@ public class Interpreter {
 		
 		if(cmd.equals("echo")){
 			throw new ShellAnswerException(param);
-		}else if(cmd.equals("clear")){
+		}
+		
+		else if(cmd.equals("clear")){
 			throw new ShellAnswerException("\n\n\n\n\n\n\n\n\n\n\n");
-		}else if(cmd.equals("sayshi")){
-			throw new ShellAnswerException("Hola "+param);
-		}else if(cmd.equals("-1")&&param.equals("-1")){
-			throw new ShellAnswerException("Wrong Params");
-		}else if(cmd.equals("initFileSystem")){
+		}
+		
+		else if(cmd.equals("sayshi")){
+			throw new ShellAnswerException("Hi "+param);
+		}
+		
+		else if(cmd.equals("initFileSystem")){
 			fs.init();
-		}else if(cmd.equals("formatCache")){
-			fs.formatCache();
-		}else{
+		}
+		
+		else if(cmd.equals("formatCache")){
+			if(fs.isCacheLoadedFlag()){
+				throw new ShellAnswerException("Cache is already loaded.\nDevice: '"+CONFIG.CACHE_LOCATION+"'");
+			}else{
+				fs.formatCache();
+			}
+		}
+		
+		else if(cmd.equals("formatDisk")){
+			if(fs.isDiskLoadedFlag()){
+				throw new ShellAnswerException("Disk is already loaded.\nDevice: '"+CONFIG.DISK_LOCATION+"'");
+			}else{
+				fs.formatDisk();
+			}
+		}
+		
+		else if(cmd.equals("disableCache")){
+			if(!fs.isCacheEnabledFlag()){
+				throw new ShellAnswerException("Cache is already disabled.");
+			}else{
+				fs.disableCache();
+			}
+		}
+		
+		else if(cmd.equals("enableCache")){
+			if(fs.isCacheEnabledFlag()){
+				throw new ShellAnswerException("Cache is already enabled.");
+			}else{
+				fs.enableCache();
+			}
+		}
+		
+		else if(cmd.equals("-1")&&param.equals("-1")){
+			throw new ShellAnswerException("Wrong Params");
+		}
+		
+		else{
 			throw new WrongCommandException("Wrong Command:" + cmd);
 		}
 	}
