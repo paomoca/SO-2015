@@ -25,8 +25,8 @@ public class DiskController {
 	
 	private RandomAccessFile rawDeviceRW;
 	private DiskDirectory directory;
-		
 
+	
 	private DiskController(boolean formatFlag) throws DiskControllerException, DiskFormatException, UnidentifiedMetadataTypeException, IOException{
 
 		try {
@@ -38,10 +38,10 @@ public class DiskController {
 			/***** The order is important please do not modify. ******/
 			mountDevice();
 			if(formatFlag){
-				metadataNewDiskInitialization();
+				//metadataNewDiskInitialization();
 			}else{
 				deviceIdentification();
-				metadataKnownDiskInitialization();
+				//metadataKnownDiskInitialization();
 			}
 	
 			//freeSpaceManagerInitialization();
