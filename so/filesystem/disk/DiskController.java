@@ -112,8 +112,9 @@ public class DiskController {
 			 
 		//Initializes the DiskFreeSpaceManager with the number of blocks remaining after the meta data bytes.
 		//Final meta data length is dependent on the result of this initialization.
-		int numberOfBlocks = (int) ((new File(CONFIG.DISK_LOCATION).getFreeSpace()-CONFIG.INITIAL_METADATA_SIZE)/CONFIG.BLOCK_SIZE);
-		DiskFreeSpaceManager.getInstance(numberOfBlocks);
+		long byteSize = (long) 22655952486.0;
+		long numberOfBlocks = ((byteSize - new Long(CONFIG.INITIAL_METADATA_SIZE))/ new Long(CONFIG.BLOCK_SIZE));
+		DiskFreeSpaceManager.getInstance((int) numberOfBlocks);
 		METADATA_NUMBER_DISK_FSM_BLOCKS  = DiskFreeSpaceManager.getInstance().getBitMapSizeInBlocks();
 		rawMetadataWrite(Integer.valueOf(METADATA_NUMBER_DISK_FSM_BLOCKS), "FSM_NUMBER_OF_BLOCKS");
 		METADATA_LENGTH = CONFIG.INITIAL_METADATA_SIZE + (METADATA_NUMBER_DISK_FSM_BLOCKS * CONFIG.BLOCK_SIZE);

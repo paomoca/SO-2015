@@ -10,7 +10,9 @@ import java.awt.event.MouseListener;
 import java.io.File;
 
 import so.filesystem.main.FileSystemController;
+import so.gui.grid.BlockGrid;
 import so.gui.grid.Grid;
+import so.gui.grid.SectionGrid;
 import so.gui.shell.*;
 
 /**
@@ -19,8 +21,8 @@ import so.gui.shell.*;
 public class FSFrame extends JFrame {
 
 	private static final long serialVersionUID = 1L;
-	private Grid section;
-	private Grid blocks;
+	private SectionGrid section;
+	private BlockGrid blocks;
     private Shell shell;
     private Interpreter intr;
     private FileSystemController fileSystemController;
@@ -43,16 +45,23 @@ public class FSFrame extends JFrame {
 		
 		fileChooser = new JFileChooser();
 
-        section = new Grid(480,480,10,10);
-        blocks = new Grid(480, 480, 10, 10);
+        section = new SectionGrid(480,480,10,10);
+        blocks = new BlockGrid(480, 480, 10, 10);
+
+        section.addMouseListener(new BlockClickListener());
+
+		section.setBackground(Color.white);
+		blocks.setBackground(Color.white);
         
         gridsHolder.setLayout(new BorderLayout());
         gridsHolder.add(section,BorderLayout.WEST);
         gridsHolder.add(Box.createHorizontalStrut(20));
         gridsHolder.add(blocks, BorderLayout.EAST);
+		gridsHolder.setBackground(new Color(78, 78, 78));
         
         content.setLayout(new BorderLayout());        
         content.add(gridsHolder, BorderLayout.NORTH);
+		content.add(Box.createVerticalStrut(17));
         content.add(shell, BorderLayout.SOUTH);
 
         this.add(content, BorderLayout.CENTER);
@@ -71,7 +80,7 @@ public class FSFrame extends JFrame {
 			}
     }
     
-    private void loadImport(){
+    private void reqImport(){
     	int flag = fileChooser.showOpenDialog(this);
 		if (flag == JFileChooser.APPROVE_OPTION) {
 			
@@ -79,7 +88,7 @@ public class FSFrame extends JFrame {
 			//JOptionPane.showMessageDialog(myWindow, file.getName()+ ": File loaded.\n");
 			shell.getHistory().append("\nTo import: "+file.getAbsolutePath());
 		}else{
-			shell.getHistory().append("\nError loading FileChooser.");
+			shell.getHistory().append("\nAction Canceled.");
 		}
     }
     
@@ -143,10 +152,50 @@ public class FSFrame extends JFrame {
 					shell.getHistory().append("\n"+e.toString());
 				} catch (RequestImportException e){
 					shell.getHistory().append("\n"+e.toString());
-					loadImport();
+					reqImport();
+					//shell.getScroller().getVerticalScrollBar().setValue(shell.getScroller().getVerticalScrollBar().getMaximum());;		
 				}
 			}
 		}
 	}// CurCommandKeyListener
+
+    class BlockClickListener implements MouseListener {
+
+        @Override
+        public void mouseClicked(MouseEvent e) {
+
+        }
+
+        @Override
+        public void mousePressed(MouseEvent e) {
+
+            int row = (e.getY()/section.getCellWidth());
+            int column = (e.getX()/section.getCellHeight());
+            int blocksRange = (section.getColumns() * row) + column ;
+            if (blocksRange >= 0 && blocksRange < (section.getColumns() * section.getRows())) {
+                System.out.println(blocksRange);
+                section.getFillCells().clear();
+                section.fillCell(column, row);
+                blocks.getFillCells().clear();
+                blocks.testBits();
+            }
+
+        }
+
+        @Override
+        public void mouseReleased(MouseEvent e) {
+
+        }
+
+        @Override
+        public void mouseEntered(MouseEvent e) {
+
+        }
+
+        @Override
+        public void mouseExited(MouseEvent e) {
+
+        }
+    }
     
 }

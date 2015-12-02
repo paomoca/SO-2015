@@ -5,12 +5,12 @@ import java.awt.*;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.util.*;
+import java.util.List;
 
 /**
  * Created by diegomartin on 12/1/15.
  */
 public class Grid extends JPanel {
-
 
     private int gridWidth;
     private int gridHeight;
@@ -21,7 +21,6 @@ public class Grid extends JPanel {
     private int cells;
     private int columns;
     private int rows;
-
 
     private java.util.List<Point> fillCells;
 
@@ -38,10 +37,8 @@ public class Grid extends JPanel {
         this.cells = columns*rows;
 
         this.setPreferredSize(new Dimension(gridWidth, gridHeight));
-        this.addMouseListener(new BlockClickListener());
-
-        System.out.print("Total blocks = " + this.cells + "\n");
     }
+
 
     @Override
     protected void paintComponent(Graphics g) {
@@ -71,45 +68,53 @@ public class Grid extends JPanel {
         repaint();
     }
 
-    class BlockClickListener implements MouseListener {
+    public void fillCells(boolean[] blocks) {
 
-        @Override
-        public void mouseClicked(MouseEvent e) {
-
-        }
-
-        @Override
-        public void mousePressed(MouseEvent e) {
-            System.out.println("Click detected.");
-
-            int row = (e.getY()/cellWidth);
-            System.out.println("Row = " + row);
-            int column = (e.getX()/cellHeight);
-            System.out.println("Column = " + column);
-            int section = (columns * row) + column ;
-
-            if (section >= 0 && section < (columns * rows)) {
-                System.out.println(section);
-                fillCell(column, row);
+        for (int column = 0; column < columns; column++) {
+            for (int row = 0; row < rows; row++) {
+                if (blocks[(column * columns) + row]) {
+                    fillCells.add(new Point(row, column));
+                }
             }
-
         }
-
-        @Override
-        public void mouseReleased(MouseEvent e) {
-
-        }
-
-        @Override
-        public void mouseEntered(MouseEvent e) {
-
-        }
-
-        @Override
-        public void mouseExited(MouseEvent e) {
-
-        }
+        repaint();
     }
 
+    public int randInt(int min, int max) {
 
+        Random rand = new Random();
+        return rand.nextInt((max - min) + 1) + min;
+    }
+
+    public int getGridWidth() {
+        return gridWidth;
+    }
+
+    public int getGridHeight() {
+        return gridHeight;
+    }
+
+    public int getCellWidth() {
+        return cellWidth;
+    }
+
+    public int getCellHeight() {
+        return cellHeight;
+    }
+
+    public int getCells() {
+        return cells;
+    }
+
+    public int getColumns() {
+        return columns;
+    }
+
+    public int getRows() {
+        return rows;
+    }
+
+    public List<Point> getFillCells() {
+        return fillCells;
+    }
 }

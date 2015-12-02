@@ -29,7 +29,8 @@ public class PaoTestsMain {
 
 			
 			String string = "aei aei aei";
-			DiskController dc = DiskController.getInstance(true);
+			System.out.println(new File("/Volumes/SO").getTotalSpace());
+			DiskController dc = DiskController.getInstance(false);
 			System.out.println("Metadata length: "+dc.METADATA_LENGTH);
 			
 			boolean write = false;
@@ -105,19 +106,19 @@ public class PaoTestsMain {
 			//DiskFreeSpaceManager.getInstance(40000000);
 			
 			
-			InodeWriter inodeW = new InodeWriter();
+			/*InodeWriter inodeW = new InodeWriter();
 			
 			for(int i = 1000; i< 5000; i++){
 				inodeW.inodeWriteWalker(i);
 				
-			}
-			/*
+			}*/
+			
 			InodeReader inodeR = new InodeReader(1);
 			
-			for(int i = 1000; i< 4000; i++){
+			for(int i = 1000; i< 2019; i++){
 				inodeR.inodeReadWalkerNext();
 			}
-			*/
+			
 				
 			dc.finalize();
 			

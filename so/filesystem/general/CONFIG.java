@@ -32,7 +32,7 @@ public class CONFIG {
 	public static int BLOCK_PAYLOAD_SIZE = BLOCK_SIZE-CONTROL_BYTES_SIZE;
 	public static int ADDRESS_SIZE = 4;
 
-	public static String DISK_LOCATION = "b";
+	public static String DISK_LOCATION = "/dev/disk1s2";
 	public static String CACHE_LOCATION = "cacheRawDeviceTestFile";
 	
 	public static int IDB1_OFFSET = BLOCK_SIZE-2*ADDRESS_SIZE;
