@@ -10,6 +10,7 @@ import so.filesystem.filemanagment.FileController;
 import so.filesystem.filemanagment.InodeFileTooBigException;
 import so.filesystem.filemanagment.InodeNotEnoughDiskSpaceExcepcion;
 import so.filesystem.general.CONFIG;
+import so.gui.shell.ShellAnswerException;
 
 import java.io.IOException;
 import java.util.Scanner;
@@ -19,85 +20,70 @@ public class FileSystemController {
     private FileController fileController;
     private CacheController cacheController;
     private DiskController diskController;
+    private boolean diskLoadedFlag = false;
+    private boolean cacheLoadedFlag = false;
+    private boolean cacheEnabledFlag = false;
 
-    public FileSystemController () {
-        init();
+    public FileSystemController() {
+        //init();
     }
 
-    public boolean init() {
+    public void init() throws ShellAnswerException {
 
-        Scanner scanner = new Scanner(System.in);
+    	//loadDisk();
+    	loadCache();
+    	if(!cacheLoadedFlag){
+    		throw new ShellAnswerException("Error Initializing :(\n");
+    	}
+    	fileController = new FileController(cacheEnabledFlag);
+    	throw new ShellAnswerException("FS Load SuccesFull!");
 
-        boolean diskFormatFlag = false;
-        boolean diskContinueFlag = true;
-        boolean diskFound = false;
-
-        while (diskContinueFlag) {
-            try {
-                diskController = DiskController.getInstance(diskFormatFlag);
-                diskContinueFlag = false;
-            } catch (DiskControllerException e) {
-                // TODO Auto-generated catch block
-                System.out.println(e);
-            } catch (DiskFormatException e) {
-                // TODO Auto-generated catch block
-                System.out.println(e);
-                System.out
-                        .print("Would you like to format the device named '"
-                                + CONFIG.DISK_LOCATION
-                                + "'? \n Without formatting the program will stop. [y/n]: ");
-                String usrAnswer = scanner.next();
-                if (usrAnswer.compareTo("y") == 0) {
-                    diskFormatFlag = true;
-                    diskFound = true;
-                } else if (usrAnswer.compareTo("n") == 0) {
-                    diskContinueFlag = false;
-                    diskFound = false;
-                } else {
-                    System.out.println("Ok, try again!");
-                }
-            }
+    }
+    
+    public void loadCache() throws ShellAnswerException{
+    	try {
+            cacheController = CacheController.getInstance(false);
+            // If there are no exception cache will be considered loaded
+            cacheLoadedFlag = true;
+            cacheEnabledFlag = true;
+        } catch (CacheControllerException e) {
+            // TODO Auto-generated catch block
+            System.out.println(e);
+            cacheLoadedFlag = false;
+            throw new ShellAnswerException(e.toString());
+        } catch (CacheFormatException e) {
+            // TODO Auto-generated catch block
+            System.out.println(e);
+            cacheLoadedFlag = false;
+            throw new ShellAnswerException("Cache FileSystem unknown for: '"
+                            + CONFIG.CACHE_LOCATION
+                            + "'\n type formatCache to load new FileSystem on the device.");
         }
-
-        if(!diskFound){
-            return  false;
+    }
+    
+    public void formatCache() throws ShellAnswerException{
+    	try {
+            cacheController = CacheController.getInstance(true);
+            // If there are no exception cache will be considered loaded
+            cacheLoadedFlag = true;
+            throw new ShellAnswerException("Cache loaded succefully on: '"+CONFIG.CACHE_LOCATION+"'");
+        } catch (CacheControllerException e) {
+            // TODO Auto-generated catch block
+            System.out.println(e);
+            cacheLoadedFlag = false;
+            throw new ShellAnswerException(e.toString());
+        } catch (CacheFormatException e) {
+            // TODO Auto-generated catch block
+            System.out.println(e);
+            cacheLoadedFlag = false;
+            throw new ShellAnswerException("Error formating Cache on device: '"
+                            + CONFIG.CACHE_LOCATION
+                            + "'\n type formatCache to load FileSystem on the device again.");
         }
-
-        boolean cacheFormatFlag = false;
-        boolean cacheActive = false;
-        boolean cacheContinueFlag = true;
-
-        while (cacheContinueFlag) {
-            try {
-                cacheController = CacheController.getInstance(cacheFormatFlag);
-                cacheActive = true;
-                cacheContinueFlag = false;
-            } catch (CacheControllerException e) {
-                // TODO Auto-generated catch block
-                System.out.println(e);
-            } catch (CacheFormatException e) {
-                // TODO Auto-generated catch block
-                System.out.println(e);
-                System.out
-                        .print("Would you like to format the device named '"
-                                + CONFIG.CACHE_LOCATION
-                                + "' or continue with cache disabled?\n [f] -format [c] -continue: ");
-                String usrAnswer = scanner.next();
-                if (usrAnswer.compareTo("f") == 0) {
-                    cacheFormatFlag = true;
-                    cacheActive = true;
-                } else if (usrAnswer.compareTo("c") == 0) {
-                    cacheActive = false;
-                    cacheContinueFlag = false;
-                } else {
-                    System.out.println("Ok, try again!");
-                }
-            }
-        }
-
-        fileController = new FileController(cacheActive);
-        return true;
-
+    }
+    
+    public void loadDisk(){
+    	
     }
 
     public void randomlyAccessFile() {
