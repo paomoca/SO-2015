@@ -18,8 +18,10 @@ public class Grid extends JPanel {
     private int cellWidth ;
     private int cellHeight;
 
+    private int cells;
     private int columns;
     private int rows;
+
 
     private java.util.List<Point> fillCells;
 
@@ -33,11 +35,12 @@ public class Grid extends JPanel {
 
         this.columns = gridWidth/cellWidth;
         this.rows = gridHeight/cellHeight;
+        this.cells = columns*rows;
 
         this.setPreferredSize(new Dimension(gridWidth, gridHeight));
         this.addMouseListener(new BlockClickListener());
 
-        System.out.print("Total blocks = " + (rows*columns) + "\n");
+        System.out.print("Total blocks = " + this.cells + "\n");
     }
 
     @Override
