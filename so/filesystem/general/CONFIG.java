@@ -39,6 +39,9 @@ public class CONFIG {
 	public static int IDB1_OFFSET = BLOCK_SIZE-2*ADDRESS_SIZE;
 	public static int IDB2_OFFSET = BLOCK_SIZE-ADDRESS_SIZE;
 	
-	
+	//iNode Info
+	public static int INODE_INFO_FILE_SIZE_IN_BYTES = 4;
+	public static int INODE_INFO_FILE_ID = 2;
+	public static int INODE_INFO_FILE_MAX_SIZE = INODE_INFO_FILE_ID + INODE_INFO_FILE_SIZE_IN_BYTES;
 	
 }

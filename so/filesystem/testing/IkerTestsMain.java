@@ -54,11 +54,11 @@ public class IkerTestsMain {
 		fsm.firstFreeBlock();
 
 		
-		boolean[] hola = fsm.printbits(0, 2499);
-//		for (int i = 0; i < hola.length; i++) {
-//			System.out.println(hola[i]);
-//		}
-		System.out.println(hola.length);
+		boolean[] hola = fsm.printbits(0, 29);
+		for (int i = 0; i < hola.length; i++) {
+			System.out.println(hola[i]);
+		}
+		//System.out.println(hola.length);
 		
 		gen.update("holaprobandohhshsgfiddhhskhhdjdfsdnsfklallskjdksfdvcnserbvcnjbashingdeinfo".getBytes());
 		System.out.println(gen.getValue());
