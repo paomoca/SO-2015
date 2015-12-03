@@ -34,7 +34,6 @@ public class FSFrame extends JFrame {
     private JFileChooser fileChooserImport;
     private JFileChooser fileChooserExport;
     private FileWindow openFileWindow;
-    private JFileChooser fileChooser;
 
     public FSFrame() {
 
@@ -54,6 +53,7 @@ public class FSFrame extends JFrame {
 		shell.getHistory().setBackground(Color.BLACK);
 		
 		fileChooserImport = new JFileChooser();
+		fileChooserExport = new JFileChooser();
 
         section = SectionGrid.getInstance(480,480,10,10);
         blocks = BlockGrid.getInstance(480, 480, 10, 10);
@@ -107,7 +107,7 @@ public class FSFrame extends JFrame {
 		if (flag == JFileChooser.APPROVE_OPTION) {
 			byte[] dataTowrite = {'t','e','s','t'};
 			try {
-				BufferedWriter outFile = new BufferedWriter(new FileWriter(fileChooserExport.getSelectedFile()+".txt"));
+				BufferedWriter outFile = new BufferedWriter(new FileWriter(fileChooserExport.getSelectedFile()));
 				outFile.write(new String(dataTowrite));
 				outFile.close();
 				} 
@@ -191,11 +191,10 @@ public class FSFrame extends JFrame {
 				} catch (RequestImportException e){
 					shell.getHistory().append("\n"+e.toString());
 					reqImport();
-					//shell.getScroller().getVerticalScrollBar().setValue(shell.getScroller().getVerticalScrollBar().getMaximum());;		
-				} catch (RequestCreateFileExcpetion requestCreateFileExcpetion) {
-                    requestCreateFileExcpetion.printStackTrace();
+				} catch (RequestCreateFileExcpetion e) {
+					reqCreate(e.toString());
                 } catch (RequestExportException e) {
-                    e.printStackTrace();
+                    reqExport(e.toString());
                 }
             }
 		}
