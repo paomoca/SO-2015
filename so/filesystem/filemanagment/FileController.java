@@ -82,6 +82,7 @@ public class FileController {
 		
 		int numberOfBytesRead;
 		int blockAddress;
+		int totalBytesRead=0;
 
 		FileInputStream fis = new FileInputStream(fileName);
 		byte[] dataBuffer = new byte[CONFIG.BLOCK_PAYLOAD_SIZE];
@@ -92,12 +93,14 @@ public class FileController {
 		InodeWriter inode = new InodeWriter();
 		int inodeBlockAddress = inode.getInodeAddress();
 		
-		while((numberOfBytesRead = fis.read(dataBuffer)) != -1){
 		
+		while((numberOfBytesRead = fis.read(dataBuffer)) != -1){
+			
+		
+			totalBytesRead += numberOfBytesRead;
 			//We ask the Free Space Manager for an available block.
 			if((blockAddress = DiskFreeSpaceManager.getInstance().firstFreeBlock()) != -1){
 				
-				blockAddress = DiskFreeSpaceManager.getInstance().firstFreeBlock();
 				DiskController.getInstance().rawWriteBlockPayload(inode.getInodeAddress(), dataBuffer, numberOfBytesRead);
 				
 				//Sets control bytes.
@@ -106,28 +109,23 @@ public class FileController {
 				
 				inode.inodeWriteWalker(blockAddress);
 				
-				
-				
-				//TODO: Como definimos que hacer cuando no leimos un bloque completo. 
-				//We write the data on the given block
-				//disk.rawWriteBlockPayload(blockAddress, dataBuffer, numberOfBytesRead);
-				
-				//We save the reference to the new address in the inode.
-				//fileInode.inodeWriteWalker(blockAddress);
-				
 			} else {
 				
-				//TODO: throw exception
+				fis.close();
+				//TODO: throw exception de que ya no hay espacio
+				
 			}
 	
 		}
 		
-		//If the file was created successfully we add the inode reference to the directory.
-		disk.newDirectoryEntry(fileName, inodeBlockAddress);
+		DiskController.getInstance().writeFileSize(inodeBlockAddress, totalBytesRead);
+		System.out.println("(IMPORT) TOTAL FILE SIZE READ IN BYTES: "+DiskController.getInstance().readFileSize(inodeBlockAddress));
 		
-		//Write file entry into Directory.
-		//Update Free Space
-		//Iker nos pasa un arreglo de bytes
+		//If the file was created successfully we add the inode reference to the directory.
+		//disk.newDirectoryEntry(fileName, inodeBlockAddress);
+		
+		fis.close();
+		System.out.println("Inode block address assigned: "+inodeBlockAddress);
 		
 		
 	}

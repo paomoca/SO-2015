@@ -74,7 +74,10 @@ public class InodeWriter {
 		
 	public void directPointers() throws DiskControllerException, IncorrectLengthConversionException, InodeDirectPointerIndexOutOfRange{
 
-		System.out.println("\nWrite direct pointer in Inode: "+currentDataAddress+" offset: "+currentOffset);
+		if(CONFIG.DEBUG_SESSION){
+			System.out.println("\nWrite direct pointer in Inode: "+currentDataAddress+" offset: "+currentOffset);
+		}
+		
 		DiskController.getInstance().writeDirectPointer(INODE_ADDRESS, currentOffset, currentDataAddress);
 		
 		if(currentOffset == CONFIG.DIRECT_POINTERS-1){
@@ -93,7 +96,9 @@ public class InodeWriter {
 		}
 		
 		DiskController.getInstance().rawAddressWrite(IDB1, currentOffset, currentDataAddress);
-		System.out.println("Write address: "+currentDataAddress+" to "+IDB1+" OFFSET: "+currentOffset);
+		if(CONFIG.DEBUG_SESSION){
+			System.out.println("Write address: "+currentDataAddress+" to "+IDB1+" OFFSET: "+currentOffset);
+		}
 		
 		if(currentOffset == CONFIG.IDB_TOTAL_ADDRESSES-1){
 			flag = 3;
@@ -121,13 +126,20 @@ public class InodeWriter {
 			currentIDB2InternalIDB = requestBlock();
 			DiskController.getInstance().rawAddressWrite(IDB2, IDB2InternalOffset, currentIDB2InternalIDB);
 			// Syso. is a simulation, replace with real function.
-			System.out.println("--->Write new currentIDB2InternalIDB: "+currentIDB2InternalIDB+" to: "+IDB2
+				
+			if(CONFIG.DEBUG_SESSION){
+				System.out.println("--->Write new currentIDB2InternalIDB: "+currentIDB2InternalIDB+" to: "+IDB2
 					+" internal IDB2 offset"+ IDB2InternalOffset);
+			}
 
 		}
 		
 		DiskController.getInstance().rawAddressWrite(currentIDB2InternalIDB, currentOffset, currentDataAddress);
-		System.out.println("Write ADDRESS:"+currentDataAddress+" to internal IDB "+currentIDB2InternalIDB+" OFFSET: "+currentOffset);
+		
+		if(CONFIG.DEBUG_SESSION){
+			System.out.println("Write ADDRESS:"+currentDataAddress+" to internal IDB "+currentIDB2InternalIDB+" OFFSET: "+currentOffset);
+		}
+		
 		if(currentOffset == CONFIG.IDB_TOTAL_ADDRESSES-1){
 			currentIDB2InternalIDB = -1;
 			resetOffset();
