@@ -64,7 +64,7 @@ public class IkerTestsMain {
 		}
 		//System.out.println(hola.size());
 
-		FreeSpaceManager fsm = new FreeSpaceManager((154*4096));
+		FreeSpaceManager fsm = new FreeSpaceManager((630784*8));
 		System.out.println("Size arraList: " + fsm.updateFreeSpace().size());
 		System.out.println("BitMapSizeBlocks: " + fsm.getBitMapSizeInBlocks());
 
