@@ -33,6 +33,8 @@ public class CacheController {
 		diskVSCache = new HashMap<Integer, Integer>();
 		diskVSFrequency = new HashMap<Integer, Integer>();
 
+		this.cacheHits = 0;
+		
 		TreeMap<Integer, Integer> dummy = new TreeMap<Integer, Integer>();
 		dummy.put(-1, 65537);
 		lowestEntry = dummy.lastEntry();
@@ -130,17 +132,12 @@ public class CacheController {
 	public void freeSpaceManagerInitialization()
 			throws CacheControllerException {
 
-		try {
+		long byteSize = (long) 2147483648.0;
+		long numberOfBlocks = ((byteSize / new Long(CONFIG.BLOCK_SIZE)));
 
-			int numberOfBlocks = (int) ((rawDeviceRW.length() - CONFIG.CACHE_SYSTEMKEY.length) / CONFIG.BLOCK_SIZE);
-			System.out.println("bblocks av: " + numberOfBlocks);
-			fsm = CacheFreeSpaceManager.getInstance(numberOfBlocks);
-
-		} catch (IOException e) {
-
-			throw new CacheControllerException(
-					"Unable to initialize Free Space Manager.");
-		}
+		//int numberOfBlocks = (int) ((rawDeviceRW.length() - CONFIG.CACHE_SYSTEMKEY.length) / CONFIG.BLOCK_SIZE);
+		System.out.println("bblocks av: " + numberOfBlocks);
+		fsm = CacheFreeSpaceManager.getInstance((int) numberOfBlocks);
 	}
 
 	public void writeCacheBlock(int hddAddr, byte[] block, int frec)
@@ -169,10 +166,11 @@ public class CacheController {
 	public byte[] readCacheBlock(int hddAddr) throws CacheControllerException {
 		int cacheAddress = this.diskVSCache.get(hddAddr);
 		byte[] blockPayload = rawReadBlock(cacheAddress);
-
+		
 		int newFreq = this.diskVSFrequency.get(hddAddr) + 1;
 		this.diskVSFrequency.put(hddAddr, newFreq);
 		updateLowestEntry();
+		this.cacheHits++;
 
 		return blockPayload;
 	}
