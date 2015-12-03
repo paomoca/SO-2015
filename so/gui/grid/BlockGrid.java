@@ -40,8 +40,8 @@ public class BlockGrid extends Grid {
 //        for(int i = 0; i < getRows()*getColumns(); ++i) {
 //            arrayBits.add(n.nextBoolean());
 //        }
-        bits = new boolean[blocksRange - 1];
-        for(int i = 0; i < blocksRange - 1; ++i) {
+        bits = new boolean[getCells() - 1];
+        for(int i = 0; i < getCells() - 1; ++i) {
             bits[i] = !DiskFreeSpaceManager.getInstance().printbits(blocksRange + 1, blocksRange + getCells())[i];
         }
 
