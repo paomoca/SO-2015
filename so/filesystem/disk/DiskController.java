@@ -5,7 +5,10 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.nio.ByteBuffer;
+import java.util.ArrayList;
 import java.util.Arrays;
+
+import javax.swing.DebugGraphics;
 
 import so.filesystem.filemanagment.InodeDirectPointerIndexOutOfRange;
 import so.filesystem.general.CONFIG;
@@ -96,7 +99,7 @@ public class DiskController {
 	}
 	
 	//TODO: AQUI ESTAN LAS FORMAS DE LEER Y ESCRIBIR LA METADATA NO SE DONDE VAN, DEPENDE DE LA INICIALIZACION DE JUAN
-	private void metadataNewDiskInitialization() throws UnidentifiedMetadataTypeException, DiskControllerException, IncorrectLengthConversionException, IOException{
+	private void metadataNewDiskInitialization() throws UnidentifiedMetadataTypeException, DiskControllerException, IncorrectLengthConversionException, IOException, DeviceInitializationException{
 		
 		//Saves the key at the beginning of the disk.
 		METADATA_DISK_KEY = CONFIG.DISK_SYSTEMKEY;
@@ -118,13 +121,19 @@ public class DiskController {
 		rawMetadataWrite(Integer.valueOf(METADATA_NUMBER_DISK_FSM_BLOCKS), "FSM_NUMBER_OF_BLOCKS");
 		METADATA_LENGTH = CONFIG.INITIAL_METADATA_SIZE + (METADATA_NUMBER_DISK_FSM_BLOCKS * CONFIG.BLOCK_SIZE);
 		
-		byte[] disk_fsm_bitmap = DiskFreeSpaceManager.getInstance().updateFreeSpace();
-		rawMetadataWrite(disk_fsm_bitmap, "FSM_BITMAP");
+		//We get the bitMap block list from the Disk Space Manager and we write each block on it's corresponding position
+		//taking into consideration the proper Meta data offset.
+		ArrayList<byte[]> fsmList = DiskFreeSpaceManager.getInstance().updateFreeSpace();
+		rawMetadataWrite(fsmList, "FSM_BITMAP");
 		
+		if(CONFIG.DEBUG_SESSION){
+			System.out.println("DFSM LIS SIZE NEW DEVICE = "+fsmList.size());
+		}
+	
 	}
 	
 	//TODO: AQUI ESTAN LAS FORMAS DE LEER Y ESCRIBIR LA METADATA NO SE DONDE VAN, DEPENDE DE LA INICIALIZACION DE JUAN
-	private void metadataKnownDiskInitialization()  throws UnidentifiedMetadataTypeException, DiskControllerException, IncorrectLengthConversionException{
+	private void metadataKnownDiskInitialization()  throws UnidentifiedMetadataTypeException, DiskControllerException, IncorrectLengthConversionException, DeviceInitializationException{
 		
 		//How to read each meta data value
 		
@@ -136,8 +145,12 @@ public class DiskController {
 		METADATA_NUMBER_DISK_FSM_BLOCKS = (int) rawMetadataRead("FSM_NUMBER_OF_BLOCKS");
 		METADATA_LENGTH = CONFIG.INITIAL_METADATA_SIZE + (METADATA_NUMBER_DISK_FSM_BLOCKS * CONFIG.BLOCK_SIZE);
 		
-		byte[] fsmBitmap = (byte[]) rawMetadataRead("FSM_BITMAP");
-		DiskFreeSpaceManager.getInstance(fsmBitmap);
+		//Read Disk Free Space Manager based on the given number of blocks and create an ArrayList.
+		ArrayList<?> fsmList = (ArrayList<?>) rawMetadataRead("FSM_BITMAP");
+		
+		if(CONFIG.DEBUG_SESSION){
+			System.out.println("DFSM LIS SIZE KNOWN DEVICE = "+fsmList.size());
+		}
 		
 	}
 	
@@ -529,9 +542,10 @@ public class DiskController {
 	 * @throws UnidentifiedMetadataTypeException 
 	 * @throws DiskControllerException 
 	 * @throws IncorrectLengthConversionException 
+	 * @throws DeviceInitializationException 
 	 *****************************************************************************************/
 	
-	private Object rawMetadataRead(String type) throws UnidentifiedMetadataTypeException, DiskControllerException, IncorrectLengthConversionException{
+	private Object rawMetadataRead(String type) throws UnidentifiedMetadataTypeException, DiskControllerException, IncorrectLengthConversionException, DeviceInitializationException{
 		
 		switch (type){
 		
@@ -551,7 +565,15 @@ public class DiskController {
 				return new Integer(bytesToInt(fsmNumberBlocks));
 				
 			case "FSM_BITMAP":
-				byte[] fsmBitmap = rawRead(CONFIG.INITIAL_METADATA_SIZE, (METADATA_NUMBER_DISK_FSM_BLOCKS*CONFIG.BLOCK_PAYLOAD_SIZE));
+				
+				
+				ArrayList<byte[]> fsmBitmap = new ArrayList<byte[]>();
+				
+				for (int i = 0; i< METADATA_NUMBER_DISK_FSM_BLOCKS; i++){
+					
+					fsmBitmap.add(rawReadMetadataFSM_block(i));
+				}
+				
 				return fsmBitmap;
 				
 				
@@ -561,7 +583,7 @@ public class DiskController {
 		
 	}
 
-	private void rawMetadataWrite(Object data, String type) throws UnidentifiedMetadataTypeException, DiskControllerException, IncorrectLengthConversionException{
+	private void rawMetadataWrite(Object data, String type) throws UnidentifiedMetadataTypeException, DiskControllerException, IncorrectLengthConversionException, DeviceInitializationException{
 		
 		switch (type){
 		
@@ -585,13 +607,45 @@ public class DiskController {
 				break;
 				
 			case "FSM_BITMAP":
-				byte[] bitMap = (byte[]) data;
-				rawWrite(CONFIG.INITIAL_METADATA_SIZE, bitMap, (METADATA_NUMBER_DISK_FSM_BLOCKS*CONFIG.BLOCK_SIZE));
+				
+				ArrayList<?> fsmList = (ArrayList<?>) data;
+				int offset = -1;
+				
+				for (Object block : fsmList) {
+					offset++;
+					rawWriteMetadataFSM_block((byte[])data, offset);
+				}
+				
 				break;
 				
 			default:
 				throw new UnidentifiedMetadataTypeException("Unidentified requested metadata type.");
 		}
+		
+	}
+	
+	private byte[] rawReadMetadataFSM_block(int offset) throws DeviceInitializationException, DiskControllerException{
+		
+		if(offset > METADATA_NUMBER_DISK_FSM_BLOCKS){
+			throw new DeviceInitializationException("Trying to access an invalid block while"
+					+ " reading the corresponding FSM metadata blocks in OFFSET: "+offset);
+		}
+		
+		int position = CONFIG.INITIAL_METADATA_SIZE + (offset*CONFIG.ADDRESS_SIZE);
+		byte [] fsmBlock = rawRead(position, CONFIG.BLOCK_SIZE);
+		return fsmBlock;
+		
+	}
+	
+	private void rawWriteMetadataFSM_block(byte[] data,int offset) throws DeviceInitializationException, DiskControllerException{
+		
+		if(offset > METADATA_NUMBER_DISK_FSM_BLOCKS){
+			throw new DeviceInitializationException("Trying to access an invalid block while"
+					+ " writing the corresponding FSM metadata blocks in OFFSET: "+offset);
+		}
+		
+		int position = CONFIG.INITIAL_METADATA_SIZE + (offset*CONFIG.ADDRESS_SIZE);
+		rawWrite(position, data, CONFIG.BLOCK_SIZE);
 		
 	}
 	
