@@ -79,7 +79,7 @@ public class Grid extends JPanel {
         for (int column = 0; column < columns; column++) {
             cellColor = new Color(randInt(1,255),randInt(1,255),randInt(1,255));
             for (int row = 0; row < rows; row++) {
-                if (blocks[(column * columns) + row]) {
+                if (!blocks[(column * columns) + row]) {
                     fillCells.add(new ColorPoint(row, column, cellColor));
                 }
             }
