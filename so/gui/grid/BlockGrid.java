@@ -23,12 +23,16 @@ public class BlockGrid extends Grid {
         return self;
     }
 
+    public static BlockGrid getInstance() {
+        return self;
+    }
+
     public void testBits(int blocksRange) {
         ArrayList<Boolean> arrayBits = new ArrayList<Boolean>();
         boolean[] bits;
 
-        System.out.println("Start = " + (blocksRange + 1));
-        System.out.println("End = " + (blocksRange + getCells()));
+        //System.out.println("Start = " + (blocksRange + 1));
+        //System.out.println("End = " + (blocksRange + getCells()));
 
         Random n = new Random();
         for(int i = 0; i < getRows()*getColumns(); ++i) {
@@ -40,6 +44,6 @@ public class BlockGrid extends Grid {
         }
 
         fillCells(bits);
-
     }
+
 }

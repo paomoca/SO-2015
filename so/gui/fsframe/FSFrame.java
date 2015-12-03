@@ -253,6 +253,7 @@ public class FSFrame extends JFrame {
                 // Funcion de pruebas
                 blocks.getFillCells().clear();
                 blocks.testBits(blockSection * section.getColumns() * section.getRows());
+
             }
 
         }

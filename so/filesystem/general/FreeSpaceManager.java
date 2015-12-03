@@ -1,5 +1,7 @@
 package so.filesystem.general;
 
+import so.gui.grid.BlockGrid;
+
 import java.util.ArrayList;
 import java.util.BitSet;
 
@@ -10,12 +12,12 @@ public class FreeSpaceManager {
 	/*
 	 * By definition, 1 means free, 0 means used
 	 */
-//	public FreeSpaceManager(byte[] bitmapBytes) {
-//		this.diskSpaceBitMap = new BitSet((bitmapBytes.length * 8) + 1);
-//		this.diskSpaceBitMap.set((bitmapBytes.length * 8) + 1, true);
-//		this.diskSpaceBitMap = BitSet.valueOf(bitmapBytes);
-//		this.diskSpaceBitMap.set(CONFIG.METADATA_DIRECTORY_ADDRESS_REFERENCE, false);
-//	}
+	public FreeSpaceManager(byte[] bitmapBytes) {
+		this.diskSpaceBitMap = new BitSet((bitmapBytes.length * 8) + 1);
+		this.diskSpaceBitMap.set((bitmapBytes.length * 8) + 1, true);
+		this.diskSpaceBitMap = BitSet.valueOf(bitmapBytes);
+		this.diskSpaceBitMap.set(CONFIG.METADATA_DIRECTORY_ADDRESS_REFERENCE, false);
+	}
 
 	public FreeSpaceManager(ArrayList<?> bitmap) {
 		ArrayList<byte[]> bitmapBytes = (ArrayList<byte[]>) bitmap;
@@ -75,6 +77,7 @@ public class FreeSpaceManager {
 			bits[i] = !arrayBits.get(i);
 		}
 
+		BlockGrid.getInstance().fillCells(bits);
 		return bits;
 	}
 

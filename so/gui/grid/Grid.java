@@ -66,6 +66,14 @@ public class Grid extends JPanel {
         repaint();
     }
 
+    public void fillCell(int block) {
+        int i = (int) Math.floor(block/columns);
+        int x = (int) Math.floor(i/columns);
+        int y =  (block - x * columns + 1);
+        fillCells.add(new ColorPoint(x, y, new Color(randInt(1,255))));
+        repaint();
+    }
+
     public void fillCells(boolean[] blocks) {
         Color cellColor;
         for (int column = 0; column < columns; column++) {
