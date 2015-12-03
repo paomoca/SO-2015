@@ -160,8 +160,8 @@ public class FileSystemController {
 
     }
     
-    public void writeFile(String fileName){
-    	
+    public void writeFile(String fileName) throws ShellAnswerException{
+    	throw new ShellAnswerException("TODO");
     }
     
     public void importFile(String fileName) throws IncorrectLengthConversionException, InodeDirectPointerIndexOutOfRange {

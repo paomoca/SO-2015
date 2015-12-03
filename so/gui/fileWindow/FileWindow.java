@@ -41,7 +41,7 @@ public class FileWindow {
 		saveButton.setSelected(false);
 		saveButton.setActionCommand("save");
 		saveButton.setMnemonic('S');
-		saveButton.addActionListener(new ScriptWindowButtonListener());
+		//saveButton.addActionListener(new ScriptWindowButtonListener());
 		
 		clearButton = new JButton("Clear Contents");
 		clearButton.setSelected(false);
@@ -114,7 +114,8 @@ public class FileWindow {
 					catch (Exception ex) {
 		            ex.printStackTrace();}
 					File file = fileChooser.getSelectedFile();
-					JOptionPane.showMessageDialog(myWindow, "File: " + file.getName() + " Saved.\n"); } 
+					JOptionPane.showMessageDialog(myWindow, "File: " + file.getName() + " Saved.\n"); 
+					} 
 					scriptArea.setCaretPosition(scriptArea.getDocument().getLength()); 
 		    }else if(ae.getActionCommand().equals("quit")){
 		    	myWindow.setVisible(false);

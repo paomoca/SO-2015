@@ -33,7 +33,8 @@ public class FSFrame extends JFrame {
     private Shell shell;
     private Interpreter intr;
     private FileSystemController fileSystemController;
-    private JFileChooser fileChooser;
+    private JFileChooser fileChooserImport;
+    private JFileChooser fileChooserExport;
     private FileWindow openFileWindow;
 
     public FSFrame() {
@@ -42,6 +43,7 @@ public class FSFrame extends JFrame {
         JPanel gridsHolder = new JPanel();
         
         openFileWindow = new FileWindow();
+        openFileWindow.getSaveButton().addActionListener(new CreateWindowButtonListener());
         
         shell = new Shell();
         shell.getCurCommand().addKeyListener(new GetCurCommandKeyListener());
@@ -52,7 +54,7 @@ public class FSFrame extends JFrame {
 		shell.getHistory().setForeground(Color.GREEN.darker());
 		shell.getHistory().setBackground(Color.BLACK);
 		
-		fileChooser = new JFileChooser();
+		fileChooserImport = new JFileChooser();
 
         section = new SectionGrid(480,480,10,10);
         blocks = new BlockGrid(480, 480, 10, 10);
@@ -90,10 +92,10 @@ public class FSFrame extends JFrame {
     }
     
     private void reqImport(){
-    	int flag = fileChooser.showOpenDialog(this);
+    	int flag = fileChooserImport.showOpenDialog(this);
 		if (flag == JFileChooser.APPROVE_OPTION) {
 			
-			File file = fileChooser.getSelectedFile();
+			File file = fileChooserImport.getSelectedFile();
 			//JOptionPane.showMessageDialog(myWindow, file.getName()+ ": File loaded.\n");
 			shell.getHistory().append("\nTo import: "+file.getAbsolutePath());
 		}else{
@@ -102,19 +104,24 @@ public class FSFrame extends JFrame {
     }
     
     private void reqExport(String fileName){
-    	if(openFileWindow != null){
-			openFileWindow = new FileWindow();
-			openFileWindow.getMyWindow().setTitle(fileName);
-			openFileWindow.getScriptArea().setText(fileName);
-			openFileWindow.getMyWindow().setVisible(true);
-    	}else{
-    		shell.getHistory().append("\nError exporting "+fileName);
-    	}
+    	int flag = fileChooserExport.showSaveDialog(this);
+		if (flag == JFileChooser.APPROVE_OPTION) {
+			byte[] dataTowrite = {'t','e','s','t'};
+			try {
+				BufferedWriter outFile = new BufferedWriter(new FileWriter(fileChooserExport.getSelectedFile()+".txt"));
+				outFile.write(new String(dataTowrite));
+				outFile.close();
+				} 
+			catch (Exception ex) {
+				shell.getHistory().append("\n Error"); 
+			}
+		}
     }
     
     private void reqCreate(String fileName){
     	if(openFileWindow != null){
 			openFileWindow = new FileWindow();
+	        openFileWindow.getSaveButton().addActionListener(new CreateWindowButtonListener());
 			openFileWindow.getMyWindow().setTitle(fileName);
 			openFileWindow.getScriptArea().setText(fileName);
 			openFileWindow.getMyWindow().setVisible(true);
@@ -198,15 +205,13 @@ public class FSFrame extends JFrame {
 		}
 	}// CurCommandKeyListener
 	
-	class ScriptWindowButtonListener implements ActionListener
+	class CreateWindowButtonListener implements ActionListener
 	{
 		public void actionPerformed(ActionEvent ae) 
 		{
-		    if(ae.getActionCommand().equals("clear")){
-		    	openFileWindow.getScriptArea().setText("");
-		    }else if(ae.getActionCommand().equals("save")){
+		    if(ae.getActionCommand().equals("save")){
 		    	try {
-					intr.saveFile("", fileSystemController);
+					intr.saveFile(openFileWindow.getMyWindow().getTitle(), fileSystemController);
 				} catch (ShellAnswerException e) {
 					shell.getHistory().append("\n"+e.toString());
 				}
