@@ -21,7 +21,7 @@ public class CacheController {
 	private Entry<Integer, Integer> lowestEntry;
 
 	private RandomAccessFile rawDeviceRW;
-	private CacheFreeSpaceManager fsm;
+	public CacheFreeSpaceManager fsm;
 	private HashMap<Integer, Integer> diskVSCache;
 	private HashMap<Integer, Integer> diskVSFrequency;
 

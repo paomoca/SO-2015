@@ -1,5 +1,8 @@
 package so.filesystem.general;
 
+import so.filesystem.disk.DiskController;
+import so.filesystem.disk.DiskControllerException;
+import so.filesystem.disk.IncorrectLengthConversionException;
 import so.gui.grid.BlockGrid;
 
 import java.util.ArrayList;
@@ -50,7 +53,18 @@ public class FreeSpaceManager {
 	}
 
 	public void freeBlocks(int block) {
-		this.diskSpaceBitMap.set(block);
+		try {
+			if(DiskController.getInstance().getDeduplicationCounter(block) > 1) {
+				DiskController.getInstance().setDeduplicationCounter(block, DiskController.getInstance().getDeduplicationCounter(block) - 1);
+			} else {
+				this.diskSpaceBitMap.set(block);
+			}
+		} catch (IncorrectLengthConversionException | DiskControllerException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		//Falta borrar dato de deduplicacion de hash
+		//DiskController.getInstance().
 	}
 
 	public void freeBlocks(int[] block) {

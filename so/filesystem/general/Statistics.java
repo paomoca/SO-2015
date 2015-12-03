@@ -2,10 +2,13 @@ package so.filesystem.general;
 
 import java.util.ArrayList;
 
+import so.filesystem.cache.CacheController;
+import so.filesystem.cache.CacheControllerException;
+import so.filesystem.cache.CacheFreeSpaceManager;
 import so.filesystem.disk.DiskFreeSpaceManager;
 
 public class Statistics {
-	public ArrayList<String> getAllDiskStatistics() {
+	public ArrayList<String> getAllDiskStatistics() throws CacheControllerException {
 		ArrayList<String> statisticsBundle =  new ArrayList<String>();
 		
 		String freeBlocks = "Number of free blocks: " + DiskFreeSpaceManager.getInstance().getNumberFreeBlocks() + " blocks.";
@@ -22,6 +25,18 @@ public class Statistics {
 		
 		String diskUsage = "% of free space: " + (DiskFreeSpaceManager.getInstance().getNumberFreeBlocks()/DiskFreeSpaceManager.getInstance().getBitmapSize()) * 100 + "%.";
 		statisticsBundle.add(diskUsage);
+		
+		return statisticsBundle;
+	}
+	
+	public ArrayList<String> getAllCacheStatistics() throws CacheControllerException {
+		ArrayList<String> statisticsBundle =  new ArrayList<String>();
+		
+		String cacheHits = "Cache Hits: " + CacheController.getInstance().getCacheHits();
+		statisticsBundle.add(cacheHits);
+		
+		String cacheFreeBlocks = "Number of free blocks: " + CacheController.getInstance().fsm.getNumberFreeBlocks();
+		statisticsBundle.add(cacheFreeBlocks);
 		
 		return statisticsBundle;
 	}
