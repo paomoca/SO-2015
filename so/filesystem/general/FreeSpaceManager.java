@@ -5,6 +5,8 @@ import so.gui.grid.BlockGrid;
 import java.util.ArrayList;
 import java.util.BitSet;
 
+import so.gui.grid.SectionGrid;
+
 public class FreeSpaceManager {
 	private BitSet diskSpaceBitMap;
 	private int bitMapSizeInBlocks;
@@ -115,6 +117,7 @@ public class FreeSpaceManager {
 		} else {
 			int nextFreeBlock = this.diskSpaceBitMap.nextSetBit(0);
 			this.diskSpaceBitMap.clear(nextFreeBlock);
+			
 			return nextFreeBlock;
 		}
 	}
