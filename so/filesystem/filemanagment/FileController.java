@@ -159,6 +159,7 @@ public class FileController {
 			if((blockAddress = DiskFreeSpaceManager.getInstance().firstFreeBlock()) != -1){
 				System.out.println("BLOCK ADDRESS ASIGNED: "+blockAddress);
 				
+				
 				DiskController.getInstance().rawWriteBlockPayload(blockAddress, dataBuffer, numberOfBytesRead);
 				
 				//Sets control bytes.
