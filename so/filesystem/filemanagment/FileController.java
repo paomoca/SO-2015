@@ -3,6 +3,9 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.Arrays;
 
+import so.filesystem.cache.CacheController;
+import so.filesystem.cache.CacheControllerException;
+import so.filesystem.cache.CacheFormatException;
 import so.filesystem.disk.*;
 import so.filesystem.general.CONFIG;
 
@@ -10,6 +13,7 @@ public class FileController {
 	
 	private boolean IS_USING_CACHE = false;
 	private DiskController disk;
+	private CacheController cache;
 	
 	public FileController(boolean cacheActive){
 
@@ -20,7 +24,17 @@ public class FileController {
 		} catch(DiskControllerException e){
 			System.out.println(e.toString());		
 		}
-				
+		
+		//Instance CacheController
+		if (this.IS_USING_CACHE == true) {
+			try {
+				this.cache = CacheController.getInstance();
+			} catch (CacheControllerException e) {
+				// TODO Auto-generated catch block
+				this.IS_USING_CACHE = false;
+				e.printStackTrace();
+			}
+		}		
 	}
 	
 	public void readDiskFile(String fileName) throws DiskControllerException, IncorrectLengthConversionException, InodeDirectPointerIndexOutOfRange, InodeNotEnoughDiskSpaceExcepcion, InodeFileTooBigException{
@@ -118,5 +132,19 @@ public class FileController {
 		
 	}
 	
+	public void enableCache() {
+		try {
+			this.cache = CacheController.getInstance();
+			this.IS_USING_CACHE = true;
+		} catch (CacheControllerException e) {
+			// TODO Auto-generated catch block
+			this.IS_USING_CACHE = false;
+			e.printStackTrace();
+		}
+	}
+	
+	public void disableCache() {
+		this.IS_USING_CACHE = false;
+	}
 
 }
