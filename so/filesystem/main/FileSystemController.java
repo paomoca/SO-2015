@@ -157,7 +157,7 @@ public class FileSystemController {
 		DiskController.getInstance().rawMetadataWrite(fsmList, "FSM_BITMAP");
     }
 
-    public void exportFile(String fileName, String filePath) throws DiskControllerException, IncorrectLengthConversionException, InodeDirectPointerIndexOutOfRange, InodeNotEnoughDiskSpaceExcepcion, InodeFileTooBigException, IOException, ShellAnswerException {
+    public void exportFile(String fileName, String filePath) throws DiskControllerException, IncorrectLengthConversionException, InodeDirectPointerIndexOutOfRange, InodeNotEnoughDiskSpaceExcepcion, InodeFileTooBigException, IOException, ShellAnswerException, CacheControllerException {
     	System.out.println("export");
     	fileController.exportFile(fileName, filePath);
     	
@@ -224,12 +224,12 @@ public class FileSystemController {
 
     public void enableCache() throws ShellAnswerException{
     	loadCache();
-    	//fileController.enableCache();
+    	fileController.enableCache();
     }
 
     public void disableCache() {
     	cacheController = null;
-    	//fileController.disableCache();
+    	fileController.disableCache();
     }
     
     
