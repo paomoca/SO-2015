@@ -12,6 +12,7 @@ import so.filesystem.filemanagment.FileController;
 import so.filesystem.filemanagment.InodeDirectPointerIndexOutOfRange;
 import so.filesystem.filemanagment.InodeFileTooBigException;
 import so.filesystem.filemanagment.InodeNotEnoughDiskSpaceExcepcion;
+import so.filesystem.filemanagment.InodeReader;
 import so.filesystem.general.CONFIG;
 
 public class DiegoTestsMain {
@@ -24,17 +25,27 @@ public class DiegoTestsMain {
 			CONFIG.DEBUG_SESSION = false;
 			skipped_debug = true;
 		}
-		DiskController dc2 = DiskController.getInstance(true);
+		DiskController dc2 = DiskController.getInstance(false);
 		System.out.println("Free blocks antes"+DiskFreeSpaceManager.getInstance().getNumberFreeBlocks());
 		if(skipped_debug){
 			CONFIG.DEBUG_SESSION = true;
 		}
 		
 		FileController fileController = new FileController(false);
-		fileController.importFile("UserManual.pdf");
+		//fileController.importFile("prueba231.txt");
+		//fileController.importFile("UserManual.pdf");
+		fileController.exportFile("funciona.pdf");
+		//fileController.exportFile("pruebaplisfunciona.txt");
+		
+//		InodeReader inodeR = new InodeReader(1);
+//		
+//		for(int i = 0; i< 400; i++){
+//			System.out.println(i+" "+inodeR.inodeReadWalkerNext());
+//		}
 		
 		System.out.println("Free blocks despues"+DiskFreeSpaceManager.getInstance().getNumberFreeBlocks());
 		
+		dc2.finalize();
 		
 		
 	}

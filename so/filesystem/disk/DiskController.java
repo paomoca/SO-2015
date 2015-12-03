@@ -271,7 +271,7 @@ public class DiskController {
 				return readBuffer;
 				
 			} catch (IOException e) {
-				
+				e.printStackTrace();
 				throw new DiskControllerException("");
 			}
 		
@@ -482,6 +482,7 @@ public class DiskController {
 		
 		//We take the amount of control bytes as offset to translate address.
 		int position = addressTranslation(address, CONFIG.CONTROL_BYTES_SIZE);
+		System.out.println("Translated position for address: "+address+" = "+position);
 		
 		byte[] readBuffer = rawRead(position, CONFIG.BLOCK_PAYLOAD_SIZE);
 		
@@ -493,6 +494,7 @@ public class DiskController {
 		
 		//We take the amount of control bytes as offset to translate address.
 		int position = addressTranslation(address, CONFIG.CONTROL_BYTES_SIZE);
+		System.out.println("Translated position for address: "+address+" = "+position);
 		
 		byte[] readBuffer = rawRead(position, length);
 		

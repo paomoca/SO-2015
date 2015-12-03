@@ -1,5 +1,7 @@
 package so.filesystem.filemanagment;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.Arrays;
 
@@ -76,6 +78,59 @@ public class FileController {
 	
 	}
 	
+	public void exportFile(String fileName) throws DiskControllerException, IncorrectLengthConversionException, InodeDirectPointerIndexOutOfRange, InodeNotEnoughDiskSpaceExcepcion, InodeFileTooBigException, IOException{
+		
+		int blockAdressToRead = -1;
+		int blocksRead = 0;
+		
+		//Searches for file inode reference (inodeBlockAddress) in the directory.
+//		int fileInodeBlock = disk.getDirectory().searchForFile(fileName);
+//		
+//		if(fileInodeBlock == -1){
+//			throw new DiskControllerException("The file: "+fileName+ " does not exist.");
+//		}
+		//TODO: supuestamente le pasamos lo que nos de el directorio
+		InodeReader inode = new InodeReader(1);
+		
+		int totalBlocksToAddress = inode.getTotalBlocksToAddress();
+		System.out.println("TOTAL BLOCKS TO ADDRESS: "+totalBlocksToAddress);
+		int internalFragmentation = inode.getInternalFragmentation();
+		System.out.println("INTERNAL FRAGMENTATION: "+internalFragmentation);
+		
+		byte[] dataBuffer = new byte[CONFIG.BLOCK_PAYLOAD_SIZE];
+		byte[] lastBlockDataBuffer = new byte[CONFIG.BLOCK_PAYLOAD_SIZE-internalFragmentation];
+		
+		//We get a pointer to the file to export to.
+		FileOutputStream fis = new FileOutputStream(fileName);
+		
+		//Asks the inode walker, based on the inodeBlockAddress for each block to read.
+		while(blocksRead < totalBlocksToAddress){
+			
+			blockAdressToRead = inode.inodeReadWalkerNext();
+			System.out.println("BLOCK ADDRESS TO READ "+blockAdressToRead);
+			
+			//If we are dealing with the last block.
+			if(blocksRead == totalBlocksToAddress-1){
+				lastBlockDataBuffer = DiskController.getInstance().rawReadBlockPayload(blockAdressToRead,lastBlockDataBuffer.length);
+				fis.write(lastBlockDataBuffer);
+				System.out.println("WROTE LAST BLOCK");
+				
+			} else {
+				dataBuffer = DiskController.getInstance().rawReadBlockPayload(blockAdressToRead);
+				fis.write(dataBuffer);
+			
+			}
+			
+			blocksRead++;
+			
+		}
+			
+		System.out.println("Total blocks actually read "+blocksRead);
+		fis.close();
+		
+		
+	}
+	
 	
 	//Pulls a file from user computer and writes it to our disk.
 	public void importFile(String fileName) throws IOException, DiskControllerException, InodeFileTooBigException, InodeNotEnoughDiskSpaceExcepcion, IncorrectLengthConversionException, InodeDirectPointerIndexOutOfRange{
@@ -100,12 +155,13 @@ public class FileController {
 			totalBytesRead += numberOfBytesRead;
 			//We ask the Free Space Manager for an available block.
 			if((blockAddress = DiskFreeSpaceManager.getInstance().firstFreeBlock()) != -1){
+				System.out.println("BLOCK ADDRESS ASIGNED: "+blockAddress);
 				
-				DiskController.getInstance().rawWriteBlockPayload(inode.getInodeAddress(), dataBuffer, numberOfBytesRead);
+				DiskController.getInstance().rawWriteBlockPayload(blockAddress, dataBuffer, numberOfBytesRead);
 				
 				//Sets control bytes.
-				DiskController.getInstance().setBlockAccessFrequency(inode.getInodeAddress(), 0);
-				DiskController.getInstance().setDeduplicationCounter(inode.getInodeAddress(), 0);
+				DiskController.getInstance().setBlockAccessFrequency(blockAddress, 0);
+				DiskController.getInstance().setDeduplicationCounter(blockAddress, 0);
 				
 				inode.inodeWriteWalker(blockAddress);
 				

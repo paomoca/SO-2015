@@ -56,8 +56,8 @@ public class InodeReader {
 		//When blockCount is equal to TOTAL_BLOCKS_TO_ADDRESS INTERNAL_FRAGMENTATION is taken into consideration.
 		//This values are important to whoever is using the InodeReader. They are used as a reference to know when 
 		//to stop asking for addresses and when to treat the last block differently (given the internal fragmentation).
-		TOTAL_BLOCKS_TO_ADDRESS = (int) Math.ceil((double)FILE_SIZE_IN_BYTES/CONFIG.BLOCK_SIZE);
-		INTERNAL_FRAGMENTATION= (TOTAL_BLOCKS_TO_ADDRESS*CONFIG.BLOCK_SIZE)-FILE_SIZE_IN_BYTES;
+		TOTAL_BLOCKS_TO_ADDRESS = (int) Math.ceil((double)FILE_SIZE_IN_BYTES/CONFIG.BLOCK_PAYLOAD_SIZE);
+		INTERNAL_FRAGMENTATION= (TOTAL_BLOCKS_TO_ADDRESS*CONFIG.BLOCK_PAYLOAD_SIZE)-FILE_SIZE_IN_BYTES;
 		
 	}
 	
