@@ -42,11 +42,11 @@ public class Interpreter {
 		
 		// Formats Disk for File System
 		else if(cmd.equals("formatDisk")){
-			if(fs.isDiskLoadedFlag()){
-				throw new ShellAnswerException("Disk is already loaded.\nDevice: '"+CONFIG.DISK_LOCATION+"'");
-			}else{
+			//if(fs.isDiskLoadedFlag()){
+				//throw new ShellAnswerException("Disk is already loaded.\nDevice: '"+CONFIG.DISK_LOCATION+"'");
+			//}else{
 				fs.formatDisk();
-			}
+			//}
 		}
 		
 		// Disables Cache usage
@@ -70,9 +70,12 @@ public class Interpreter {
 		}
 		
 		// Requests file import from computer
-		else if(cmd.equals("reqImport")){
+		else if(cmd.equals("importFile")){
 			if(fs.isDiskLoadedFlag()){
-				throw new RequestImportException("Choose File");
+				if(param.equals("-1")){
+					throw new ShellAnswerException("Need parameter for command: "+cmd);
+				}
+					throw new RequestImportException(param);
 			}else{
 				throw new ShellAnswerException("Could not perform action Import. No disk loaded.");
 			}

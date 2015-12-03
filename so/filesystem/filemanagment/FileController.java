@@ -16,6 +16,7 @@ public class FileController {
 	private boolean IS_USING_CACHE = false;
 	private DiskController disk;
 	private CacheController cache;
+	private DiskDirectory directory;
 	
 	public FileController(boolean cacheActive){
 
@@ -23,6 +24,7 @@ public class FileController {
 		
 		try {
 			disk = DiskController.getInstance();
+			directory = new DiskDirectory();
 		} catch(DiskControllerException e){
 			System.out.println(e.toString());		
 		}
@@ -78,19 +80,19 @@ public class FileController {
 	
 	}
 	
-	public void exportFile(String fileName) throws DiskControllerException, IncorrectLengthConversionException, InodeDirectPointerIndexOutOfRange, InodeNotEnoughDiskSpaceExcepcion, InodeFileTooBigException, IOException{
+	public void exportFile(String fileName, String filePath) throws DiskControllerException, IncorrectLengthConversionException, InodeDirectPointerIndexOutOfRange, InodeNotEnoughDiskSpaceExcepcion, InodeFileTooBigException, IOException{
 		
 		int blockAdressToRead = -1;
 		int blocksRead = 0;
 		
 		//Searches for file inode reference (inodeBlockAddress) in the directory.
-//		int fileInodeBlock = disk.getDirectory().searchForFile(fileName);
+		int fileInodeBlock = directory.searchForFile(fileName);
 //		
-//		if(fileInodeBlock == -1){
-//			throw new DiskControllerException("The file: "+fileName+ " does not exist.");
-//		}
+		if(fileInodeBlock == -1){
+			throw new DiskControllerException("The file: "+fileName+ " does not exist.");
+		}
 		//TODO: supuestamente le pasamos lo que nos de el directorio
-		InodeReader inode = new InodeReader(1);
+		InodeReader inode = new InodeReader(fileInodeBlock);
 		
 		int totalBlocksToAddress = inode.getTotalBlocksToAddress();
 		System.out.println("TOTAL BLOCKS TO ADDRESS: "+totalBlocksToAddress);
@@ -101,7 +103,7 @@ public class FileController {
 		byte[] lastBlockDataBuffer = new byte[CONFIG.BLOCK_PAYLOAD_SIZE-internalFragmentation];
 		
 		//We get a pointer to the file to export to.
-		FileOutputStream fis = new FileOutputStream(fileName);
+		FileOutputStream fis = new FileOutputStream(filePath);
 		
 		//Asks the inode walker, based on the inodeBlockAddress for each block to read.
 		while(blocksRead < totalBlocksToAddress){
@@ -133,13 +135,13 @@ public class FileController {
 	
 	
 	//Pulls a file from user computer and writes it to our disk.
-	public void importFile(String fileName) throws IOException, DiskControllerException, InodeFileTooBigException, InodeNotEnoughDiskSpaceExcepcion, IncorrectLengthConversionException, InodeDirectPointerIndexOutOfRange{
+	public void importFile(String filePath, String fileName) throws IOException, DiskControllerException, InodeFileTooBigException, InodeNotEnoughDiskSpaceExcepcion, IncorrectLengthConversionException, InodeDirectPointerIndexOutOfRange{
 		
 		int numberOfBytesRead;
 		int blockAddress;
 		int totalBytesRead=0;
 
-		FileInputStream fis = new FileInputStream(fileName);
+		FileInputStream fis = new FileInputStream(filePath);
 		byte[] dataBuffer = new byte[CONFIG.BLOCK_PAYLOAD_SIZE];
 		
 		//TODO: CREAMOS UNA ENTRADA EN EL DIRECTORIO
@@ -182,7 +184,7 @@ public class FileController {
 		
 		fis.close();
 		System.out.println("Inode block address assigned: "+inodeBlockAddress);
-		
+		directory.newFile(fileName, inodeBlockAddress);
 		
 	}
 	
@@ -199,6 +201,14 @@ public class FileController {
 	
 	public void disableCache() {
 		this.IS_USING_CACHE = false;
+	}
+
+	public DiskDirectory getDirectory() {
+		return directory;
+	}
+
+	public void setDirectory(DiskDirectory directory) {
+		this.directory = directory;
 	}
 
 }

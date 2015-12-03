@@ -25,16 +25,16 @@ public class DiegoTestsMain {
 			CONFIG.DEBUG_SESSION = false;
 			skipped_debug = true;
 		}
-		DiskController dc2 = DiskController.getInstance(false);
+		DiskController dc2 = DiskController.getInstance(true);
 		System.out.println("Free blocks antes"+DiskFreeSpaceManager.getInstance().getNumberFreeBlocks());
 		if(skipped_debug){
 			CONFIG.DEBUG_SESSION = true;
 		}
 		
 		FileController fileController = new FileController(false);
-		//fileController.importFile("prueba231.txt");
+		fileController.importFile("Interestellar-original.mp4");
 		//fileController.importFile("UserManual.pdf");
-		fileController.exportFile("funciona.pdf");
+		//fileController.exportFile("funciona.pdf");
 		//fileController.exportFile("pruebaplisfunciona.txt");
 		
 //		InodeReader inodeR = new InodeReader(1);

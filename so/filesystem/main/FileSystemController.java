@@ -16,6 +16,7 @@ import so.filesystem.general.CONFIG;
 import so.gui.shell.ShellAnswerException;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Scanner;
 
 public class FileSystemController {
@@ -152,21 +153,32 @@ public class FileSystemController {
 
     }
 
-    public void exportFile() {
-
+    public void exportFile(String fileName, String filePath) throws DiskControllerException, IncorrectLengthConversionException, InodeDirectPointerIndexOutOfRange, InodeNotEnoughDiskSpaceExcepcion, InodeFileTooBigException, IOException {
+    	System.out.println("export");
+    	ArrayList<String> list = fileController.getDirectory().listDirectory();
+    	for (String file : list) {
+			System.out.println(file);
+		}
+    	fileController.exportFile(fileName, filePath);
     }
     
     public void readFile() {
-
+    	
     }
     
     public void writeFile(String fileName) throws ShellAnswerException{
     	throw new ShellAnswerException("TODO");
     }
     
-    public void importFile(String fileName) throws IncorrectLengthConversionException, InodeDirectPointerIndexOutOfRange {
+    public void importFile(String filePath, String fileName) throws IncorrectLengthConversionException, InodeDirectPointerIndexOutOfRange {
         try {
-            fileController.importFile(fileName);
+        	fileController.importFile(filePath,fileName);
+        	System.out.println("import");
+        	ArrayList<String> list = fileController.getDirectory().listDirectory();
+        	for (String file : list) {
+				System.out.println(file);
+			}
+        	fileController.getDirectory().saveDirectory();
         } catch (IOException e) {
             e.printStackTrace();
         } catch (DiskControllerException e) {

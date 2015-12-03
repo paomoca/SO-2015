@@ -13,6 +13,8 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 
+import so.filesystem.disk.IncorrectLengthConversionException;
+import so.filesystem.filemanagment.InodeDirectPointerIndexOutOfRange;
 import so.filesystem.main.FileSystemController;
 import so.gui.fileWindow.FileWindow;
 import so.gui.grid.BlockGrid;
@@ -90,13 +92,22 @@ public class FSFrame extends JFrame {
 			}
     }
     
-    private void reqImport(){
+    private void reqImport(String fileName){
     	int flag = fileChooserImport.showOpenDialog(this);
 		if (flag == JFileChooser.APPROVE_OPTION) {
 			
 			File file = fileChooserImport.getSelectedFile();
 			//JOptionPane.showMessageDialog(myWindow, file.getName()+ ": File loaded.\n");
 			shell.getHistory().append("\nTo import: "+file.getAbsolutePath());
+		try {
+			fileSystemController.importFile(file.getAbsolutePath(),fileName);
+		} catch (IncorrectLengthConversionException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (InodeDirectPointerIndexOutOfRange e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		}else{
 			shell.getHistory().append("\nAction Canceled.");
 		}
@@ -107,12 +118,14 @@ public class FSFrame extends JFrame {
 		if (flag == JFileChooser.APPROVE_OPTION) {
 			byte[] dataTowrite = {'t','e','s','t'};
 			try {
-				BufferedWriter outFile = new BufferedWriter(new FileWriter(fileChooserExport.getSelectedFile()));
-				outFile.write(new String(dataTowrite));
-				outFile.close();
+				//BufferedWriter outFile = new BufferedWriter(new FileWriter(fileChooserExport.getSelectedFile()));
+				//outFile.write(new String(dataTowrite));
+				//outFile.close();
+				String path = fileChooserExport.getSelectedFile().getPath();
+				fileSystemController.exportFile(fileName,path);
 				} 
 			catch (Exception ex) {
-				shell.getHistory().append("\n Error"); 
+				shell.getHistory().append("\n Error: " + ex.toString() + ex.getMessage()); 
 			}
 		}
     }
@@ -189,8 +202,8 @@ public class FSFrame extends JFrame {
 				} catch (ShellAnswerException e){
 					shell.getHistory().append("\n"+e.toString());
 				} catch (RequestImportException e){
-					shell.getHistory().append("\n"+e.toString());
-					reqImport();
+					shell.getHistory().append("\n Will import "+e.toString());
+					reqImport(e.toString());
 				} catch (RequestCreateFileExcpetion e) {
 					reqCreate(e.toString());
                 } catch (RequestExportException e) {
