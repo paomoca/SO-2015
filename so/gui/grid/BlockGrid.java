@@ -9,38 +9,26 @@ import java.util.Random;
  */
 public class BlockGrid extends Grid {
 
-    public BlockGrid(int gridWidth, int gridHeight, int cellWidth, int cellHeight) {
+    private static BlockGrid self = null;
+
+    private BlockGrid(int gridWidth, int gridHeight, int cellWidth, int cellHeight) {
         super(gridWidth, gridHeight, cellWidth, cellHeight);
 
     }
 
-    @Override
-    protected void paintComponent(Graphics g) {
-        super.paintComponent(g);
-        Random rand = new Random();
-        for (Point fillCell : getFillCells()) {
-            int cellX = fillCell.x * getCellWidth();
-            int cellY = fillCell.y * getCellHeight();
-            g.setColor(new Color(randInt(1,255),randInt(1,255),randInt(1,255)));
-            g.fillRect(cellX, cellY, getCellWidth(), getCellHeight());
+    public static BlockGrid getInstance(int gridWidth, int gridHeight, int cellWidth, int cellHeight) {
+        if (self == null) {
+            self = new BlockGrid(gridWidth, gridHeight, cellWidth,cellHeight);
         }
-
-        g.setColor(Color.BLACK);
-        g.drawRect(0, 0, getGridWidth(), getGridHeight());
-
-        for (int i = 0; i <= getGridWidth(); i += getCellWidth()) {
-            g.drawLine(i, 0, i, getGridHeight());
-        }
-
-        for (int i = 0; i <= getGridHeight(); i += getCellHeight()) {
-            g.drawLine(0, i, getGridWidth(), i);
-        }
-
+        return self;
     }
 
-    public void testBits() {
+    public void testBits(int blocksRange) {
         ArrayList<Boolean> arrayBits = new ArrayList<Boolean>();
         boolean[] bits;
+
+        System.out.println("Start = " + (blocksRange + 1));
+        System.out.println("End = " + (blocksRange + getCells()));
 
         Random n = new Random();
         for(int i = 0; i < getRows()*getColumns(); ++i) {
@@ -52,7 +40,6 @@ public class BlockGrid extends Grid {
         }
 
         fillCells(bits);
-
 
     }
 }

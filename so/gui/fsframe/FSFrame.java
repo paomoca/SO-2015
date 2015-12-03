@@ -3,20 +3,13 @@ package so.gui.fsframe;
 import javax.swing.*;
 
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileReader;
-import java.io.FileWriter;
 
 import so.filesystem.main.FileSystemController;
-import so.gui.fileWindow.FileWindow;
 import so.gui.grid.BlockGrid;
 import so.gui.grid.Grid;
 import so.gui.grid.SectionGrid;
@@ -34,14 +27,12 @@ public class FSFrame extends JFrame {
     private Interpreter intr;
     private FileSystemController fileSystemController;
     private JFileChooser fileChooser;
-    private FileWindow openFileWindow;
 
     public FSFrame() {
 
         JPanel content = new JPanel();
         JPanel gridsHolder = new JPanel();
         
-        openFileWindow = new FileWindow();
         
         shell = new Shell();
         shell.getCurCommand().addKeyListener(new GetCurCommandKeyListener());
@@ -54,8 +45,8 @@ public class FSFrame extends JFrame {
 		
 		fileChooser = new JFileChooser();
 
-        section = new SectionGrid(480,480,10,10);
-        blocks = new BlockGrid(480, 480, 10, 10);
+        section = SectionGrid.getInstance(480,480,10,10);
+        blocks = BlockGrid.getInstance(480, 480, 10, 10);
 
         section.addMouseListener(new BlockClickListener());
 
@@ -100,29 +91,6 @@ public class FSFrame extends JFrame {
 			shell.getHistory().append("\nAction Canceled.");
 		}
     }
-    
-    private void reqExport(String fileName){
-    	if(openFileWindow != null){
-			openFileWindow = new FileWindow();
-			openFileWindow.getMyWindow().setTitle(fileName);
-			openFileWindow.getScriptArea().setText(fileName);
-			openFileWindow.getMyWindow().setVisible(true);
-    	}else{
-    		shell.getHistory().append("\nError exporting "+fileName);
-    	}
-    }
-    
-    private void reqCreate(String fileName){
-    	if(openFileWindow != null){
-			openFileWindow = new FileWindow();
-			openFileWindow.getMyWindow().setTitle(fileName);
-			openFileWindow.getScriptArea().setText(fileName);
-			openFileWindow.getMyWindow().setVisible(true);
-    	}else{
-    		shell.getHistory().append("\nError creating "+fileName);
-    	}
-    }
-    
     
     class ShellClickListener implements MouseListener {
 
@@ -179,9 +147,6 @@ public class FSFrame extends JFrame {
 				try {
 					intr.readCommand(shell.getCommand(),fileSystemController);
 				} catch (WrongCommandException e) {
-					if(openFileWindow.getMyWindow().isVisible()){
-						openFileWindow.getScriptArea().setText(e.toString());
-					}
 					shell.getHistory().append("\n"+e.toString());
 				} catch (ShellAnswerException e){
 					shell.getHistory().append("\n"+e.toString());
@@ -189,32 +154,14 @@ public class FSFrame extends JFrame {
 					shell.getHistory().append("\n"+e.toString());
 					reqImport();
 					//shell.getScroller().getVerticalScrollBar().setValue(shell.getScroller().getVerticalScrollBar().getMaximum());;		
-				} catch (RequestExportException e) {
-					reqExport(e.toString());
-				} catch (RequestCreateFileExcpetion e) {
-					reqCreate(e.toString());
-				}
-			}
+				} catch (RequestCreateFileExcpetion requestCreateFileExcpetion) {
+                    requestCreateFileExcpetion.printStackTrace();
+                } catch (RequestExportException e) {
+                    e.printStackTrace();
+                }
+            }
 		}
 	}// CurCommandKeyListener
-	
-	class ScriptWindowButtonListener implements ActionListener
-	{
-		public void actionPerformed(ActionEvent ae) 
-		{
-		    if(ae.getActionCommand().equals("clear")){
-		    	openFileWindow.getScriptArea().setText("");
-		    }else if(ae.getActionCommand().equals("save")){
-		    	try {
-					intr.saveFile("", fileSystemController);
-				} catch (ShellAnswerException e) {
-					shell.getHistory().append("\n"+e.toString());
-				}
-		    }else if(ae.getActionCommand().equals("quit")){
-		    	openFileWindow.getMyWindow().setVisible(false);
-		    }
-		}
-	}//BotonesListener
 
     class BlockClickListener implements MouseListener {
 
@@ -228,14 +175,16 @@ public class FSFrame extends JFrame {
 
             int row = (e.getY()/section.getCellWidth());
             int column = (e.getX()/section.getCellHeight());
-            int blocksRange = (section.getColumns() * row) + column ;
-            if (blocksRange >= 0 && blocksRange < (section.getColumns() * section.getRows())) {
-                System.out.println(blocksRange);
+            int blockSection = (section.getColumns() * row) + column ;
+            if (blockSection >= 0 && blockSection < (section.getColumns() * section.getRows())) {
                 section.getFillCells().clear();
                 section.fillCell(column, row);
+
+                // Funcion de pruebas
                 blocks.getFillCells().clear();
-                blocks.testBits();
+                blocks.testBits(blockSection * section.getColumns() * section.getRows());
             }
+
         }
 
         @Override

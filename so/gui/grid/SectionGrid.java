@@ -9,33 +9,18 @@ import java.awt.event.MouseListener;
  */
 public class SectionGrid extends Grid {
 
-    public SectionGrid(int gridWidth, int gridHeight, int cellWidth, int cellHeight) {
+    private static SectionGrid self = null;
 
+    private SectionGrid(int gridWidth, int gridHeight, int cellWidth, int cellHeight) {
         super(gridWidth, gridHeight, cellWidth, cellHeight);
 
     }
 
-    @Override
-    protected void paintComponent(Graphics g) {
-        super.paintComponent(g);
-        for (Point fillCell : getFillCells()) {
-            int cellX = fillCell.x * getCellWidth();
-            int cellY = fillCell.y * getCellHeight();
-            g.setColor(Color.BLUE);
-            g.fillRect(cellX, cellY, getCellWidth(), getCellHeight());
+    public static SectionGrid getInstance(int gridWidth, int gridHeight, int cellWidth, int cellHeight) {
+        if (self == null) {
+            self = new SectionGrid(gridWidth, gridHeight, cellWidth , cellHeight);
         }
-
-        g.setColor(Color.BLACK);
-        g.drawRect(0, 0, getGridWidth(), getGridHeight());
-
-        for (int i = 0; i <= getGridWidth(); i += getCellWidth()) {
-            g.drawLine(i, 0, i, getGridHeight());
-        }
-
-        for (int i = 0; i <= getGridHeight(); i += getCellHeight()) {
-            g.drawLine(0, i, getGridWidth(), i);
-        }
-
+        return self;
     }
 
 
