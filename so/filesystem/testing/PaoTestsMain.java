@@ -121,10 +121,7 @@ public class PaoTestsMain {
 			
 				
 			dc.finalize();
-			
-
-			
-			
+	
 			
 		} catch (DiskControllerException e) {
 			// TODO Auto-generated catch block
