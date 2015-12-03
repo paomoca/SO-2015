@@ -111,15 +111,16 @@ public class Interpreter {
 				if(param.equals("-1")){
 					throw new ShellAnswerException("Need parameter for command: "+cmd);
 				}
-				throw new ShellAnswerException("TODO delFile");
+				fs.deleteFile(param);
+				throw new ShellAnswerException("Deleted File: "+param);
 			}else{
 				throw new ShellAnswerException("Could not perform action Delete File. No disk loaded.");
 			}
 		}
 		
 		// Export File  by name
-		else if(cmd.equals("exportFile")){
-			if(/*fs.isDiskLoadedFlag()*/true){
+		else if(cmd.equals("export")){
+			if(fs.isDiskLoadedFlag()){
 				if(param.equals("-1")){
 					throw new ShellAnswerException("Need parameter for command: "+cmd);
 				}
@@ -174,7 +175,8 @@ public class Interpreter {
 		// List Disk Contents
 		else if(cmd.equals("ls")){
 			if(fs.isDiskLoadedFlag()){
-				throw new ShellAnswerException("TODO ls");
+				String list = fs.listDiskContents();
+				throw new ShellAnswerException(list);
 			}else{
 				throw new ShellAnswerException("Could not perform action List Disk Contents. No disk loaded.");
 			}

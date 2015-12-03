@@ -10,6 +10,7 @@ import so.filesystem.cache.CacheControllerException;
 import so.filesystem.cache.CacheFormatException;
 import so.filesystem.disk.*;
 import so.filesystem.general.CONFIG;
+import so.gui.shell.ShellAnswerException;
 
 public class FileController {
 	
@@ -85,13 +86,16 @@ public class FileController {
 		int blockAdressToRead = -1;
 		int blocksRead = 0;
 		
+//		if(!directory.isFileInDirectory(fileName)){
+//			throw new ShellAnswerException("");
+//		}
+		
 		//Searches for file inode reference (inodeBlockAddress) in the directory.
 		int fileInodeBlock = directory.searchForFile(fileName);
 //		
 		if(fileInodeBlock == -1){
 			throw new DiskControllerException("The file: "+fileName+ " does not exist.");
 		}
-		//TODO: supuestamente le pasamos lo que nos de el directorio
 		InodeReader inode = new InodeReader(fileInodeBlock);
 		
 		int totalBlocksToAddress = inode.getTotalBlocksToAddress();
@@ -135,7 +139,7 @@ public class FileController {
 	
 	
 	//Pulls a file from user computer and writes it to our disk.
-	public void importFile(String filePath, String fileName) throws IOException, DiskControllerException, InodeFileTooBigException, InodeNotEnoughDiskSpaceExcepcion, IncorrectLengthConversionException, InodeDirectPointerIndexOutOfRange{
+	public void importFile(String filePath, String fileName) throws IOException, DiskControllerException, InodeFileTooBigException, InodeNotEnoughDiskSpaceExcepcion, IncorrectLengthConversionException, InodeDirectPointerIndexOutOfRange, ShellAnswerException{
 		
 		int numberOfBytesRead;
 		int blockAddress;
@@ -145,11 +149,15 @@ public class FileController {
 		byte[] dataBuffer = new byte[CONFIG.BLOCK_PAYLOAD_SIZE];
 		
 		//TODO: CREAMOS UNA ENTRADA EN EL DIRECTORIO
+		if(directory.isFileInDirectory(fileName)){
+			throw new ShellAnswerException("File "+fileName+" is already in Disk.");
+		}
 		
 		//We create a new Inode for the file. The Inode itself requests a free block.
 		InodeWriter inode = new InodeWriter();
 		int inodeBlockAddress = inode.getInodeAddress();
 		
+		directory.newFile(fileName, inodeBlockAddress);
 		
 		while((numberOfBytesRead = fis.read(dataBuffer)) != -1){
 			
@@ -185,7 +193,7 @@ public class FileController {
 		
 		fis.close();
 		System.out.println("Inode block address assigned: "+inodeBlockAddress);
-		directory.newFile(fileName, inodeBlockAddress);
+		//directory.newFile(fileName, inodeBlockAddress);
 		
 	}
 	
