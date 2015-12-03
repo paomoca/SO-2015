@@ -89,7 +89,7 @@ public class FileController {
 	
 
 	public void exportFile(String fileName, String filePath) throws DiskControllerException, IncorrectLengthConversionException, InodeDirectPointerIndexOutOfRange,
-			InodeNotEnoughDiskSpaceExcepcion, InodeFileTooBigException, IOException, ShellAnswerException {
+			InodeNotEnoughDiskSpaceExcepcion, InodeFileTooBigException, IOException, ShellAnswerException, CacheControllerException {
 
 		int blockAdressToRead = -1;
 		int blocksRead = 0;
@@ -133,11 +133,42 @@ public class FileController {
 			if (blocksRead == totalBlocksToAddress - 1) {
 				lastBlockDataBuffer = DiskController.getInstance().rawReadBlockPayload(blockAdressToRead,
 						lastBlockDataBuffer.length);
+				DiskController.getInstance().incrementBlockAccessFrequency(blockAdressToRead);
+				
 				fis.write(lastBlockDataBuffer);
 				System.out.println("WROTE LAST BLOCK");
 
 			} else {
-				dataBuffer = DiskController.getInstance().rawReadBlockPayload(blockAdressToRead);
+				if (IS_USING_CACHE) {
+					if (CacheController.getInstance().isBlockInCache(
+							blockAdressToRead)){
+						dataBuffer = CacheController.getInstance()
+								.readCacheBlock(blockAdressToRead);
+					} else {
+						dataBuffer = DiskController.getInstance()
+								.rawReadBlockPayload(blockAdressToRead);
+						DiskController.getInstance()
+								.incrementBlockAccessFrequency(
+										blockAdressToRead);
+						int bFrec = DiskController.getInstance().getBlockAccessFrequency(blockAdressToRead);
+						int lowestFrec = CacheController.getInstance().getLowestFrec();
+						if(bFrec>lowestFrec){
+							CacheController.getInstance().writeCacheBlock(blockAdressToRead, dataBuffer, bFrec);
+						}
+					}
+				} else {
+					dataBuffer = DiskController.getInstance()
+							.rawReadBlockPayload(blockAdressToRead);
+
+					DiskController.getInstance().incrementBlockAccessFrequency(
+							blockAdressToRead);
+
+				}
+				fis.write(lastBlockDataBuffer);
+				System.out.println("WROTE LAST BLOCK");
+
+				dataBuffer = DiskController.getInstance().rawReadBlockPayload(
+						blockAdressToRead);
 				fis.write(dataBuffer);
 
 			}
