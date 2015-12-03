@@ -139,12 +139,38 @@ public class FileController {
 				System.out.println("WROTE LAST BLOCK");
 
 			} else {
-//			
+			
 					dataBuffer = DiskController.getInstance()
 							.rawReadBlockPayload(blockAdressToRead);
 
 			
 				
+
+				if (IS_USING_CACHE) {
+					if (CacheController.getInstance().isBlockInCache(
+							blockAdressToRead)){
+						dataBuffer = CacheController.getInstance()
+								.readCacheBlock(blockAdressToRead);
+					} else {
+						dataBuffer = DiskController.getInstance()
+								.rawReadBlockPayload(blockAdressToRead);
+						DiskController.getInstance()
+								.incrementBlockAccessFrequency(
+										blockAdressToRead);
+						int bFrec = DiskController.getInstance().getBlockAccessFrequency(blockAdressToRead);
+						int lowestFrec = CacheController.getInstance().getLowestFrec();
+						if(bFrec>lowestFrec){
+							CacheController.getInstance().writeCacheBlock(blockAdressToRead, dataBuffer, bFrec);
+						}
+					}
+				} else {
+					dataBuffer = DiskController.getInstance()
+							.rawReadBlockPayload(blockAdressToRead);
+
+					//DiskController.getInstance().incrementBlockAccessFrequency(blockAdressToRead);
+
+				}
+
 				System.out.println("WROTE LAST BLOCK");
 
 				dataBuffer = DiskController.getInstance().rawReadBlockPayload(
