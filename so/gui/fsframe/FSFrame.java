@@ -101,6 +101,9 @@ public class FSFrame extends JFrame {
 			shell.getHistory().append("\nTo import: "+file.getAbsolutePath());
 		try {
 			fileSystemController.importFile(file.getAbsolutePath(),fileName);
+			
+		} catch (ShellAnswerException e){
+			shell.getHistory().append("\n"+e.toString());
 		} catch (IncorrectLengthConversionException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

@@ -175,7 +175,8 @@ public class Interpreter {
 		// List Disk Contents
 		else if(cmd.equals("ls")){
 			if(fs.isDiskLoadedFlag()){
-				throw new ShellAnswerException("TODO ls");
+				String list = fs.listDiskContents();
+				throw new ShellAnswerException(list);
 			}else{
 				throw new ShellAnswerException("Could not perform action List Disk Contents. No disk loaded.");
 			}
