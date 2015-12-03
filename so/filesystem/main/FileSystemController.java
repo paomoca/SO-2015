@@ -246,6 +246,8 @@ public class FileSystemController {
     public void disableCache() {
     	cacheController = null;
     	fileController.disableCache();
+    	cacheEnabledFlag = false;
+    	cacheLoadedFlag = false;
     }
     
     

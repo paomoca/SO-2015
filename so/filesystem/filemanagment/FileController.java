@@ -139,31 +139,30 @@ public class FileController {
 				System.out.println("WROTE LAST BLOCK");
 
 			} else {
-				if (IS_USING_CACHE) {
-					if (CacheController.getInstance().isBlockInCache(
-							blockAdressToRead)){
-						dataBuffer = CacheController.getInstance()
-								.readCacheBlock(blockAdressToRead);
-					} else {
-						dataBuffer = DiskController.getInstance()
-								.rawReadBlockPayload(blockAdressToRead);
-						DiskController.getInstance()
-								.incrementBlockAccessFrequency(
-										blockAdressToRead);
-						int bFrec = DiskController.getInstance().getBlockAccessFrequency(blockAdressToRead);
-						int lowestFrec = CacheController.getInstance().getLowestFrec();
-						if(bFrec>lowestFrec){
-							CacheController.getInstance().writeCacheBlock(blockAdressToRead, dataBuffer, bFrec);
-						}
-					}
-				} else {
+//				if (IS_USING_CACHE) {
+//					if (CacheController.getInstance().isBlockInCache(
+//							blockAdressToRead)){
+//						dataBuffer = CacheController.getInstance()
+//								.readCacheBlock(blockAdressToRead);
+//					} else {
+//						dataBuffer = DiskController.getInstance()
+//								.rawReadBlockPayload(blockAdressToRead);
+//						DiskController.getInstance()
+//								.incrementBlockAccessFrequency(
+//										blockAdressToRead);
+//						int bFrec = DiskController.getInstance().getBlockAccessFrequency(blockAdressToRead);
+//						int lowestFrec = CacheController.getInstance().getLowestFrec();
+//						if(bFrec>lowestFrec){
+//							CacheController.getInstance().writeCacheBlock(blockAdressToRead, dataBuffer, bFrec);
+//						}
+//					}
+//				} else {
 					dataBuffer = DiskController.getInstance()
 							.rawReadBlockPayload(blockAdressToRead);
 
-					DiskController.getInstance().incrementBlockAccessFrequency(
-							blockAdressToRead);
+					//DiskController.getInstance().incrementBlockAccessFrequency(blockAdressToRead);
 
-				}
+				//}
 				fis.write(lastBlockDataBuffer);
 				System.out.println("WROTE LAST BLOCK");
 
