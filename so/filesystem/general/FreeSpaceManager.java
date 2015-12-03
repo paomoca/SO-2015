@@ -53,6 +53,7 @@ public class FreeSpaceManager {
 	}
 
 	public void freeBlocks(int block) {
+
 		try {
 			if(DiskController.getInstance().getDeduplicationCounter(block) > 1) {
 				DiskController.getInstance().setDeduplicationCounter(block, DiskController.getInstance().getDeduplicationCounter(block) - 1);
@@ -65,6 +66,9 @@ public class FreeSpaceManager {
 		}
 		//Falta borrar dato de deduplicacion de hash
 		//DiskController.getInstance().
+		System.out.println("delete block: "+block);
+		this.diskSpaceBitMap.set(block);
+
 	}
 
 	public void freeBlocks(int[] block) {

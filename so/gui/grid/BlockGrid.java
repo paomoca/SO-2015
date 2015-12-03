@@ -45,7 +45,7 @@ public class BlockGrid extends Grid {
 //            bits[i] = !DiskFreeSpaceManager.getInstance().printbits(blocksRange + 1, blocksRange + getCells())[i];
 //        }
 
-        System.arraycopy(DiskFreeSpaceManager.getInstance(1000).printbits(blocksRange + 1, blocksRange + getCells()),0,bits,0,getCells());
+        System.arraycopy(DiskFreeSpaceManager.getInstance(1500).printbits(blocksRange + 1, blocksRange + getCells()),0,bits,0,getCells());
 
         fillCells(bits);
     }

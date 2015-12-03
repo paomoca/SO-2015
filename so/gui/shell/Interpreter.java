@@ -1,11 +1,21 @@
 package so.gui.shell;
 
+import java.io.IOException;
+
+import so.filesystem.disk.DeviceInitializationException;
+import so.filesystem.disk.DiskControllerException;
+import so.filesystem.disk.DiskFreeSpaceManager;
+import so.filesystem.disk.IncorrectLengthConversionException;
+import so.filesystem.disk.UnidentifiedMetadataTypeException;
+import so.filesystem.filemanagment.InodeDirectPointerIndexOutOfRange;
+import so.filesystem.filemanagment.InodeFileTooBigException;
+import so.filesystem.filemanagment.InodeNotEnoughDiskSpaceExcepcion;
 import so.filesystem.general.CONFIG;
 import so.filesystem.main.FileSystemController;
 
 public class Interpreter {
 
-	public void readCommand(String curCommand, FileSystemController fs) throws WrongCommandException, ShellAnswerException, RequestImportException, RequestExportException, RequestCreateFileExcpetion{
+	public void readCommand(String curCommand, FileSystemController fs) throws WrongCommandException, ShellAnswerException, RequestImportException, RequestExportException, RequestCreateFileExcpetion, UnidentifiedMetadataTypeException, DeviceInitializationException{
 		
 		String[] in = this.divideCurCommand(curCommand);
 		String cmd = in[0];
@@ -70,7 +80,7 @@ public class Interpreter {
 		}
 		
 		// Requests file import from computer
-		else if(cmd.equals("importFile")){
+		else if(cmd.equals("import")){
 			if(fs.isDiskLoadedFlag()){
 				if(param.equals("-1")){
 					throw new ShellAnswerException("Need parameter for command: "+cmd);
@@ -106,12 +116,32 @@ public class Interpreter {
 		}
 		
 		// Delete File  by name
-		else if(cmd.equals("delFile")){
+		else if(cmd.equals("delete")){
 			if(fs.isDiskLoadedFlag()){
 				if(param.equals("-1")){
 					throw new ShellAnswerException("Need parameter for command: "+cmd);
 				}
-				fs.deleteFile(param);
+				try {
+					fs.deleteFile(param);
+				} catch (DiskControllerException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				} catch (IncorrectLengthConversionException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				} catch (InodeDirectPointerIndexOutOfRange e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				} catch (InodeNotEnoughDiskSpaceExcepcion e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				} catch (InodeFileTooBigException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
 				throw new ShellAnswerException("Deleted File: "+param);
 			}else{
 				throw new ShellAnswerException("Could not perform action Delete File. No disk loaded.");
@@ -147,11 +177,12 @@ public class Interpreter {
 			}
 		}
 		
-		else if(cmd.endsWith("test")){
-			if(param.equals("-1")){
-				throw new ShellAnswerException("Need parameter for command: "+cmd);
+		// Show Free blocks
+		else if(cmd.endsWith("freeB")){
+			if(fs.isDiskLoadedFlag()){
+				throw new ShellAnswerException("Free Blocks: "+DiskFreeSpaceManager.getInstance().getNumberFreeBlocks());
 			}
-			throw new WrongCommandException(param);
+			throw new ShellAnswerException("No disk");		
 		}
 		
 		// List Disk Usage

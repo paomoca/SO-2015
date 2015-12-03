@@ -13,8 +13,10 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 
+import so.filesystem.disk.DeviceInitializationException;
 import so.filesystem.disk.DiskFreeSpaceManager;
 import so.filesystem.disk.IncorrectLengthConversionException;
+import so.filesystem.disk.UnidentifiedMetadataTypeException;
 import so.filesystem.filemanagment.InodeDirectPointerIndexOutOfRange;
 import so.filesystem.main.FileSystemController;
 import so.gui.fileWindow.FileWindow;
@@ -42,10 +44,10 @@ public class FSFrame extends JFrame {
 
         JPanel content = new JPanel();
         JPanel gridsHolder = new JPanel();
-        
+
         openFileWindow = new FileWindow();
         openFileWindow.getSaveButton().addActionListener(new CreateWindowButtonListener());
-        
+
         shell = new Shell();
         shell.getCurCommand().addKeyListener(new GetCurCommandKeyListener());
 		shell.getHistory().addMouseListener(new ShellClickListener());
@@ -54,7 +56,7 @@ public class FSFrame extends JFrame {
 		shell.getCurCommand().setBackground(Color.BLACK);
 		shell.getHistory().setForeground(Color.GREEN.darker());
 		shell.getHistory().setBackground(Color.BLACK);
-		
+
 		fileChooserImport = new JFileChooser();
 		fileChooserExport = new JFileChooser();
 
@@ -65,14 +67,14 @@ public class FSFrame extends JFrame {
 
 		section.setBackground(Color.white);
 		blocks.setBackground(Color.white);
-        
+
         gridsHolder.setLayout(new BorderLayout());
         gridsHolder.add(section,BorderLayout.WEST);
         gridsHolder.add(Box.createHorizontalStrut(20));
         gridsHolder.add(blocks, BorderLayout.EAST);
 		gridsHolder.setBackground(new Color(78, 78, 78));
-        
-        content.setLayout(new BorderLayout());        
+
+        content.setLayout(new BorderLayout());
         content.add(gridsHolder, BorderLayout.NORTH);
 		content.add(Box.createVerticalStrut(17));
         content.add(shell, BorderLayout.SOUTH);
@@ -82,7 +84,7 @@ public class FSFrame extends JFrame {
         this.setTitle("File System GUI");
         this.setResizable(false);
         this.pack();
-        
+
         intr = new Interpreter();
         fileSystemController = new FileSystemController();
         	try {
@@ -92,17 +94,17 @@ public class FSFrame extends JFrame {
 				this.shell.getHistory().append(e.toString());
 			}
     }
-    
+
     private void reqImport(String fileName){
     	int flag = fileChooserImport.showOpenDialog(this);
 		if (flag == JFileChooser.APPROVE_OPTION) {
-			
+
 			File file = fileChooserImport.getSelectedFile();
 			//JOptionPane.showMessageDialog(myWindow, file.getName()+ ": File loaded.\n");
 			shell.getHistory().append("\nTo import: "+file.getAbsolutePath());
 		try {
 			fileSystemController.importFile(file.getAbsolutePath(),fileName);
-			
+
 		} catch (ShellAnswerException e){
 			shell.getHistory().append("\n"+e.toString());
 		} catch (IncorrectLengthConversionException e) {
@@ -111,12 +113,16 @@ public class FSFrame extends JFrame {
 		} catch (InodeDirectPointerIndexOutOfRange e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
-		}
-		}else{
+		} catch (UnidentifiedMetadataTypeException e) {
+            e.printStackTrace();
+        } catch (DeviceInitializationException e) {
+            e.printStackTrace();
+        }
+        }else{
 			shell.getHistory().append("\nAction Canceled.");
 		}
     }
-    
+
     private void reqExport(String fileName){
     	int flag = fileChooserExport.showSaveDialog(this);
 		if (flag == JFileChooser.APPROVE_OPTION) {
@@ -127,13 +133,13 @@ public class FSFrame extends JFrame {
 				//outFile.close();
 				String path = fileChooserExport.getSelectedFile().getPath();
 				fileSystemController.exportFile(fileName,path);
-				} 
+				}
 			catch (Exception ex) {
-				shell.getHistory().append("\n Error: " + ex.toString() + ex.getMessage()); 
+				shell.getHistory().append("\n Error: " + ex.toString() + ex.getMessage());
 			}
 		}
     }
-    
+
     private void reqCreate(String fileName){
     	if(openFileWindow != null){
 			openFileWindow = new FileWindow();
@@ -145,8 +151,8 @@ public class FSFrame extends JFrame {
     		shell.getHistory().append("\nError creating "+fileName);
     	}
     }
-    
-    
+
+
     class ShellClickListener implements MouseListener {
 
 		@Override
@@ -212,14 +218,18 @@ public class FSFrame extends JFrame {
 					reqCreate(e.toString());
                 } catch (RequestExportException e) {
                     reqExport(e.toString());
+                } catch (UnidentifiedMetadataTypeException e) {
+                    e.printStackTrace();
+                } catch (DeviceInitializationException e) {
+                    e.printStackTrace();
                 }
             }
 		}
 	}// CurCommandKeyListener
-	
+
 	class CreateWindowButtonListener implements ActionListener
 	{
-		public void actionPerformed(ActionEvent ae) 
+		public void actionPerformed(ActionEvent ae)
 		{
 		    if(ae.getActionCommand().equals("save")){
 		    	try {
