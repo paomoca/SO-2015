@@ -1,12 +1,14 @@
 package so.filesystem.disk;
 
+import java.util.ArrayList;
+
 import so.filesystem.general.FreeSpaceManager;
 
 public class DiskFreeSpaceManager extends FreeSpaceManager {
 
 	private static DiskFreeSpaceManager self = null;
 
-	private DiskFreeSpaceManager(byte[] bitmapBytes) {
+	private DiskFreeSpaceManager(ArrayList<byte[]> bitmapBytes) {
 		super(bitmapBytes);
 		
 	}
@@ -17,7 +19,7 @@ public class DiskFreeSpaceManager extends FreeSpaceManager {
 	}
 
 
-	public static DiskFreeSpaceManager getInstance(byte[] bitmapBytes) {
+	public static DiskFreeSpaceManager getInstance(ArrayList<byte[]> bitmapBytes) {
 		if (self == null) {
 			self = new DiskFreeSpaceManager(bitmapBytes);
 		}
