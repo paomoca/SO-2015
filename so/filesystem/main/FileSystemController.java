@@ -17,7 +17,6 @@ import so.gui.shell.ShellAnswerException;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Scanner;
 
 public class FileSystemController {
 
@@ -124,6 +123,7 @@ public class FileSystemController {
     	try {
             diskController = DiskController.getInstance(true);
             // If there are no exception cache will be considered loaded
+            fileController.getDirectory().resetDirectory();
             diskLoadedFlag = true;
             throw new ShellAnswerException("Disk loaded succefully on: '"+CONFIG.DISK_LOCATION+"'");
         } catch (DiskControllerException e) {
@@ -149,8 +149,8 @@ public class FileSystemController {
 
     }
 
-    public void deleteFile() {
-
+    public void deleteFile(String fileName) {
+    	
     }
 
     public void exportFile(String fileName, String filePath) throws DiskControllerException, IncorrectLengthConversionException, InodeDirectPointerIndexOutOfRange, InodeNotEnoughDiskSpaceExcepcion, InodeFileTooBigException, IOException {
