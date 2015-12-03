@@ -81,7 +81,7 @@ public class FileController {
 	
 	}
 	
-	public void exportFile(String fileName, String filePath) throws DiskControllerException, IncorrectLengthConversionException, InodeDirectPointerIndexOutOfRange, InodeNotEnoughDiskSpaceExcepcion, InodeFileTooBigException, IOException{
+	public void exportFile(String fileName, String filePath) throws DiskControllerException, IncorrectLengthConversionException, InodeDirectPointerIndexOutOfRange, InodeNotEnoughDiskSpaceExcepcion, InodeFileTooBigException, IOException, ShellAnswerException{
 		
 		int blockAdressToRead = -1;
 		int blocksRead = 0;
@@ -92,10 +92,14 @@ public class FileController {
 		
 		//Searches for file inode reference (inodeBlockAddress) in the directory.
 		int fileInodeBlock = directory.searchForFile(fileName);
-//		
-		if(fileInodeBlock == -1){
-			throw new DiskControllerException("The file: "+fileName+ " does not exist.");
+		
+		if(!directory.isFileInDirectory(fileName)){
+			throw new ShellAnswerException("The file: "+fileName+ " not found.");
 		}
+		
+//		if(fileInodeBlock == -1){
+//			throw new DiskControllerException("The file: "+fileName+ " does not exist.");
+//		}
 		InodeReader inode = new InodeReader(fileInodeBlock);
 		
 		int totalBlocksToAddress = inode.getTotalBlocksToAddress();
@@ -150,8 +154,11 @@ public class FileController {
 		
 		//TODO: CREAMOS UNA ENTRADA EN EL DIRECTORIO
 		if(directory.isFileInDirectory(fileName)){
-			throw new ShellAnswerException("File "+fileName+" is already in Disk.");
+			throw new ShellAnswerException("The file: "+fileName+ " Already exists.");
 		}
+//		if(directory.isFileInDirectory(fileName)){
+//			throw new ShellAnswerException("File "+fileName+" is already in Disk.");
+//		}
 		
 		//We create a new Inode for the file. The Inode itself requests a free block.
 		InodeWriter inode = new InodeWriter();
@@ -198,25 +205,27 @@ public class FileController {
 	}
 	
 	
-	public void deleteFile(String fileName, String filePath) throws DiskControllerException, IncorrectLengthConversionException, InodeDirectPointerIndexOutOfRange, InodeNotEnoughDiskSpaceExcepcion, InodeFileTooBigException, IOException{
+	public void deleteFile(String fileName) throws DiskControllerException, IncorrectLengthConversionException, InodeDirectPointerIndexOutOfRange, InodeNotEnoughDiskSpaceExcepcion, InodeFileTooBigException, IOException, ShellAnswerException{
 		
 		int blockAdressToRead = -1;
 		int blocksRead = 0;
 		
 		//Searches for file inode reference (inodeBlockAddress) in the directory.
 		int fileInodeBlock = directory.searchForFile(fileName);
-//		
-		if(fileInodeBlock == -1){
-			throw new DiskControllerException("The file: "+fileName+ " does not exist.");
+		
+//		if(fileInodeBlock == -1){
+//			throw new DiskControllerException("The file: "+fileName+ " does not exist.");
+//		}
+		
+		if(!directory.isFileInDirectory(fileName)){
+			throw new ShellAnswerException("The file: "+fileName+ " does not exist.");
 		}
+		
 		//TODO: supuestamente le pasamos lo que nos de el directorio
 		InodeReader inode = new InodeReader(fileInodeBlock);
 		
 		int totalBlocksToAddress = inode.getTotalBlocksToAddress();
 		System.out.println("TOTAL BLOCKS TO ADDRESS: "+totalBlocksToAddress);
-		
-		//We get a pointer to the file to export to.
-		FileOutputStream fis = new FileOutputStream(filePath);
 		
 		//Asks the inode walker, based on the inodeBlockAddress for each block to read.
 		while(blocksRead < totalBlocksToAddress){
@@ -229,13 +238,20 @@ public class FileController {
 			
 		}
 		
-		DiskFreeSpaceManager.getInstance().freeBlocks(inode.getIDB1());
-		DiskFreeSpaceManager.getInstance().freeBlocks(inode.getIDB2());
+		int IDB1 = inode.getIDB1();
+		int IDB2 = inode.getIDB2();
+		
+		if(IDB1 != -1){
+			DiskFreeSpaceManager.getInstance().freeBlocks(IDB1);
+		}
+		if(IDB2!=-1){
+			DiskFreeSpaceManager.getInstance().freeBlocks(IDB2);
+		}		
+		
 		DiskFreeSpaceManager.getInstance().freeBlocks(fileInodeBlock);
 		
 		System.out.println("Total blocks actually freed "+blocksRead);
-		fis.close();
-		
+		directory.deleteFile(fileName);
 		
 	}
 	

@@ -593,7 +593,7 @@ public class DiskController {
 		
 	}
 
-	private void rawMetadataWrite(Object data, String type) throws UnidentifiedMetadataTypeException, DiskControllerException, IncorrectLengthConversionException, DeviceInitializationException{
+	public void rawMetadataWrite(Object data, String type) throws UnidentifiedMetadataTypeException, DiskControllerException, IncorrectLengthConversionException, DeviceInitializationException{
 		
 		switch (type){
 		

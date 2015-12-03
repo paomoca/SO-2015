@@ -13,8 +13,10 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 
+import so.filesystem.disk.DeviceInitializationException;
 import so.filesystem.disk.DiskFreeSpaceManager;
 import so.filesystem.disk.IncorrectLengthConversionException;
+import so.filesystem.disk.UnidentifiedMetadataTypeException;
 import so.filesystem.filemanagment.InodeDirectPointerIndexOutOfRange;
 import so.filesystem.main.FileSystemController;
 import so.gui.fileWindow.FileWindow;
@@ -109,6 +111,12 @@ public class FSFrame extends JFrame {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (InodeDirectPointerIndexOutOfRange e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (UnidentifiedMetadataTypeException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (DeviceInitializationException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
@@ -212,7 +220,13 @@ public class FSFrame extends JFrame {
 					reqCreate(e.toString());
                 } catch (RequestExportException e) {
                     reqExport(e.toString());
-                }
+                } catch (UnidentifiedMetadataTypeException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				} catch (DeviceInitializationException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
             }
 		}
 	}// CurCommandKeyListener
@@ -250,10 +264,10 @@ public class FSFrame extends JFrame {
             if (blockSection >= 0 && blockSection < (section.getColumns() * section.getRows())) {
                 section.getFillCells().clear();
                 section.fillCell(column, row);
-                
-                // Funcion de pruebas
+
                 blocks.getFillCells().clear();
-                blocks.testBits(blockSection * section.getColumns() * section.getRows());
+                blocks.fillCells(DiskFreeSpaceManager.getInstance().printbits(blockSection + 1, blockSection + blocks.getCells()));
+
 
 
             }
