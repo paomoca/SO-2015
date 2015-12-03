@@ -155,7 +155,15 @@ public class FileSystemController {
     public void exportFile() {
 
     }
+    
+    public void readFile() {
 
+    }
+    
+    public void writeFile(String fileName){
+    	
+    }
+    
     public void importFile(String fileName) throws IncorrectLengthConversionException, InodeDirectPointerIndexOutOfRange {
         try {
             fileController.importFile(fileName);
