@@ -21,7 +21,7 @@ public class DeduplicationPlugin {
 	public DeduplicationPlugin() {
 
 		try {
-			FileInputStream fos = new FileInputStream("t.tmp");
+			FileInputStream fos = new FileInputStream("deduplication.ded");
 			ObjectInputStream oos = new ObjectInputStream(fos);
 			try {
 				this.blockHash = (HashMap<Long, ArrayList<Integer>>) oos.readObject();
@@ -114,7 +114,7 @@ public class DeduplicationPlugin {
 
 	public void closeDeduplicationPlugin() {
 		try {
-			FileOutputStream fos = new FileOutputStream("t.tmp");
+			FileOutputStream fos = new FileOutputStream("deduplication.ded");
 			ObjectOutputStream oos = new ObjectOutputStream(fos);
 			oos.writeObject(this.blockHash);
 			oos.close();
