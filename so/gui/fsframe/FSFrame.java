@@ -13,6 +13,7 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 
+import so.filesystem.cache.CacheControllerException;
 import so.filesystem.disk.DeviceInitializationException;
 import so.filesystem.disk.DiskFreeSpaceManager;
 import so.filesystem.disk.IncorrectLengthConversionException;
@@ -222,7 +223,10 @@ public class FSFrame extends JFrame {
                     e.printStackTrace();
                 } catch (DeviceInitializationException e) {
                     e.printStackTrace();
-                }
+                } catch (CacheControllerException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
             }
 		}
 	}// CurCommandKeyListener

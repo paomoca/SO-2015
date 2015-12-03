@@ -2,6 +2,7 @@ package so.gui.shell;
 
 import java.io.IOException;
 
+import so.filesystem.cache.CacheControllerException;
 import so.filesystem.disk.DeviceInitializationException;
 import so.filesystem.disk.DiskControllerException;
 import so.filesystem.disk.DiskFreeSpaceManager;
@@ -15,7 +16,7 @@ import so.filesystem.main.FileSystemController;
 
 public class Interpreter {
 
-	public void readCommand(String curCommand, FileSystemController fs) throws WrongCommandException, ShellAnswerException, RequestImportException, RequestExportException, RequestCreateFileExcpetion, UnidentifiedMetadataTypeException, DeviceInitializationException{
+	public void readCommand(String curCommand, FileSystemController fs) throws WrongCommandException, ShellAnswerException, RequestImportException, RequestExportException, RequestCreateFileExcpetion, UnidentifiedMetadataTypeException, DeviceInitializationException, CacheControllerException{
 		
 		String[] in = this.divideCurCommand(curCommand);
 		String cmd = in[0];

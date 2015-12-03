@@ -215,7 +215,7 @@ public class FileSystemController {
     	
     }
 
-    public void listCacheUsage() throws ShellAnswerException {
+    public void listCacheUsage() throws ShellAnswerException, CacheControllerException {
     	Statistics stats = new Statistics();
     	String s = "";
     	ArrayList<String> st = stats.getAllDiskStatistics();
@@ -225,7 +225,7 @@ public class FileSystemController {
     	throw new ShellAnswerException(s);
     }
 
-    public void listCacheHitStatistics() throws ShellAnswerException {
+    public void listCacheHitStatistics() throws ShellAnswerException, CacheControllerException {
     	Statistics stats = new Statistics();
     	String s = "";
     	ArrayList<String> st = stats.getAllCacheStatistics();
