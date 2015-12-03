@@ -54,7 +54,7 @@ public class PaoTestsMain {
 			System.out.println("New read");
 			for(int i = 0; i< 10031; i++){
 				
-				System.out.println(inodeRr.inodeReadWalkerNext());
+				//System.out.println(inodeRr.inodeReadWalkerNext());
 			}
 			System.out.println("Metadata despues: "+dc.METADATA_LENGTH);
 			System.out.println("Free blocks: "+DiskFreeSpaceManager.getInstance().getNumberFreeBlocks());

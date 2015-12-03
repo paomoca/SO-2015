@@ -1,5 +1,7 @@
 package so.gui.grid;
 
+import so.filesystem.disk.DiskFreeSpaceManager;
+
 import java.awt.*;
 import java.util.ArrayList;
 import java.util.Random;
@@ -28,20 +30,22 @@ public class BlockGrid extends Grid {
     }
 
     public void testBits(int blocksRange) {
-        ArrayList<Boolean> arrayBits = new ArrayList<Boolean>();
+        //ArrayList<Boolean> arrayBits = new ArrayList<Boolean>();
         boolean[] bits;
 
         //System.out.println("Start = " + (blocksRange + 1));
         //System.out.println("End = " + (blocksRange + getCells()));
-
-        Random n = new Random();
-        for(int i = 0; i < getRows()*getColumns(); ++i) {
-            arrayBits.add(n.nextBoolean());
-        }
-        bits = new boolean[arrayBits.size()];
-        for(int i = 0; i < arrayBits.size(); ++i) {
-            bits[i] = !arrayBits.get(i);
-        }
+        bits = DiskFreeSpaceManager.getInstance().printbits(blocksRange + 1, blocksRange + getCells());
+//
+//
+//        Random n = new Random();
+//        for(int i = 0; i < getRows()*getColumns(); ++i) {
+//            arrayBits.add(n.nextBoolean());
+//        }
+//        bits = new boolean[arrayBits.size()];
+//        for(int i = 0; i < arrayBits.size(); ++i) {
+//            bits[i] = !arrayBits.get(i);
+//        }
 
         fillCells(bits);
     }
