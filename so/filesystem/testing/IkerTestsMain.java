@@ -4,16 +4,22 @@ import java.io.File;
 import java.io.IOException;
 
 import so.filesystem.disk.DiskControllerException;
+import so.filesystem.disk.DiskFormatException;
 import so.filesystem.disk.IncorrectLengthConversionException;
+import so.filesystem.disk.UnidentifiedMetadataTypeException;
 import so.filesystem.filemanagment.Inode;
 import so.filesystem.filemanagment.InodeDirectPointerIndexOutOfRange;
 import so.filesystem.filemanagment.InodeNotEnoughDiskSpaceExcepcion;
+import so.filesystem.filemanagment.InodeReader;
 import so.filesystem.general.FreeSpaceManager;
 import so.filesystem.disk.DeduplicationPlugin;
+import so.filesystem.disk.DiskController;
 
 public class IkerTestsMain {
 
-	public static void main(String[] args) throws IncorrectLengthConversionException, DiskControllerException, IOException, InodeNotEnoughDiskSpaceExcepcion, InodeDirectPointerIndexOutOfRange {
+	public static void main(String[] args) throws IncorrectLengthConversionException, DiskControllerException, IOException, InodeNotEnoughDiskSpaceExcepcion, InodeDirectPointerIndexOutOfRange, UnidentifiedMetadataTypeException {
+
+		
 		// TODO Auto-generated method stub
 		//long diskSizeInBytes = new File("/Volumes/SO").getFreeSpace();
 		//System.out.println("size " + new File("/Volumes/SO").getFreeSpace());
@@ -42,8 +48,10 @@ public class IkerTestsMain {
 //		}
 //		dedup.closeDeduplicationPlugin();
 		
+		
 		FreeSpaceManager fsm = new FreeSpaceManager(5000000);
-		Inode inode  = new Inode(fsm.firstFreeBlock());
+		System.out.println(fsm.updateFreeSpace().size());
+		System.out.println(fsm.getBitMapSizeInBlocks());
 	}
 
 }

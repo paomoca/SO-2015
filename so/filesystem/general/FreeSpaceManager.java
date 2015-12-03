@@ -16,6 +16,22 @@ public class FreeSpaceManager {
 		this.diskSpaceBitMap.set(CONFIG.METADATA_DIRECTORY_ADDRESS_REFERENCE, false);
 	}
 	
+	public FreeSpaceManager(ArrayList<byte[]> bitmapBytes) {
+		this.diskSpaceBitMap = new BitSet(bitmapBytes.size() * 4096 * 8);
+		this.bitMapSizeInBlocks = bitmapBytes.size();
+		byte[] superArray = new byte[bitmapBytes.size() * 4096];
+		int multiplier = 0;
+		for(byte[] block : bitmapBytes) {
+			int j = 4096 * multiplier;
+			for (int i = 0; i < 4096; ++i) {
+				superArray[i + j] = block[i];
+			}
+			multiplier++;
+		}
+		this.diskSpaceBitMap = BitSet.valueOf(superArray);
+		this.diskSpaceBitMap.set(CONFIG.METADATA_DIRECTORY_ADDRESS_REFERENCE, false);
+	}
+	
 	public FreeSpaceManager(int deviceBlockSize) {
 		this.bitMapSizeInBlocks = ((deviceBlockSize/8)/4096)+1;
 		this.diskSpaceBitMap = new BitSet((deviceBlockSize-this.bitMapSizeInBlocks)+1);
@@ -58,8 +74,21 @@ public class FreeSpaceManager {
 		return bits;
 	}
 	
-	public byte[] updateFreeSpace() {
-		return  this.diskSpaceBitMap.toByteArray();
+	public ArrayList<byte[]> updateFreeSpace() {
+		byte[] bytesBit = this.diskSpaceBitMap.toByteArray();
+		//byte[][] bitmapInBlocks = new byte[bytesBit.length][4096];
+		ArrayList<byte[]> bytesToWrite = new ArrayList<byte[]>();
+		
+		for (int i = 0; i <= bytesBit.length/4096; ++i) {
+			int multiplier = i * 4096;
+			byte[] temp = new byte[4096];
+			for(int j = 0; j < 4096; ++j) {
+				temp[j] = bytesBit[j + i];
+			}
+			bytesToWrite.add(temp);
+		}
+		
+		return bytesToWrite;
 	}
 	
 	public int firstFreeBlock() {
