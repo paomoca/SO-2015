@@ -55,6 +55,7 @@ public class Interpreter {
 				throw new ShellAnswerException("Cache is already disabled.");
 			}else{
 				fs.disableCache();
+				throw new ShellAnswerException("Cache disabled.");
 			}
 		}
 		
@@ -64,6 +65,7 @@ public class Interpreter {
 				throw new ShellAnswerException("Cache is already enabled.");
 			}else{
 				fs.enableCache();
+				throw new ShellAnswerException("Cache enabled.");
 			}
 		}
 		

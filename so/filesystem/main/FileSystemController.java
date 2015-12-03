@@ -194,12 +194,14 @@ public class FileSystemController {
 
     }
 
-    public void enableCache() {
-
+    public void enableCache() throws ShellAnswerException{
+    	loadCache();
+    	//fileController.enableCache();
     }
 
     public void disableCache() {
-
+    	cacheController = null;
+    	//fileController.disableCache();
     }
     
     
