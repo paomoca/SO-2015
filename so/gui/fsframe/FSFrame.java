@@ -3,13 +3,18 @@ package so.gui.fsframe;
 import javax.swing.*;
 
 import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
+import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileWriter;
 
 import so.filesystem.main.FileSystemController;
+import so.gui.fileWindow.FileWindow;
 import so.gui.grid.BlockGrid;
 import so.gui.grid.Grid;
 import so.gui.grid.SectionGrid;
@@ -26,6 +31,9 @@ public class FSFrame extends JFrame {
     private Shell shell;
     private Interpreter intr;
     private FileSystemController fileSystemController;
+    private JFileChooser fileChooserImport;
+    private JFileChooser fileChooserExport;
+    private FileWindow openFileWindow;
     private JFileChooser fileChooser;
 
     public FSFrame() {
@@ -33,6 +41,8 @@ public class FSFrame extends JFrame {
         JPanel content = new JPanel();
         JPanel gridsHolder = new JPanel();
         
+        openFileWindow = new FileWindow();
+        openFileWindow.getSaveButton().addActionListener(new CreateWindowButtonListener());
         
         shell = new Shell();
         shell.getCurCommand().addKeyListener(new GetCurCommandKeyListener());
@@ -43,7 +53,7 @@ public class FSFrame extends JFrame {
 		shell.getHistory().setForeground(Color.GREEN.darker());
 		shell.getHistory().setBackground(Color.BLACK);
 		
-		fileChooser = new JFileChooser();
+		fileChooserImport = new JFileChooser();
 
         section = SectionGrid.getInstance(480,480,10,10);
         blocks = BlockGrid.getInstance(480, 480, 10, 10);
@@ -81,16 +91,44 @@ public class FSFrame extends JFrame {
     }
     
     private void reqImport(){
-    	int flag = fileChooser.showOpenDialog(this);
+    	int flag = fileChooserImport.showOpenDialog(this);
 		if (flag == JFileChooser.APPROVE_OPTION) {
 			
-			File file = fileChooser.getSelectedFile();
+			File file = fileChooserImport.getSelectedFile();
 			//JOptionPane.showMessageDialog(myWindow, file.getName()+ ": File loaded.\n");
 			shell.getHistory().append("\nTo import: "+file.getAbsolutePath());
 		}else{
 			shell.getHistory().append("\nAction Canceled.");
 		}
     }
+    
+    private void reqExport(String fileName){
+    	int flag = fileChooserExport.showSaveDialog(this);
+		if (flag == JFileChooser.APPROVE_OPTION) {
+			byte[] dataTowrite = {'t','e','s','t'};
+			try {
+				BufferedWriter outFile = new BufferedWriter(new FileWriter(fileChooserExport.getSelectedFile()+".txt"));
+				outFile.write(new String(dataTowrite));
+				outFile.close();
+				} 
+			catch (Exception ex) {
+				shell.getHistory().append("\n Error"); 
+			}
+		}
+    }
+    
+    private void reqCreate(String fileName){
+    	if(openFileWindow != null){
+			openFileWindow = new FileWindow();
+	        openFileWindow.getSaveButton().addActionListener(new CreateWindowButtonListener());
+			openFileWindow.getMyWindow().setTitle(fileName);
+			openFileWindow.getScriptArea().setText(fileName);
+			openFileWindow.getMyWindow().setVisible(true);
+    	}else{
+    		shell.getHistory().append("\nError creating "+fileName);
+    	}
+    }
+    
     
     class ShellClickListener implements MouseListener {
 
@@ -162,6 +200,23 @@ public class FSFrame extends JFrame {
             }
 		}
 	}// CurCommandKeyListener
+	
+	class CreateWindowButtonListener implements ActionListener
+	{
+		public void actionPerformed(ActionEvent ae) 
+		{
+		    if(ae.getActionCommand().equals("save")){
+		    	try {
+					intr.saveFile(openFileWindow.getMyWindow().getTitle(), fileSystemController);
+				} catch (ShellAnswerException e) {
+					shell.getHistory().append("\n"+e.toString());
+				}
+		    }else if(ae.getActionCommand().equals("quit")){
+		    	openFileWindow.getMyWindow().setVisible(false);
+		    }
+		}
+	}//BotonesListener
+
 
     class BlockClickListener implements MouseListener {
 
