@@ -18,8 +18,7 @@ public class FileController {
 		try {
 			disk = DiskController.getInstance();
 		} catch(DiskControllerException e){
-			System.out.println(e.toString());
-			
+			System.out.println(e.toString());		
 		}
 				
 	}
