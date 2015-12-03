@@ -50,6 +50,7 @@ public class FreeSpaceManager {
 	}
 
 	public void freeBlocks(int block) {
+		System.out.println("delete block: "+block);
 		this.diskSpaceBitMap.set(block);
 	}
 

@@ -3,9 +3,11 @@ package so.filesystem.main;
 import so.filesystem.cache.CacheController;
 import so.filesystem.cache.CacheControllerException;
 import so.filesystem.cache.CacheFormatException;
+import so.filesystem.disk.DeviceInitializationException;
 import so.filesystem.disk.DiskController;
 import so.filesystem.disk.DiskControllerException;
 import so.filesystem.disk.DiskFormatException;
+import so.filesystem.disk.DiskFreeSpaceManager;
 import so.filesystem.disk.IncorrectLengthConversionException;
 import so.filesystem.disk.UnidentifiedMetadataTypeException;
 import so.filesystem.filemanagment.FileController;
@@ -149,13 +151,16 @@ public class FileSystemController {
     	
     }
 
-    public void deleteFile(String fileName) {
-    	
+    public void deleteFile(String fileName) throws DiskControllerException, IncorrectLengthConversionException, InodeDirectPointerIndexOutOfRange, InodeNotEnoughDiskSpaceExcepcion, InodeFileTooBigException, IOException, ShellAnswerException, UnidentifiedMetadataTypeException, DeviceInitializationException {
+    	fileController.deleteFile(fileName);
+    	ArrayList<byte[]> fsmList = DiskFreeSpaceManager.getInstance().updateFreeSpace();
+		DiskController.getInstance().rawMetadataWrite(fsmList, "FSM_BITMAP");
     }
 
-    public void exportFile(String fileName, String filePath) throws DiskControllerException, IncorrectLengthConversionException, InodeDirectPointerIndexOutOfRange, InodeNotEnoughDiskSpaceExcepcion, InodeFileTooBigException, IOException {
+    public void exportFile(String fileName, String filePath) throws DiskControllerException, IncorrectLengthConversionException, InodeDirectPointerIndexOutOfRange, InodeNotEnoughDiskSpaceExcepcion, InodeFileTooBigException, IOException, ShellAnswerException {
     	System.out.println("export");
     	fileController.exportFile(fileName, filePath);
+    	
     }
     
     public void readFile() {
@@ -166,9 +171,11 @@ public class FileSystemController {
     	throw new ShellAnswerException("TODO");
     }
     
-    public void importFile(String filePath, String fileName) throws IncorrectLengthConversionException, InodeDirectPointerIndexOutOfRange, ShellAnswerException {
+    public void importFile(String filePath, String fileName) throws IncorrectLengthConversionException, InodeDirectPointerIndexOutOfRange, ShellAnswerException, UnidentifiedMetadataTypeException, DeviceInitializationException {
         try {
         	fileController.importFile(filePath,fileName);
+        	ArrayList<byte[]> fsmList = DiskFreeSpaceManager.getInstance().updateFreeSpace();
+    		DiskController.getInstance().rawMetadataWrite(fsmList, "FSM_BITMAP");
         	System.out.println("import");
 //        	ArrayList<String> list = fileController.getDirectory().listDirectory();
 //        	for (String file : list) {
