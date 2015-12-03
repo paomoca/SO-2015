@@ -126,10 +126,6 @@ public class DiskController {
 		ArrayList<byte[]> fsmList = DiskFreeSpaceManager.getInstance().updateFreeSpace();
 		rawMetadataWrite(fsmList, "FSM_BITMAP");
 		
-		if(CONFIG.DEBUG_SESSION){
-			System.out.println("DFSM LIS SIZE NEW DEVICE = "+fsmList.size());
-		}
-	
 	}
 	
 	//TODO: AQUI ESTAN LAS FORMAS DE LEER Y ESCRIBIR LA METADATA NO SE DONDE VAN, DEPENDE DE LA INICIALIZACION DE JUAN
@@ -203,28 +199,7 @@ public class DiskController {
 
 	private void rawWrite(int position, byte[] dataToWrite, int length) throws DiskControllerException{
 
-		if(CONFIG.DEBUG_SESSION){
-			
-			System.out.println("\n\n-------------DEBUG SESSION: RAW WRITE"
-					+ "\nPOSITION: "+position
-					+ "\nDATA TO WRITE String: "+ new String(dataToWrite)
-					+ "\nDATA LENGTH: "+dataToWrite.length
-					+ "\nUSER GIVEN LENGTH: "+length);
-			
-	
-				try {
-					System.out.println("\nDATA TO WRITE INT: "+bytesToInt(dataToWrite)+"---------");
-					byte[] test = rawRead(position, length);
-					System.out.println("\nCOMPROBACION READ STRING: "+new String(test)+"---------------------");
-					System.out.println("\nCOMPROBACION READ INT: "+bytesToInt(test)+"---------------------\n\n");
-				} catch (IncorrectLengthConversionException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-				
-				
-			
-		} 
+		
 			try {
 				//OFFSET is already considered within the position variable
 				rawDeviceRW.seek(position);
@@ -233,6 +208,31 @@ public class DiskController {
 			
 				throw new DiskControllerException("");
 			}
+			
+			if(CONFIG.DEBUG_SESSION){
+				
+				System.out.println("\n-------------DEBUG SESSION: RAW WRITE"
+						+ "\nACTUAL POSITION: "+position
+						+ "\nLOGICAL POSITION: "+(position-METADATA_LENGTH)
+						+ "\nDATA TO WRITE String: "+ new String(dataToWrite)
+						+ "\nDATA LENGTH: "+dataToWrite.length
+						+ "\nUSER GIVEN LENGTH: "+length);
+				
+		
+					try {
+						System.out.println("\nDATA TO WRITE INT: "+bytesToInt(dataToWrite)+"---------");
+						
+						byte[] test = rawRead(position, length);
+						System.out.println("\nCOMPROBACION READ STRING: "+new String(test)+"---------------------");
+						System.out.println("\nCOMPROBACION READ INT: "+bytesToInt(test)+"---------------------\n");
+					} catch (IncorrectLengthConversionException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					} 
+					
+					
+				
+			} 
 		
 		
 	}
@@ -249,13 +249,14 @@ public class DiskController {
 				
 				if(CONFIG.DEBUG_SESSION){
 					
-					System.out.println("\n\n***********DEBUG SESSION: RAW READ"
-							+ "\nPOSITION: "+position
+					System.out.println("\n***********DEBUG SESSION: RAW READ"
+							+ "\nACTUAL POSITION: "+position
+							+ "\nLOGICAL POSITION: "+(position-METADATA_LENGTH)
 							+ "\nUSER GIVEN LENGTH: "+length
 							+"\nDATA READ: "+new String(readBuffer));
 					
 					try {
-						System.out.println("\nDATA READ INT: "+bytesToInt(readBuffer)+"***********\n\n");
+						System.out.println("\nDATA READ INT: "+bytesToInt(readBuffer)+"***********\n");
 					} catch (IncorrectLengthConversionException e) {
 						// TODO Auto-generated catch block
 						e.printStackTrace();
@@ -511,7 +512,8 @@ public class DiskController {
 			System.out.println("\nREAD ADDRESS"
 			+"\nIDBBLOCK: "+idbAddress
 			+"\nIDBOFFSET: "+idbOffset
-			+"\nTRANSLATED POSITION: "+position);
+			+"\nACTUAL TRANSLATED POSITION: "+position
+			+"\nLOGICAL TRANSLATED POSITION: "+(position-METADATA_LENGTH));
 		}
 		
 		return bytesToInt(blockAddressReference);
@@ -524,10 +526,11 @@ public class DiskController {
 		int position = IDBPositionTranslation(idbAddress, idbOffset);
 		
 		if(CONFIG.DEBUG_SESSION){
-			System.out.println("\nADDRESS: "+bytesToInt(byteBlockAddressReference)
+			System.out.println("\nWRITE ADDRESS: "+bytesToInt(byteBlockAddressReference)
 			+"\nIDBBLOCK: "+idbAddress
 			+"\nIDBOFFSET: "+idbOffset
-			+"\nTRANSLATED POSITION: "+position);
+			+"\nACTUAL TRANSLATED POSITION: "+position
+			+"\nLOGICAL TRANSLATED POSITION: "+(position-METADATA_LENGTH));
 		}
 
 		rawWrite(position, byteBlockAddressReference, CONFIG.ADDRESS_SIZE);
@@ -613,7 +616,7 @@ public class DiskController {
 				
 				for (Object block : fsmList) {
 					offset++;
-					rawWriteMetadataFSM_block((byte[])data, offset);
+					rawWriteMetadataFSM_block((byte[])block, offset);
 				}
 				
 				break;

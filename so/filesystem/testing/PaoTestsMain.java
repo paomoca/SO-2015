@@ -30,8 +30,20 @@ public class PaoTestsMain {
 			
 			String string = "aei aei aei";
 			//System.out.println(new File("/Volumes/SO").getTotalSpace());
+			boolean skipped_debug = false;
+			if(CONFIG.DEBUG_SESSION){
+				CONFIG.DEBUG_SESSION = false;
+				skipped_debug = true;
+			}
 			DiskController dc = DiskController.getInstance(true);
+			
+			if(skipped_debug){
+				CONFIG.DEBUG_SESSION = true;
+			}
+			
+
 			System.out.println("Metadata length: "+dc.METADATA_LENGTH);
+			System.out.println(CONFIG.DEBUG_SESSION);
 			
 			
 			boolean write = false;
@@ -106,20 +118,22 @@ public class PaoTestsMain {
 			
 			//DiskFreeSpaceManager.getInstance(40000000);
 			
+			System.out.println("Free blocks: "+DiskFreeSpaceManager.getInstance().getNumberFreeBlocks());
+			int tope = 2030;
 			
-			InodeWriter inodeW = new InodeWriter();
+//			InodeWriter inodeW = new InodeWriter();
+//			
+//			for(int i = 1000; i< tope; i++){
+//				inodeW.inodeWriteWalker(i);
+//				
+//			}
 			
-			for(int i = 1000; i< 2000; i++){
-				inodeW.inodeWriteWalker(i);
-				
-			}
+			InodeReader inodeR = new InodeReader(1);
 			
-			/*InodeReader inodeR = new InodeReader(1);
-			
-			for(int i = 1000; i< 2019; i++){
+			for(int i = 1000; i< tope; i++){
 				inodeR.inodeReadWalkerNext();
 			}
-			*/
+//			
 				
 			dc.finalize();
 	

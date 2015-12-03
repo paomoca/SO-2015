@@ -9,10 +9,8 @@ import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
-import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileReader;
 import java.io.FileWriter;
 
 import so.filesystem.main.FileSystemController;
@@ -36,6 +34,7 @@ public class FSFrame extends JFrame {
     private JFileChooser fileChooserImport;
     private JFileChooser fileChooserExport;
     private FileWindow openFileWindow;
+    private JFileChooser fileChooser;
 
     public FSFrame() {
 
@@ -56,8 +55,8 @@ public class FSFrame extends JFrame {
 		
 		fileChooserImport = new JFileChooser();
 
-        section = new SectionGrid(480,480,10,10);
-        blocks = new BlockGrid(480, 480, 10, 10);
+        section = SectionGrid.getInstance(480,480,10,10);
+        blocks = BlockGrid.getInstance(480, 480, 10, 10);
 
         section.addMouseListener(new BlockClickListener());
 
@@ -186,9 +185,6 @@ public class FSFrame extends JFrame {
 				try {
 					intr.readCommand(shell.getCommand(),fileSystemController);
 				} catch (WrongCommandException e) {
-					if(openFileWindow.getMyWindow().isVisible()){
-						openFileWindow.getScriptArea().setText(e.toString());
-					}
 					shell.getHistory().append("\n"+e.toString());
 				} catch (ShellAnswerException e){
 					shell.getHistory().append("\n"+e.toString());
@@ -196,12 +192,12 @@ public class FSFrame extends JFrame {
 					shell.getHistory().append("\n"+e.toString());
 					reqImport();
 					//shell.getScroller().getVerticalScrollBar().setValue(shell.getScroller().getVerticalScrollBar().getMaximum());;		
-				} catch (RequestExportException e) {
-					reqExport(e.toString());
-				} catch (RequestCreateFileExcpetion e) {
-					reqCreate(e.toString());
-				}
-			}
+				} catch (RequestCreateFileExcpetion requestCreateFileExcpetion) {
+                    requestCreateFileExcpetion.printStackTrace();
+                } catch (RequestExportException e) {
+                    e.printStackTrace();
+                }
+            }
 		}
 	}// CurCommandKeyListener
 	
@@ -221,6 +217,7 @@ public class FSFrame extends JFrame {
 		}
 	}//BotonesListener
 
+
     class BlockClickListener implements MouseListener {
 
         @Override
@@ -233,14 +230,16 @@ public class FSFrame extends JFrame {
 
             int row = (e.getY()/section.getCellWidth());
             int column = (e.getX()/section.getCellHeight());
-            int blocksRange = (section.getColumns() * row) + column ;
-            if (blocksRange >= 0 && blocksRange < (section.getColumns() * section.getRows())) {
-                System.out.println(blocksRange);
+            int blockSection = (section.getColumns() * row) + column ;
+            if (blockSection >= 0 && blockSection < (section.getColumns() * section.getRows())) {
                 section.getFillCells().clear();
                 section.fillCell(column, row);
+
+                // Funcion de pruebas
                 blocks.getFillCells().clear();
-                blocks.testBits();
+                blocks.testBits(blockSection * section.getColumns() * section.getRows());
             }
+
         }
 
         @Override
