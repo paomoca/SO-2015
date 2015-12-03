@@ -31,19 +31,21 @@ public class BlockGrid extends Grid {
 
     public void testBits(int blocksRange) {
         //ArrayList<Boolean> arrayBits = new ArrayList<Boolean>();
-        boolean[] bits;
-        //System.out.println("Start = " + (blocksRange + 1));
-        //System.out.println("End = " + (blocksRange + getCells()));
+        boolean[] bits = null;
+        System.out.println("Start = " + (blocksRange + 1));
+        System.out.println("End = " + (blocksRange + getCells()));
 //
 //
 //        Random n = new Random();
 //        for(int i = 0; i < getRows()*getColumns(); ++i) {
 //            arrayBits.add(n.nextBoolean());
 //        }
-        bits = new boolean[getCells() - 1];
-        for(int i = 0; i < getCells() - 1; ++i) {
-            bits[i] = !DiskFreeSpaceManager.getInstance().printbits(blocksRange + 1, blocksRange + getCells())[i];
-        }
+//        bits = new boolean[getCells() - 1];
+//        for(int i = 0; i < getCells() - 1; ++i) {
+//            bits[i] = !DiskFreeSpaceManager.getInstance().printbits(blocksRange + 1, blocksRange + getCells())[i];
+//        }
+
+        System.arraycopy(DiskFreeSpaceManager.getInstance(1000).printbits(blocksRange + 1, blocksRange + getCells()),0,bits,0,getCells());
 
         fillCells(bits);
     }

@@ -269,7 +269,6 @@ public class FSFrame extends JFrame {
                 blocks.fillCells(DiskFreeSpaceManager.getInstance().printbits(blockSection + 1, blockSection + blocks.getCells()));
 
 
-
             }
 
         }
