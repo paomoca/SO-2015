@@ -63,7 +63,7 @@ public class FileController {
 		//Asks the inode walker, based on the inodeBlockAddress for each block to read.
 		while(blocksRead < totalBlocksToAddress){
 			
-			blockAdressToRead = inode.inodeReadWalkerNext();
+			blockAdressToRead = inode.inodeReadWalkerNext(false);
 			
 			if(blocksRead == totalBlocksToAddress-1){
 				lastBlockDataBuffer = DiskController.getInstance().rawReadBlockPayload(blockAdressToRead,lastBlockDataBuffer.length);
