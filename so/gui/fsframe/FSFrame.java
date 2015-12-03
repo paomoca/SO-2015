@@ -13,6 +13,7 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 
+import so.filesystem.disk.DiskFreeSpaceManager;
 import so.filesystem.disk.IncorrectLengthConversionException;
 import so.filesystem.filemanagment.InodeDirectPointerIndexOutOfRange;
 import so.filesystem.main.FileSystemController;
@@ -249,10 +250,12 @@ public class FSFrame extends JFrame {
             if (blockSection >= 0 && blockSection < (section.getColumns() * section.getRows())) {
                 section.getFillCells().clear();
                 section.fillCell(column, row);
-
+                
                 // Funcion de pruebas
                 blocks.getFillCells().clear();
                 blocks.testBits(blockSection * section.getColumns() * section.getRows());
+
+
             }
 
         }
