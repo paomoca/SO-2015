@@ -15,6 +15,7 @@ import so.filesystem.filemanagment.InodeDirectPointerIndexOutOfRange;
 import so.filesystem.filemanagment.InodeFileTooBigException;
 import so.filesystem.filemanagment.InodeNotEnoughDiskSpaceExcepcion;
 import so.filesystem.general.CONFIG;
+import so.filesystem.general.Statistics;
 import so.gui.shell.ShellAnswerException;
 
 import java.io.IOException;
@@ -211,15 +212,27 @@ public class FileSystemController {
     }
 
     public void listDiskUsage() {
-
-    }
-
-    public void listCacheUsage() {
     	
     }
 
-    public void listCacheHitStatistics() {
+    public void listCacheUsage() throws ShellAnswerException {
+    	Statistics stats = new Statistics();
+    	String s = "";
+    	ArrayList<String> st = stats.getAllDiskStatistics();
+    	for (String stat : st) {
+			s = s + stat + "\n";
+		}
+    	throw new ShellAnswerException(s);
+    }
 
+    public void listCacheHitStatistics() throws ShellAnswerException {
+    	Statistics stats = new Statistics();
+    	String s = "";
+    	ArrayList<String> st = stats.getAllCacheStatistics();
+    	for (String stat : st) {
+			s = s + stat + "\n";
+		}
+    	throw new ShellAnswerException(s);
     }
 
     public void enableCache() throws ShellAnswerException{

@@ -188,7 +188,7 @@ public class Interpreter {
 		// List Disk Usage
 		else if(cmd.equals("diskUsg")){
 			if(fs.isDiskLoadedFlag()){
-				throw new ShellAnswerException("TODO diskUsg");
+				fs.listDiskUsage();
 			}else{
 				throw new ShellAnswerException("Could not perform action List Disk Usage. No disk loaded.");
 			}
@@ -216,7 +216,7 @@ public class Interpreter {
 		// List Cache Statistics
 		else if (cmd.equals("cacheStats")) {
 			if (fs.isCacheLoadedFlag()&&fs.isCacheEnabledFlag()) {
-				throw new ShellAnswerException("TODO cacheStats");
+				fs.listCacheHitStatistics();
 			} else {
 				throw new ShellAnswerException("Could not perform action List Cache Statistics. Cache is disables or not loaded.");
 			}
