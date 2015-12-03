@@ -45,8 +45,8 @@ public class FSFrame extends JFrame {
 		
 		fileChooser = new JFileChooser();
 
-        section = new SectionGrid(480,480,10,10);
-        blocks = new BlockGrid(480, 480, 10, 10);
+        section = SectionGrid.getInstance(480,480,10,10);
+        blocks = BlockGrid.getInstance(480, 480, 10, 10);
 
         section.addMouseListener(new BlockClickListener());
 
@@ -154,8 +154,12 @@ public class FSFrame extends JFrame {
 					shell.getHistory().append("\n"+e.toString());
 					reqImport();
 					//shell.getScroller().getVerticalScrollBar().setValue(shell.getScroller().getVerticalScrollBar().getMaximum());;		
-				}
-			}
+				} catch (RequestCreateFileExcpetion requestCreateFileExcpetion) {
+                    requestCreateFileExcpetion.printStackTrace();
+                } catch (RequestExportException e) {
+                    e.printStackTrace();
+                }
+            }
 		}
 	}// CurCommandKeyListener
 
@@ -171,13 +175,14 @@ public class FSFrame extends JFrame {
 
             int row = (e.getY()/section.getCellWidth());
             int column = (e.getX()/section.getCellHeight());
-            int blocksRange = (section.getColumns() * row) + column ;
-            if (blocksRange >= 0 && blocksRange < (section.getColumns() * section.getRows())) {
-                System.out.println(blocksRange);
+            int blockSection = (section.getColumns() * row) + column ;
+            if (blockSection >= 0 && blockSection < (section.getColumns() * section.getRows())) {
                 section.getFillCells().clear();
                 section.fillCell(column, row);
+
+                // Funcion de pruebas
                 blocks.getFillCells().clear();
-                blocks.testBits();
+                blocks.testBits(blockSection * section.getColumns() * section.getRows());
             }
 
         }

@@ -2,8 +2,6 @@ package so.gui.grid;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
 import java.util.*;
 import java.util.List;
 
@@ -22,7 +20,7 @@ public class Grid extends JPanel {
     private int columns;
     private int rows;
 
-    private java.util.List<Point> fillCells;
+    private java.util.List<ColorPoint> fillCells;
 
     public Grid(int gridWidth, int gridHeight, int cellWidth, int cellHeight) {
         fillCells = new ArrayList<>();
@@ -43,10 +41,10 @@ public class Grid extends JPanel {
     @Override
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
-        for (Point fillCell : fillCells) {
+        for (ColorPoint fillCell : fillCells) {
             int cellX = fillCell.x * cellWidth;
             int cellY = fillCell.y * cellHeight;
-            g.setColor(Color.RED);
+            g.setColor(fillCell.getColor());
             g.fillRect(cellX, cellY, cellWidth, cellHeight);
         }
 
@@ -64,18 +62,20 @@ public class Grid extends JPanel {
     }
 
     public void fillCell(int x, int y) {
-        fillCells.add(new Point(x, y));
+        fillCells.add(new ColorPoint(x, y));
         repaint();
     }
 
     public void fillCells(boolean[] blocks) {
-
+        Color cellColor;
         for (int column = 0; column < columns; column++) {
+            cellColor = new Color(randInt(1,255),randInt(1,255),randInt(1,255));
             for (int row = 0; row < rows; row++) {
                 if (blocks[(column * columns) + row]) {
-                    fillCells.add(new Point(row, column));
+                    fillCells.add(new ColorPoint(row, column, cellColor));
                 }
             }
+
         }
         repaint();
     }
@@ -114,7 +114,7 @@ public class Grid extends JPanel {
         return rows;
     }
 
-    public List<Point> getFillCells() {
+    public List<ColorPoint> getFillCells() {
         return fillCells;
     }
 }
