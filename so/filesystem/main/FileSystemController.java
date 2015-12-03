@@ -126,6 +126,9 @@ public class FileSystemController {
     	try {
             diskController = DiskController.getInstance(true);
             // If there are no exception cache will be considered loaded
+            long byteSize = (long) 22655952486.0;
+    		long numberOfBlocks = ((byteSize - new Long(CONFIG.INITIAL_METADATA_SIZE))/ new Long(CONFIG.BLOCK_SIZE));	
+            DiskFreeSpaceManager.getInstance((int) numberOfBlocks);
             fileController.getDirectory().resetDirectory();
             diskLoadedFlag = true;
             throw new ShellAnswerException("Disk loaded succefully on: '"+CONFIG.DISK_LOCATION+"'");
