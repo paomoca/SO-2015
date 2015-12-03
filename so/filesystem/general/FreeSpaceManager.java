@@ -123,7 +123,10 @@ public class FreeSpaceManager {
 	public int getNumberFreeBlocks() {
 		return this.diskSpaceBitMap.cardinality() - 1;
 	}
-
+	
+	public int getBitmapSize() {
+		return this.diskSpaceBitMap.length();
+	}
 	public void closeBitMap() {
 
 	}

@@ -3,8 +3,6 @@ package so.filesystem.cache;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.RandomAccessFile;
-import java.util.Arrays;
-import java.util.HashMap;
 import java.util.Map.Entry;
 
 import so.filesystem.disk.DeviceInitializationException;
@@ -19,7 +17,7 @@ public class CacheController {
 	private static CacheController self = null;
 
 	private int METADATA_LENGTH;
-	private int cacheHits;
+	private long cacheHits;
 	private Entry<Integer, Integer> lowestEntry;
 
 	private RandomAccessFile rawDeviceRW;
@@ -276,5 +274,20 @@ public void rawWriteBlock(int address, int offset, byte[] dataToWrite) throws Ca
 			}
 		}
 
+	}
+	
+	
+	public long getCacheHits() {
+		return this.cacheHits;
+	}
+	
+	public ArrayList<Integer> listCacheContents() {
+		ArrayList<Integer> ls = new ArrayList<Integer>();
+		
+		for (Integer key : this.diskVSCache.keySet()) {
+			ls.add(key);
+		}
+		
+		return ls;
 	}
 }
