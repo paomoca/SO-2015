@@ -676,7 +676,7 @@ public class DiskController {
 	 * this function translates this position in terms of bytes taking into consideration the address size. */
 	private int IDBPositionTranslation(int address, int offset){
 		
-		int position = METADATA_LENGTH + (CONFIG.BLOCK_SIZE * address) + offset;
+		int position = METADATA_LENGTH + (CONFIG.BLOCK_SIZE * address) + (offset*CONFIG.ADDRESS_SIZE);
 		
 		return position;
 	}

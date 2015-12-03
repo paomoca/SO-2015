@@ -119,7 +119,7 @@ public class PaoTestsMain {
 			//DiskFreeSpaceManager.getInstance(40000000);
 			
 			System.out.println("Free blocks: "+DiskFreeSpaceManager.getInstance().getNumberFreeBlocks());
-			int tope = 2030;
+			int tope = 4000;
 			
 //			InodeWriter inodeW = new InodeWriter();
 //			
@@ -131,9 +131,10 @@ public class PaoTestsMain {
 			InodeReader inodeR = new InodeReader(1);
 			
 			for(int i = 1000; i< tope; i++){
+				
 				inodeR.inodeReadWalkerNext();
 			}
-//			
+////			
 				
 			dc.finalize();
 	
