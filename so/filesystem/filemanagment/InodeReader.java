@@ -103,11 +103,11 @@ public class InodeReader {
 		
 		if (IDB1 == -1){	
 			IDB1 = DiskController.getInstance().readIDB1(INODE_ADDRESS);
-			System.out.println("--->IDB1 assigned to address: "+IDB1);
+			System.out.println("--->READING IDB1 FROM address: "+IDB1);
 		}
 		
 		int pointer = DiskController.getInstance().rawAddressRead(IDB1, currentOffset);
-		System.out.println("Read address: "+currentDataAddress+" to "+IDB1+" OFFSET: "+currentOffset);
+		System.out.println("Read address FROM: "+IDB1+" OFFSET: "+currentOffset);
 		
 		if(currentOffset == CONFIG.IDB_TOTAL_ADDRESSES-1){
 			flag = 3;
@@ -122,7 +122,7 @@ public class InodeReader {
 		if (IDB2 == -1){	
 			
 			IDB2 = DiskController.getInstance().readIDB2(INODE_ADDRESS);
-			System.out.println("--->IDB2 assigned to address: "+IDB2);
+			System.out.println("--->READING IDB2 FROM address: "+IDB2);
 		}
 		
 		if (currentIDB2InternalIDB == -1){	
@@ -136,7 +136,7 @@ public class InodeReader {
 		}
 		
 		int pointer = DiskController.getInstance().rawAddressRead(currentIDB2InternalIDB, currentOffset);
-		System.out.println("Read ADDRESS:"+currentDataAddress+" to internal IDB "+currentIDB2InternalIDB+" OFFSET: "+currentOffset);
+		System.out.println("Read ADDRESS FROM internal IDB "+currentIDB2InternalIDB+" OFFSET: "+currentOffset);
 		if(currentOffset == CONFIG.IDB_TOTAL_ADDRESSES-1){
 			currentIDB2InternalIDB = -1;
 			resetOffset();

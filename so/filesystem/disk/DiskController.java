@@ -44,15 +44,18 @@ public class DiskController {
 			if(formatFlag){
 				metadataNewDiskInitialization();
 			}else{
+				System.out.println("-1-");
 				deviceIdentification();
+				System.out.println("-2-");
 				metadataKnownDiskInitialization();
+				System.out.println("kdbcjsdbjhsdvb");
 			}
 	
 			//directoryInitialization();
 			
 			
 		} catch (DeviceInitializationException e) {
-			
+			e.fillInStackTrace();
 			throw new DiskControllerException(e.toString());
 		} catch (IncorrectLengthConversionException e) {
 			// TODO Auto-generated catch block
@@ -142,7 +145,8 @@ public class DiskController {
 		METADATA_LENGTH = CONFIG.INITIAL_METADATA_SIZE + (METADATA_NUMBER_DISK_FSM_BLOCKS * CONFIG.BLOCK_SIZE);
 		
 		//Read Disk Free Space Manager based on the given number of blocks and create an ArrayList.
-		ArrayList<?> fsmList = (ArrayList<?>) rawMetadataRead("FSM_BITMAP");
+		ArrayList<byte[]> fsmList = (ArrayList<byte[]>) rawMetadataRead("FSM_BITMAP");
+		DiskFreeSpaceManager.getInstance(fsmList);
 		
 		if(CONFIG.DEBUG_SESSION){
 			System.out.println("DFSM LIS SIZE KNOWN DEVICE = "+fsmList.size());
@@ -549,7 +553,7 @@ public class DiskController {
 	 *****************************************************************************************/
 	
 	private Object rawMetadataRead(String type) throws UnidentifiedMetadataTypeException, DiskControllerException, IncorrectLengthConversionException, DeviceInitializationException{
-		
+		System.out.println("washa");
 		switch (type){
 		
 			case "DISK_KEY":
@@ -565,6 +569,7 @@ public class DiskController {
 			case "FSM_NUMBER_OF_BLOCKS":
 				
 				byte[] fsmNumberBlocks = rawRead(CONFIG.METADATA_DISKFSM_INITIAL_CONTROL_BYTE_OFFSET, CONFIG.METADATA_DISKFSM_INITIAL_CONTROL_BYTE_SIZE);
+				System.out.println("READ NUMBER OF BLOCKS: "+new Integer(bytesToInt(fsmNumberBlocks)));
 				return new Integer(bytesToInt(fsmNumberBlocks));
 				
 			case "FSM_BITMAP":
@@ -607,6 +612,7 @@ public class DiskController {
 				
 				byte[] fsmNumberOfBlocks = intToBytes(CONFIG.METADATA_DISKFSM_INITIAL_CONTROL_BYTE_SIZE,(Integer) data);
 				rawWrite(CONFIG.METADATA_DISKFSM_INITIAL_CONTROL_BYTE_OFFSET,fsmNumberOfBlocks,CONFIG.METADATA_DISKFSM_INITIAL_CONTROL_BYTE_SIZE);
+				System.out.println("WRITE NUMBER OF BLOCKS: "+(Integer) data);
 				break;
 				
 			case "FSM_BITMAP":
@@ -634,7 +640,7 @@ public class DiskController {
 					+ " reading the corresponding FSM metadata blocks in OFFSET: "+offset);
 		}
 		
-		int position = CONFIG.INITIAL_METADATA_SIZE + (offset*CONFIG.ADDRESS_SIZE);
+		int position = CONFIG.INITIAL_METADATA_SIZE + (offset*CONFIG.BLOCK_SIZE);
 		byte [] fsmBlock = rawRead(position, CONFIG.BLOCK_SIZE);
 		return fsmBlock;
 		
@@ -647,7 +653,7 @@ public class DiskController {
 					+ " writing the corresponding FSM metadata blocks in OFFSET: "+offset);
 		}
 		
-		int position = CONFIG.INITIAL_METADATA_SIZE + (offset*CONFIG.ADDRESS_SIZE);
+		int position = CONFIG.INITIAL_METADATA_SIZE + (offset*CONFIG.BLOCK_SIZE);
 		rawWrite(position, data, CONFIG.BLOCK_SIZE);
 		
 	}
@@ -740,11 +746,14 @@ public class DiskController {
 	//TODO: mejorar exception
 	public void finalize(){
 		try {
+			
 			rawDeviceRW.close();
 			System.out.println("Finalized.");
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			System.out.println("Could not finalize.");
+		}finally{
+			self=null;
 		}
 	}
 	

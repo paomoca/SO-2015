@@ -39,6 +39,7 @@ public class InodeWriter {
 		
 		//We ask the Free Space Manager for an available block.
 		INODE_ADDRESS = requestBlock();
+		System.out.println("WRITING INODE ADDRESS: "+INODE_ADDRESS);
 		
 		if(CONFIG.DEBUG_SESSION){
 			System.out.println("Inode Address defined: "+INODE_ADDRESS

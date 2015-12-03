@@ -23,7 +23,7 @@ import so.filesystem.general.CONFIG;
 public class PaoTestsMain {
 
 
-	public static void main(String[] args) throws UnidentifiedMetadataTypeException, IOException, InodeNotEnoughDiskSpaceExcepcion, InodeDirectPointerIndexOutOfRange, InodeFileTooBigException {
+	public static void main(String[] args) throws UnidentifiedMetadataTypeException, IOException, InodeNotEnoughDiskSpaceExcepcion, InodeDirectPointerIndexOutOfRange, InodeFileTooBigException, IncorrectLengthConversionException {
 
 		try {
 
@@ -36,6 +36,29 @@ public class PaoTestsMain {
 				skipped_debug = true;
 			}
 			DiskController dc = DiskController.getInstance(true);
+			System.out.println("Free blocks: "+DiskFreeSpaceManager.getInstance().getNumberFreeBlocks());
+			System.out.println("Metadata antes: "+dc.METADATA_LENGTH);
+			
+			InodeWriter inodeW = new InodeWriter();
+			
+			for(int i = 0; i< 10031; i++){
+				DiskFreeSpaceManager.getInstance().firstFreeBlock();
+				inodeW.inodeWriteWalker(i);
+				
+			}
+			
+			dc.finalize();
+			DiskController dc2 = DiskController.getInstance(false);
+			InodeReader inodeRr = new InodeReader(1);
+			
+			System.out.println("New read");
+			for(int i = 0; i< 10031; i++){
+				
+				System.out.println(inodeRr.inodeReadWalkerNext());
+			}
+			System.out.println("Metadata despues: "+dc.METADATA_LENGTH);
+			System.out.println("Free blocks: "+DiskFreeSpaceManager.getInstance().getNumberFreeBlocks());
+			dc2.finalize();
 			
 			if(skipped_debug){
 				CONFIG.DEBUG_SESSION = true;
@@ -128,13 +151,14 @@ public class PaoTestsMain {
 //				
 //			}
 			
-			InodeReader inodeR = new InodeReader(1);
-			
-			for(int i = 1000; i< tope; i++){
-				
-				inodeR.inodeReadWalkerNext();
-			}
+//			InodeReader inodeR = new InodeReader(1);
+//			
+//			for(int i = 1000; i< tope; i++){
+//				
+//				inodeR.inodeReadWalkerNext();
+//			}
 ////			
+			//System.out.println("DFSM free: "+DiskFreeSpaceManager.getInstance().getNumberFreeBlocks());
 				
 			dc.finalize();
 	
@@ -145,12 +169,6 @@ public class PaoTestsMain {
 		} catch (DiskFormatException e) {
 			// TODO Auto-generated catch block
 			System.out.println(e.toString());
-		} /*catch (IncorrectLengthConversionException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}*/ catch (IncorrectLengthConversionException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
 		} 
 
 	}
