@@ -133,37 +133,18 @@ public class FileController {
 			if (blocksRead == totalBlocksToAddress - 1) {
 				lastBlockDataBuffer = DiskController.getInstance().rawReadBlockPayload(blockAdressToRead,
 						lastBlockDataBuffer.length);
-				DiskController.getInstance().incrementBlockAccessFrequency(blockAdressToRead);
+				//DiskController.getInstance().incrementBlockAccessFrequency(blockAdressToRead);
 				
 				fis.write(lastBlockDataBuffer);
 				System.out.println("WROTE LAST BLOCK");
 
 			} else {
-//				if (IS_USING_CACHE) {
-//					if (CacheController.getInstance().isBlockInCache(
-//							blockAdressToRead)){
-//						dataBuffer = CacheController.getInstance()
-//								.readCacheBlock(blockAdressToRead);
-//					} else {
-//						dataBuffer = DiskController.getInstance()
-//								.rawReadBlockPayload(blockAdressToRead);
-//						DiskController.getInstance()
-//								.incrementBlockAccessFrequency(
-//										blockAdressToRead);
-//						int bFrec = DiskController.getInstance().getBlockAccessFrequency(blockAdressToRead);
-//						int lowestFrec = CacheController.getInstance().getLowestFrec();
-//						if(bFrec>lowestFrec){
-//							CacheController.getInstance().writeCacheBlock(blockAdressToRead, dataBuffer, bFrec);
-//						}
-//					}
-//				} else {
+//			
 					dataBuffer = DiskController.getInstance()
 							.rawReadBlockPayload(blockAdressToRead);
 
-					//DiskController.getInstance().incrementBlockAccessFrequency(blockAdressToRead);
-
-				//}
-				fis.write(lastBlockDataBuffer);
+			
+				
 				System.out.println("WROTE LAST BLOCK");
 
 				dataBuffer = DiskController.getInstance().rawReadBlockPayload(
@@ -222,33 +203,11 @@ public class FileController {
 			if ((blockAddress = DiskFreeSpaceManager.getInstance().firstFreeBlock()) != -1) {
 				System.out.println("BLOCK ADDRESS ASIGNED: " + blockAddress);
 
-				// decidirsiescribir
-				if (deduplication.isBlockInHash(dataBuffer)[0] == -1) {
-					DiskController.getInstance().rawWriteBlockPayload(blockAddress, dataBuffer, numberOfBytesRead);
-
-					// Sets control bytes.
-					DiskController.getInstance().setBlockAccessFrequency(blockAddress, 0);
-					DiskController.getInstance().setDeduplicationCounter(blockAddress, 1);
-					deduplication.addBlockToBlockHash(dataBuffer, blockAddress);
-					
-					inode.inodeWriteWalker(blockAddress);
-				} else {
-					if(deduplication.isBlockInHash(dataBuffer).length == 1) {
-						int deduplicatedAddr = deduplication.isBlockInHash(dataBuffer)[0];
-						DiskController.getInstance().incrementDeduplicationCounter(deduplicatedAddr);
-						inode.inodeWriteWalker(deduplicatedAddr);
-					} else {
-						int[] deduplicatedAddr = deduplication.isBlockInHash(dataBuffer);
-						for(int i = 0; i < deduplicatedAddr.length; i++) {
-							if(DiskController.getInstance().rawReadBlockPayload(deduplicatedAddr[i]).equals(dataBuffer)) {
-								DiskController.getInstance().incrementDeduplicationCounter(deduplicatedAddr[i]);
-								inode.inodeWriteWalker(deduplicatedAddr[i]);
-							}
-						}
-					}
-					DiskFreeSpaceManager.getInstance().freeBlocks(blockAddress);
-				}
-
+				DiskController.getInstance().rawWriteBlockPayload(blockAddress, dataBuffer, numberOfBytesRead);
+				DiskController.getInstance().setBlockAccessFrequency(blockAddress, 0);
+				DiskController.getInstance().setDeduplicationCounter(blockAddress, 1);
+				inode.inodeWriteWalker(blockAddress);
+				
 			} else {
 
 				fis.close();

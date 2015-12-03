@@ -34,7 +34,7 @@ public class CONFIG {
 
 	public static String DISK_LOCATION = "/dev/disk2s2";
 	//public static String DISK_LOCATION = "b";
-	public static String CACHE_LOCATION = "cacheRawDeviceTestFile";
+	public static String CACHE_LOCATION = "/dev/disk2s3";
 	
 	public static int IDB1_OFFSET = BLOCK_SIZE-2*ADDRESS_SIZE;
 	public static int IDB2_OFFSET = BLOCK_SIZE-ADDRESS_SIZE;
