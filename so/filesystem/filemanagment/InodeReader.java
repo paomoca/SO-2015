@@ -2,6 +2,7 @@ package so.filesystem.filemanagment;
 
 import so.filesystem.disk.DiskController;
 import so.filesystem.disk.DiskControllerException;
+import so.filesystem.disk.DiskFreeSpaceManager;
 import so.filesystem.disk.IncorrectLengthConversionException;
 import so.filesystem.general.CONFIG;
 
@@ -20,6 +21,7 @@ public class InodeReader {
 	int FILE_SIZE_IN_BYTES = 0;
 	
 	/**** END OF INODE INFO ****/
+	boolean delete = false;
 	
 	//Given the file size we will determine the amount of blocks to read.
 	int TOTAL_BLOCKS_TO_ADDRESS = 0;
@@ -61,7 +63,7 @@ public class InodeReader {
 		
 	}
 	
-	public int inodeReadWalkerNext() throws IncorrectLengthConversionException, DiskControllerException, InodeDirectPointerIndexOutOfRange, InodeNotEnoughDiskSpaceExcepcion, InodeFileTooBigException{
+	public int inodeReadWalkerNext(boolean delete) throws IncorrectLengthConversionException, DiskControllerException, InodeDirectPointerIndexOutOfRange, InodeNotEnoughDiskSpaceExcepcion, InodeFileTooBigException{
 		
 		//Starts in 0
 		currentOffset++;
@@ -83,6 +85,9 @@ public class InodeReader {
 
 		}	
 			
+		if(delete&&pointer>0){
+			DiskFreeSpaceManager.getInstance().freeBlocks(pointer);
+		}
 		return pointer;
 	}
 	
@@ -138,6 +143,9 @@ public class InodeReader {
 		int pointer = DiskController.getInstance().rawAddressRead(currentIDB2InternalIDB, currentOffset);
 		System.out.println("Read ADDRESS FROM internal IDB "+currentIDB2InternalIDB+" OFFSET: "+currentOffset);
 		if(currentOffset == CONFIG.IDB_TOTAL_ADDRESSES-1){
+			if(delete){
+				DiskFreeSpaceManager.getInstance().freeBlocks(currentIDB2InternalIDB);
+			}
 			currentIDB2InternalIDB = -1;
 			resetOffset();
 		}	
@@ -161,4 +169,11 @@ public class InodeReader {
 		return INTERNAL_FRAGMENTATION;
 	}
 
+	public int getIDB1(){
+		return IDB1;
+	}
+	
+	public int getIDB2(){
+		return IDB2;
+	}
 }

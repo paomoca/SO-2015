@@ -2,6 +2,7 @@ package so.filesystem.disk;
 
 import java.util.ArrayList;
 
+import so.filesystem.filemanagment.InodeReader;
 import so.filesystem.general.FreeSpaceManager;
 
 public class DiskFreeSpaceManager extends FreeSpaceManager {
@@ -38,4 +39,6 @@ public class DiskFreeSpaceManager extends FreeSpaceManager {
 		//TODO: SI ES NULL THORW EXCEPTION
 		return self;
 	}
+	
+	
 }

@@ -112,7 +112,7 @@ public class FileController {
 		//Asks the inode walker, based on the inodeBlockAddress for each block to read.
 		while(blocksRead < totalBlocksToAddress){
 			
-			blockAdressToRead = inode.inodeReadWalkerNext();
+			blockAdressToRead = inode.inodeReadWalkerNext(false);
 			System.out.println("BLOCK ADDRESS TO READ "+blockAdressToRead);
 			
 			//If we are dealing with the last block.
@@ -164,6 +164,7 @@ public class FileController {
 			if((blockAddress = DiskFreeSpaceManager.getInstance().firstFreeBlock()) != -1){
 				System.out.println("BLOCK ADDRESS ASIGNED: "+blockAddress);
 				
+				
 				DiskController.getInstance().rawWriteBlockPayload(blockAddress, dataBuffer, numberOfBytesRead);
 				
 				//Sets control bytes.
@@ -192,6 +193,50 @@ public class FileController {
 		//directory.newFile(fileName, inodeBlockAddress);
 		
 	}
+	
+	
+	public void deleteFile(String fileName, String filePath) throws DiskControllerException, IncorrectLengthConversionException, InodeDirectPointerIndexOutOfRange, InodeNotEnoughDiskSpaceExcepcion, InodeFileTooBigException, IOException{
+		
+		int blockAdressToRead = -1;
+		int blocksRead = 0;
+		
+		//Searches for file inode reference (inodeBlockAddress) in the directory.
+		int fileInodeBlock = directory.searchForFile(fileName);
+//		
+		if(fileInodeBlock == -1){
+			throw new DiskControllerException("The file: "+fileName+ " does not exist.");
+		}
+		//TODO: supuestamente le pasamos lo que nos de el directorio
+		InodeReader inode = new InodeReader(fileInodeBlock);
+		
+		int totalBlocksToAddress = inode.getTotalBlocksToAddress();
+		System.out.println("TOTAL BLOCKS TO ADDRESS: "+totalBlocksToAddress);
+		
+		//We get a pointer to the file to export to.
+		FileOutputStream fis = new FileOutputStream(filePath);
+		
+		//Asks the inode walker, based on the inodeBlockAddress for each block to read.
+		while(blocksRead < totalBlocksToAddress){
+			
+			blockAdressToRead = inode.inodeReadWalkerNext(true);
+			System.out.println("BLOCK ADDRESS TO DELETE "+blockAdressToRead);
+
+			DiskFreeSpaceManager.getInstance().freeBlocks(blockAdressToRead);
+			blocksRead++;
+			
+		}
+		
+		DiskFreeSpaceManager.getInstance().freeBlocks(inode.getIDB1());
+		DiskFreeSpaceManager.getInstance().freeBlocks(inode.getIDB2());
+		DiskFreeSpaceManager.getInstance().freeBlocks(fileInodeBlock);
+		
+		System.out.println("Total blocks actually freed "+blocksRead);
+		fis.close();
+		
+		
+	}
+	
+	
 	
 	public void enableCache() {
 		try {
